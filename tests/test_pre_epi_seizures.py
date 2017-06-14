@@ -6,7 +6,7 @@
 import pytest
 
 
-from pre_epi_seizures import pre_epi_seizures
+import pre_epi_seizures
 
 
 @pytest.fixture
