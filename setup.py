@@ -4,6 +4,7 @@
 """The setup script. NEW"""
 
 from setuptools import setup, find_packages
+import os
 
 with open('README.rst') as readme_file:
     readme = readme_file.read()
@@ -25,9 +26,13 @@ test_requirements = [
     # TODO: put package test requirements here
 ]
 
+version_file = open(os.path.join(os.path.dirname(os.path.abspath(__file__))
+, 'VERSION'))
+version = version_file.read().strip()
+
 setup(
     name='pre_epi_seizures',
-    version='0.1.0',
+    version = version,
     description="Python Boilerplate contains all the boilerplate you need to create a Python package.",
     long_description=readme + '\n\n' + history,
     author="Francisco Sargo",
