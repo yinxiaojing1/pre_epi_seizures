@@ -106,7 +106,7 @@ def main(args):
     """
     args = parse_args(args)
     setup_logging(args.loglevel)
-    _logger.debug("Starting crazy calculations...")
+    _logger.debug("Starting crazy callculations...")
     print("The {}-th Fibonacci number is {}".format(args.n, fib(args.n)))
     _logger.info("Script ends here")
 

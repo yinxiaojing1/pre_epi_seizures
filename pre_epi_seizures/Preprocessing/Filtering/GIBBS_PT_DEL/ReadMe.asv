@@ -1,0 +1,53 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%                                                                         %
+%   Bayesian P and T wave delineation and waveform estimation Toolbox     %
+%                          Beta version 0.2                               %
+%                          (C) Chao LIN, 2011                             %
+%               TÈSA lab, University of Toulouse, France                  %
+%                            chao.lin@tesa.prd.fr                         %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+Quick tutorial:
+1, launch test.m in the Matlab console
+2, load the target dataset using the button 'load'
+3, click on the button 'process' to start the algorithm
+
+Remarks:
+1, some representative ECG datasets from the QT database are provided 
+(ex., PVC signal:'sel803', no P-wave:'sel0114',etc.,)
+2, since there is no universal rule to locate onsets and ends of waves, we 
+   propose two possible delineation methods based on the estimates of the waveforms.
+   --'automatic analysis with local minima': the strategie proposed in [1]
+   --'automatic analysis with curvature': the strategie proposed in [3]
+   --'manual supervised analysis': the author will be required to provide to 
+   the GUI the prefered locations of the onsets and ends on the estimated waveform, 
+   this allows one to obtain flexible delineation results.
+3, the QRS complexe detection is provided by an implementation of the
+   Pan-TompKins Algorithm, for this purpose, Matlab Wavelet Toolbox is requied.
+
+Reference:
+ [1] C. Lin, C. Mailhes and J.-Y. Tourneret, "P- and T-wave delineation in
+     ECG signals using a Bayesian approach and a partially collapsed Gibbs 
+     sampler", IEEE Trans. Biomed. Eng., vol. 57, no. 12, pp. 2840 - 2849, 
+     Dec. 2010.
+ [2] C. Lin, G. Kail, J.-Y. Tourneret, C. Mailhes and F. Hlawatsch, "P and
+     T-wave Delineation and waveform estimation in ECG Signals Using a 
+     Block Gibbs Sampler," IEEE Int. Conf. on Acoust., Speech and Sig. Proc. 
+     (ICASSP'11), 2011,. 
+ 
+ Written by Chao LIN, chao.lin@tesa.prd.fr and made available under the 
+ GNU general public license. If you have not received a copy of this 
+ license, please download a copy from http://www.gnu.org/
+ Please distribute (and modify) freely, commenting
+ where you have added modifications. 
+ The author would appreciate correspondence regarding
+ corrections, modifications, improvements etc.
+ This program is distributed in the hope that it will be useful, but
+ WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ 
+ Acknowledgment: 
+ The author would like to acknowledge 
+ G. Clifford for providing BaselineTOS.m
+ R. Sameni for providing Baseline1.m and BPFilter.m
+ B. Kuczenski for providing vline.m
