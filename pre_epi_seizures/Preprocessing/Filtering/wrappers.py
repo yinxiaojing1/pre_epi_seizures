@@ -15,7 +15,7 @@ import scipy.signal
 # import matlab.engine
 
 # Local imports
-# from filter_signal import filter_signal as _filter_signal
+from filter_signal import filter_signal as _filter_signal
 # from eksmoothing import EKSmoothing
 # from eksmoothing17 import EKSmoothing17
 ###############################################################################################

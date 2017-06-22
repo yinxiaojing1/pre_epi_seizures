@@ -12,15 +12,17 @@ import pandas as pd
 
 import matplotlib.pyplot as plt
 import pre_epi_seizures.storage_utils
+
 ## Local imports
 # Filtering functions
 from Filtering import medianFIR, filterIR5to20, filter_signal
-# R peak detectors
-from Filtering import UNSW_RPeakDetector
-# Smoothers
-from Filtering import EKSmoothing, EKSmoothing17
-# Oulier detection based on DMean
-from outlier import dmean, wavedistance, cosdistance, msedistance
+
+# # R peak detectors
+#from Filtering import UNSW_RPeakDetector
+# # Smoothers
+# from Filtering import EKSmoothing, EKSmoothing17
+# # Oulier detection based on DMean
+# from outlier import dmean, wavedistance, cosdistance, msedistance
 
 #==============================================================================
 # IO Utility Functions
@@ -348,176 +350,176 @@ def outlier_removal(dfile, save_dfile=None, min_samples=5, enable_dmean=False,
     save_dataset_csv(X_new, y_new, save_dfile)
 
 
-if __name__ == '__main__':
-    f_path = lambda datafile: os.path.abspath("..\{}\{}".format(datafolder, datafile))
+# if __name__ == '__main__':
+#     f_path = lambda datafile: os.path.abspath("..\{}\{}".format(datafolder, datafile))
 
-    datafolder = 'Data'
-    fs = 500. # sampling frequency [Hz]
+#     datafolder = 'Data'
+#     fs = 500. # sampling frequency [Hz]
 
-#################################################################################################################
-# UNSW APPROACH - ECGIDDB_raw.csv (multiple sessions per subject)
-#################################################################################################################
-    step1, step2 = False, True
-    if step1:
-        X, y = read_dataset_csv(f_path("ECGIDDB_raw.csv"), multicolumn=True)
-        R_list, mask_list = UNSW_RPeakDetector(X, fs=fs, artifact_masking=True, railV=[-10, 10], return_mask=True,
-                                              padding=True, lp_b4_padding=True,
-                                              check_peak=True, neighbors=20,
-                                              check_amplitude=True, amplitude_thre=-.4, amplitude_thre_edges=-.4)
-        X = medianFIR(X, fs=fs, lpfilter=True)
-        plot_dataset_R(X, y, R_list, savefolder=f_path("ECGIDDB_medianFIR_UNSW_images"), mask_list=mask_list)
-        keep_idx = np.array([i for i, mask in enumerate(mask_list) if len(mask)==0], dtype=int) # discard records based on artifact mask
-        X, y, R_list = X[keep_idx], y[keep_idx], [R_list[i] for i in keep_idx]
-        save_dataset_csv(X, y, dfile=f_path("ECGIDDB_medianFIR_UNSW.csv"))
-        save_R_csv(R_list, dfile=f_path("ECGIDDB_raw_UNSW_Rpeaks.csv"))
-    if step2:
-        R_list = read_R_csv(f_path("ECGIDDB_raw_UNSW_Rpeaks.csv"))
-        #create_filtered_dataset(f_path("ECGIDDB_medianFIR_UNSW.csv"), multicolumn=True, filtmethod='EKSmoothing',
-        #                        R_list=R_list, fs=fs, bins=250, verbose=True, oset=False, savefolder=f_path('ECGIDDB_EKSmoothing_images'))
-        create_filtered_dataset(f_path("ECGIDDB_medianFIR_UNSW.csv"), multicolumn=True, filtmethod='EKSmoothing17',
-                                R_list=R_list, fs=fs, bins=250, verbose=True, savefolder=f_path('ECGIDDB_EKSmoothing17_images'))        
-        plot_datasets([f_path("ECGIDDB_medianFIR_UNSW.csv"), f_path("ECGIDDB_medianFIR_UNSW_EKSmoothing.csv"), 
-                       f_path("ECGIDDB_medianFIR_UNSW_EKSmoothing17.csv")], multicolumn=True, separate_instances=True)
+# #################################################################################################################
+# # UNSW APPROACH - ECGIDDB_raw.csv (multiple sessions per subject)
+# #################################################################################################################
+#     step1, step2 = False, False
+#     if step1:
+#         X, y = read_dataset_csv(f_path("ECGIDDB_raw.csv"), multicolumn=True)
+#         R_list, mask_list = UNSW_RPeakDetector(X, fs=fs, artifact_masking=True, railV=[-10, 10], return_mask=True,
+#                                               padding=True, lp_b4_padding=True,
+#                                               check_peak=True, neighbors=20,
+#                                               check_amplitude=True, amplitude_thre=-.4, amplitude_thre_edges=-.4)
+#         X = medianFIR(X, fs=fs, lpfilter=True)
+#         plot_dataset_R(X, y, R_list, savefolder=f_path("ECGIDDB_medianFIR_UNSW_images"), mask_list=mask_list)
+#         keep_idx = np.array([i for i, mask in enumerate(mask_list) if len(mask)==0], dtype=int) # discard records based on artifact mask
+#         X, y, R_list = X[keep_idx], y[keep_idx], [R_list[i] for i in keep_idx]
+#         save_dataset_csv(X, y, dfile=f_path("ECGIDDB_medianFIR_UNSW.csv"))
+#         save_R_csv(R_list, dfile=f_path("ECGIDDB_raw_UNSW_Rpeaks.csv"))
+#     if step2:
+#         R_list = read_R_csv(f_path("ECGIDDB_raw_UNSW_Rpeaks.csv"))
+#         #create_filtered_dataset(f_path("ECGIDDB_medianFIR_UNSW.csv"), multicolumn=True, filtmethod='EKSmoothing',
+#         #                        R_list=R_list, fs=fs, bins=250, verbose=True, oset=False, savefolder=f_path('ECGIDDB_EKSmoothing_images'))
+#         create_filtered_dataset(f_path("ECGIDDB_medianFIR_UNSW.csv"), multicolumn=True, filtmethod='EKSmoothing17',
+#                                 R_list=R_list, fs=fs, bins=250, verbose=True, savefolder=f_path('ECGIDDB_EKSmoothing17_images'))        
+#         plot_datasets([f_path("ECGIDDB_medianFIR_UNSW.csv"), f_path("ECGIDDB_medianFIR_UNSW_EKSmoothing.csv"), 
+#                        f_path("ECGIDDB_medianFIR_UNSW_EKSmoothing17.csv")], multicolumn=True, separate_instances=True)
         
 
 
-        #X, y = read_dataset_csv(f_path("ECGIDDB_medianFIR_UNSW.csv"), multicolumn=True)
-        #x = X[1]
-        #r = R_list[1]
-        #yy = y[1]
-        # plt.figure("Record {}".format(yy))
-        # ax1 = plt.subplot(3, 2, 1)
-        # ax1.set_title("medianFIR, full record")
-        # ax1.plot(x)
-        # ax1.plot(r, x[r], 'ro')
+#         #X, y = read_dataset_csv(f_path("ECGIDDB_medianFIR_UNSW.csv"), multicolumn=True)
+#         #x = X[1]
+#         #r = R_list[1]
+#         #yy = y[1]
+#         # plt.figure("Record {}".format(yy))
+#         # ax1 = plt.subplot(3, 2, 1)
+#         # ax1.set_title("medianFIR, full record")
+#         # ax1.plot(x)
+#         # ax1.plot(r, x[r], 'ro')
         
-        #xeks = EKSmoothing(x, [r], fs=500., bins=250, verbose=True, oset=False)[0]
-        # ax2 = plt.subplot(3, 2, 2, sharex=ax1)
-        # ax2.set_title("medianFIR+EKS, full record")
-        # ax2.plot(xeks)
-        # ax2.plot(r, xeks[r], 'ro')
+#         #xeks = EKSmoothing(x, [r], fs=500., bins=250, verbose=True, oset=False)[0]
+#         # ax2 = plt.subplot(3, 2, 2, sharex=ax1)
+#         # ax2.set_title("medianFIR+EKS, full record")
+#         # ax2.plot(xeks)
+#         # ax2.plot(r, xeks[r], 'ro')
 
-        # x_half1 = x[:int(len(x)/2)]
-        # r_half1 = r[r < int(len(x)/2)]
-        # ax3 = plt.subplot(3, 2, 3, sharex=ax1)
-        # ax3.set_title("medianFIR, 1st half record")
-        # ax3.plot(x_half1)
-        # ax3.plot(r_half1, x_half1[r_half1], 'ro')
+#         # x_half1 = x[:int(len(x)/2)]
+#         # r_half1 = r[r < int(len(x)/2)]
+#         # ax3 = plt.subplot(3, 2, 3, sharex=ax1)
+#         # ax3.set_title("medianFIR, 1st half record")
+#         # ax3.plot(x_half1)
+#         # ax3.plot(r_half1, x_half1[r_half1], 'ro')
 
-        # xeks_half1 = EKSmoothing(x_half1, [r_half1], fs=500., bins=250, verbose=True)[0]
-        # ax4 = plt.subplot(3,2,4, sharex=ax1)
-        # ax4.set_title("medianFIR+EKS, 1st half record")
-        # ax4.plot(xeks_half1)
-        # ax4.plot(r_half1, xeks_half1[r_half1], 'ro')
+#         # xeks_half1 = EKSmoothing(x_half1, [r_half1], fs=500., bins=250, verbose=True)[0]
+#         # ax4 = plt.subplot(3,2,4, sharex=ax1)
+#         # ax4.set_title("medianFIR+EKS, 1st half record")
+#         # ax4.plot(xeks_half1)
+#         # ax4.plot(r_half1, xeks_half1[r_half1], 'ro')
 
-        # x_half2 = x[int(len(x)/2):]
-        # r_half2 = r[r >= int(len(x)/2)] - int(len(x)/2) 
-        # idx_half2 = np.arange(int(len(x)/2), len(x))
-        # ax5 = plt.subplot(3,2,5, sharex=ax1)
-        # ax5.set_title("medianFIR, 2nd half record")
-        # ax5.plot(idx_half2, x_half2)
-        # ax5.plot(r_half2 + int(len(x)/2), x_half2[r_half2], 'ro')
+#         # x_half2 = x[int(len(x)/2):]
+#         # r_half2 = r[r >= int(len(x)/2)] - int(len(x)/2) 
+#         # idx_half2 = np.arange(int(len(x)/2), len(x))
+#         # ax5 = plt.subplot(3,2,5, sharex=ax1)
+#         # ax5.set_title("medianFIR, 2nd half record")
+#         # ax5.plot(idx_half2, x_half2)
+#         # ax5.plot(r_half2 + int(len(x)/2), x_half2[r_half2], 'ro')
 
-        # xeks_half2 = EKSmoothing(x_half2, [r_half2], fs=500., bins=250, verbose=True)[0]
-        # ax6 = plt.subplot(3,2,6, sharex=ax1)
-        # ax6.set_title("medianFIR+EKS, 2nd half record")
-        # ax6.plot(idx_half2, xeks_half2)
-        # ax6.plot(r_half2 + int(len(x)/2), xeks_half2[r_half2], 'ro')
+#         # xeks_half2 = EKSmoothing(x_half2, [r_half2], fs=500., bins=250, verbose=True)[0]
+#         # ax6 = plt.subplot(3,2,6, sharex=ax1)
+#         # ax6.set_title("medianFIR+EKS, 2nd half record")
+#         # ax6.plot(idx_half2, xeks_half2)
+#         # ax6.plot(r_half2 + int(len(x)/2), xeks_half2[r_half2], 'ro')
 
-        # plt.show()
-
-
-
-################################################################################################################
-
-
-#################################################################################################################
-# UNSW APPROACH - healthy_raw.csv (one session per subject)
-#################################################################################################################
-    step1, step2, step3, step4 = False, False, False, False
-    if step1:
-        ## STEP 1 - create dataset without records that were deemed of poor quality or have features that deviate
-        ##          from the idealized ECG model (e.g. waves other than R with higher amplitude). UNSW_RPeakDetector
-        ##          (with additional modifications) is expected to identify all true R peaks: healthy_raw_UNSW.csv,
-        ##          healthy_raw_UNSW_Rpeaks.csv.
-        X, y = read_dataset_csv(f_path("healthy_raw.csv"))
-        remove_ids = np.array([np.where(y==uid)[0][0] for uid in [1391, 1761, 1816, 2018]]) # waves other than R with higher amplitude
-        X, y = np.delete(X, remove_ids,axis=0), np.delete(y, remove_ids)
-        R_list, mask_list = UNSW_RPeakDetector(X, fs=fs, artifact_masking=True, return_mask=True, check_peak=True,
-                                               padding=True, check_amplitude=True)
-        keep_idx = np.array([i for i, mask in enumerate(mask_list) if len(mask)==0], dtype=int) # discard records based on artifact mask
-        X, y, R_list = X[keep_idx], y[keep_idx], [R_list[i] for i in keep_idx]
-        save_dataset_csv(X, y, dfile=f_path("healthy_raw_UNSW.csv"))
-        save_R_csv(R_list, dfile=f_path("healthy_raw_UNSW_Rpeaks.csv"))
-        plot_dataset_R(X, y, R_list, savefolder=f_path("healthy_raw_UNSW_images")) # plot raw dataset
-        # remove baseline wander from raw dataset and plot the resulting dataset
-        X = medianFIR(X, fs=fs, lpfilter=False)
-        save_dataset_csv(X, y, dfile=f_path("healthy_median_UNSW.csv"))
-        plot_dataset_R(X, y, R_list, savefolder=f_path("healthy_median_UNSW_images"))
-    if step2:
-        ## STEP 2 - create filtered dataset (baseline removal and lowpass of 40Hz): healthy_medianFIR_UNSW.csv
-        R_list = read_R_csv(f_path("healthy_raw_UNSW_Rpeaks.csv"))
-        X, y = read_dataset_csv(f_path("healthy_raw_UNSW.csv"))
-        X = medianFIR(X, fs=fs, lpfilter=True)
-        save_dataset_csv(X, y, dfile=f_path("healthy_medianFIR_UNSW.csv"))
-        plot_dataset_R(X, y, R_list, savefolder=f_path("healthy_medianFIR_UNSW_images"))
-        plot_datasets(map(lambda x: f_path(x),["healthy_raw_UNSW.csv", "healthy_median_UNSW.csv", "healthy_medianFIR_UNSW.csv"]))
-    if step3:
-        ## STEP 3 - create smoothed datasets and plot them for comparison: healthy_median_UNSW_EKSmoothing.csv
-        ##          and healthy_medianFIR_UNSW_EKSmoothing.csv
-        R_list = read_R_csv(f_path("healthy_raw_UNSW_Rpeaks.csv"))
-        create_filtered_dataset(f_path("healthy_medianFIR_UNSW.csv"), filtmethod='EKSmoothing', R_list=R_list, fs=fs, bins=250, verbose=True)
-        plot_datasets(map(lambda x: f_path(x),["healthy_medianFIR_UNSW.csv", "healthy_medianFIR_UNSW_EKSmoothing.csv"]))
-        create_filtered_dataset(f_path("healthy_median_UNSW.csv"), filtmethod='EKSmoothing', R_list=R_list, fs=fs, bins=250, verbose=True)
-        plot_datasets(map(lambda x: f_path(x),["healthy_median_UNSW.csv", "healthy_median_UNSW_EKSmoothing.csv", "healthy_medianFIR_UNSW_EKSmoothing.csv"]))
-    if step4:
-        ## STEP 4 - create datasets using other filtering approaches for future performance comparison; perform dataset segmentation
-        create_filtered_dataset(f_path("healthy_raw_UNSW.csv"), filtmethod='filterIR5to20', fs=fs)
-        R_list = read_R_csv(f_path("healthy_raw_UNSW_Rpeaks.csv"))
-        for dfile in map(lambda x: f_path(x), ["healthy_filterIR5to20_UNSW.csv", "healthy_median_UNSW_EKSmoothing.csv",
-                                               "healthy_medianFIR_UNSW_EKSmoothing.csv", "healthy_median_UNSW.csv",
-                                               "healthy_medianFIR_UNSW.csv"]):
-            dataset_segmentation(dfile, rpeaks_list=R_list, lim=[-100, 250])
-################################################################################################################
+#         # plt.show()
 
 
 
-#################################################################################################################
-# OLD APPROACH - healthy_raw.csv (one session per subject)
-#################################################################################################################
-#    ## STEP 1 - create filtered dataset using medianFIR: healthy_medianFIR.csv
-#    create_filtered_dataset(dfile=f_path('healthy_raw.csv'), filtmethod='medianFIR', fs=fs)
-#
-#    ## STEP 2 - create segmented dataset from filtered medianFIR dataset: healthy_medianFIR_segments.csv
-#    dfile = f_path('healthy_medianFIR.csv')
-#    plot_dataset(dfile)
-#    dataset_segmentation(dfile, fs=fs)
-#
-#    ## STEP 3 - remove "outliers" from the segmented dataset: healthy_medianFIR_segments_wo_out.csv
-#    dfile = f_path('healthy_medianFIR_segments.csv')
-#    plot_dataset(dfile, multicolumn=True)
-#    outlier_removal(dfile)
-#
-#    ## STEP 4 - fetch the corresponding records: healthy_medianFIR_wo_out.csv
-#    dfile = f_path('healthy_medianFIR_segments_wo_out.csv')
-#    plot_dataset(dfile, multicolumn=True)
-#    # original without outliers
-#    uids = np.unique(read_dataset_csv(dfile, multicolumn=True)[1])
-#    orig_dfile = f_path('healthy_medianFIR.csv')
-#    dset = read_dataset_csv(orig_dfile, to_array=False)[map(str, uids)]
-#    dset.to_csv(f_path('healthy_medianFIR_wo_out.csv'))
-#    plot_dataset(f_path('healthy_medianFIR_wo_out.csv'))
-#
-#    ## STEP 5 - from healthy_raw.csv pick the selected classes from the previous step: healthy_raw_selected.csv
-#    X, y = read_dataset_csv(f_path('healthy_medianFIR_wo_out.csv'))
-#    classes = np.unique(y)
-#    X, y = read_dataset_csv(f_path('healthy_raw.csv'))
-#    keep_idx = np.in1d(y, classes)
-#    X, y = X[keep_idx], y[keep_idx]
-#    save_dataset_csv(X, y, f_path('healthy_selected_raw.csv'))
-#
-#    ## STEP 6 - create filtered dataset using 5to20Hz filterIR and run segmentation
-#    create_filtered_dataset(dfile=f_path('healthy_selected_raw.csv'), filtmethod='filterIR5to20', fs=fs)
-#    dataset_segmentation(f_path('healthy_selected_filterIR5to20.csv'), fs=fs)
-#    plot_dataset(f_path('healthy_selected_filterIR5to20_segments.csv'), multicolumn=True)
-################################################################################################################
+# ################################################################################################################
+
+
+# #################################################################################################################
+# # UNSW APPROACH - healthy_raw.csv (one session per subject)
+# #################################################################################################################
+#     step1, step2, step3, step4 = False, False, False, False
+#     if step1:
+#         ## STEP 1 - create dataset without records that were deemed of poor quality or have features that deviate
+#         ##          from the idealized ECG model (e.g. waves other than R with higher amplitude). UNSW_RPeakDetector
+#         ##          (with additional modifications) is expected to identify all true R peaks: healthy_raw_UNSW.csv,
+#         ##          healthy_raw_UNSW_Rpeaks.csv.
+#         X, y = read_dataset_csv(f_path("healthy_raw.csv"))
+#         remove_ids = np.array([np.where(y==uid)[0][0] for uid in [1391, 1761, 1816, 2018]]) # waves other than R with higher amplitude
+#         X, y = np.delete(X, remove_ids,axis=0), np.delete(y, remove_ids)
+#         R_list, mask_list = UNSW_RPeakDetector(X, fs=fs, artifact_masking=True, return_mask=True, check_peak=True,
+#                                                padding=True, check_amplitude=True)
+#         keep_idx = np.array([i for i, mask in enumerate(mask_list) if len(mask)==0], dtype=int) # discard records based on artifact mask
+#         X, y, R_list = X[keep_idx], y[keep_idx], [R_list[i] for i in keep_idx]
+#         save_dataset_csv(X, y, dfile=f_path("healthy_raw_UNSW.csv"))
+#         save_R_csv(R_list, dfile=f_path("healthy_raw_UNSW_Rpeaks.csv"))
+#         plot_dataset_R(X, y, R_list, savefolder=f_path("healthy_raw_UNSW_images")) # plot raw dataset
+#         # remove baseline wander from raw dataset and plot the resulting dataset
+#         X = medianFIR(X, fs=fs, lpfilter=False)
+#         save_dataset_csv(X, y, dfile=f_path("healthy_median_UNSW.csv"))
+#         plot_dataset_R(X, y, R_list, savefolder=f_path("healthy_median_UNSW_images"))
+#     if step2:
+#         ## STEP 2 - create filtered dataset (baseline removal and lowpass of 40Hz): healthy_medianFIR_UNSW.csv
+#         R_list = read_R_csv(f_path("healthy_raw_UNSW_Rpeaks.csv"))
+#         X, y = read_dataset_csv(f_path("healthy_raw_UNSW.csv"))
+#         X = medianFIR(X, fs=fs, lpfilter=True)
+#         save_dataset_csv(X, y, dfile=f_path("healthy_medianFIR_UNSW.csv"))
+#         plot_dataset_R(X, y, R_list, savefolder=f_path("healthy_medianFIR_UNSW_images"))
+#         plot_datasets(map(lambda x: f_path(x),["healthy_raw_UNSW.csv", "healthy_median_UNSW.csv", "healthy_medianFIR_UNSW.csv"]))
+#     if step3:
+#         ## STEP 3 - create smoothed datasets and plot them for comparison: healthy_median_UNSW_EKSmoothing.csv
+#         ##          and healthy_medianFIR_UNSW_EKSmoothing.csv
+#         R_list = read_R_csv(f_path("healthy_raw_UNSW_Rpeaks.csv"))
+#         create_filtered_dataset(f_path("healthy_medianFIR_UNSW.csv"), filtmethod='EKSmoothing', R_list=R_list, fs=fs, bins=250, verbose=True)
+#         plot_datasets(map(lambda x: f_path(x),["healthy_medianFIR_UNSW.csv", "healthy_medianFIR_UNSW_EKSmoothing.csv"]))
+#         create_filtered_dataset(f_path("healthy_median_UNSW.csv"), filtmethod='EKSmoothing', R_list=R_list, fs=fs, bins=250, verbose=True)
+#         plot_datasets(map(lambda x: f_path(x),["healthy_median_UNSW.csv", "healthy_median_UNSW_EKSmoothing.csv", "healthy_medianFIR_UNSW_EKSmoothing.csv"]))
+#     if step4:
+#         ## STEP 4 - create datasets using other filtering approaches for future performance comparison; perform dataset segmentation
+#         create_filtered_dataset(f_path("healthy_raw_UNSW.csv"), filtmethod='filterIR5to20', fs=fs)
+#         R_list = read_R_csv(f_path("healthy_raw_UNSW_Rpeaks.csv"))
+#         for dfile in map(lambda x: f_path(x), ["healthy_filterIR5to20_UNSW.csv", "healthy_median_UNSW_EKSmoothing.csv",
+#                                                "healthy_medianFIR_UNSW_EKSmoothing.csv", "healthy_median_UNSW.csv",
+#                                                "healthy_medianFIR_UNSW.csv"]):
+#             dataset_segmentation(dfile, rpeaks_list=R_list, lim=[-100, 250])
+# ################################################################################################################
+
+
+
+# #################################################################################################################
+# # OLD APPROACH - healthy_raw.csv (one session per subject)
+# #################################################################################################################
+# #    ## STEP 1 - create filtered dataset using medianFIR: healthy_medianFIR.csv
+# #    create_filtered_dataset(dfile=f_path('healthy_raw.csv'), filtmethod='medianFIR', fs=fs)
+# #
+# #    ## STEP 2 - create segmented dataset from filtered medianFIR dataset: healthy_medianFIR_segments.csv
+# #    dfile = f_path('healthy_medianFIR.csv')
+# #    plot_dataset(dfile)
+# #    dataset_segmentation(dfile, fs=fs)
+# #
+# #    ## STEP 3 - remove "outliers" from the segmented dataset: healthy_medianFIR_segments_wo_out.csv
+# #    dfile = f_path('healthy_medianFIR_segments.csv')
+# #    plot_dataset(dfile, multicolumn=True)
+# #    outlier_removal(dfile)
+# #
+# #    ## STEP 4 - fetch the corresponding records: healthy_medianFIR_wo_out.csv
+# #    dfile = f_path('healthy_medianFIR_segments_wo_out.csv')
+# #    plot_dataset(dfile, multicolumn=True)
+# #    # original without outliers
+# #    uids = np.unique(read_dataset_csv(dfile, multicolumn=True)[1])
+# #    orig_dfile = f_path('healthy_medianFIR.csv')
+# #    dset = read_dataset_csv(orig_dfile, to_array=False)[map(str, uids)]
+# #    dset.to_csv(f_path('healthy_medianFIR_wo_out.csv'))
+# #    plot_dataset(f_path('healthy_medianFIR_wo_out.csv'))
+# #
+# #    ## STEP 5 - from healthy_raw.csv pick the selected classes from the previous step: healthy_raw_selected.csv
+# #    X, y = read_dataset_csv(f_path('healthy_medianFIR_wo_out.csv'))
+# #    classes = np.unique(y)
+# #    X, y = read_dataset_csv(f_path('healthy_raw.csv'))
+# #    keep_idx = np.in1d(y, classes)
+# #    X, y = X[keep_idx], y[keep_idx]
+# #    save_dataset_csv(X, y, f_path('healthy_selected_raw.csv'))
+# #
+# #    ## STEP 6 - create filtered dataset using 5to20Hz filterIR and run segmentation
+# #    create_filtered_dataset(dfile=f_path('healthy_selected_raw.csv'), filtmethod='filterIR5to20', fs=fs)
+# #    dataset_segmentation(f_path('healthy_selected_filterIR5to20.csv'), fs=fs)
+# #    plot_dataset(f_path('healthy_selected_filterIR5to20_segments.csv'), multicolumn=True)
+# ################################################################################################################

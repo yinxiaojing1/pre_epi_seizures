@@ -24,7 +24,7 @@ def load_header_signals_phisionet (nb_sz):
 
 def _fetch_record_header(record):
     d = dict((k, v) for k, v in record.__dict__.items() \
-        if (k == 'fs' or k == 'comments' ))
+        if (k != 'p_signals' ))
 
     return d
 

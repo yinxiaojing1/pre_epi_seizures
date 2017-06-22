@@ -74,12 +74,12 @@ def get_filter(ftype='FIR', band='lowpass', order=None,
                           cutoff=frequency,
                           pass_zero=False, **kwargs)
         elif ftype == 'butter':
-        # Butterworth filter
-        b, a = ss.butter(N=order,
-                         Wn=frequency,
-                         btype=band,
-                         analog=False,
-                         output='ba', **kwargs)
+            # Butterworth filter
+            b, a = ss.butter(N=order,
+                             Wn=frequency,
+                             btype=band,
+                             analog=False,
+                             output='ba', **kwargs)
     elif ftype == 'cheby1':
         # Chebyshev type I filter
         b, a = ss.cheby1(N=order,

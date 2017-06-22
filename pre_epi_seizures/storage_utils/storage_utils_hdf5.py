@@ -6,7 +6,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-def setup_logging(loglevel = 'INFO'):
+def setup_logging(loglevel):
     """Setup basic logging
 
     Args:
@@ -24,7 +24,7 @@ def load_from_file_hdf5(path):
 
     for signal_name in list_signals_names:
         try: 
-            header, signal = load_header_signals_hdf5(opened_file, signal_name)
+            header, signal = load_header_signals_hdf5(opened_file, signal_name[1])
 
         except Exception as e: 
             _logger.debug(e)
@@ -39,9 +39,9 @@ def save_to_file_hdf5(path):
     close_file(opened_file)
 
 
-def list_signals_hdf5(file):
-    list_signals = file.list_signals()
-    return list_signals['signals'][0]
+def list_signals_hdf5(file, group='raw'):
+    list_signals = file.list_signals(group='raw')
+    return list_signals['signals']
 
 
 def save_signal_hdf5(file, signal, group, mdata, name, compress=False):
@@ -71,6 +71,6 @@ def main(arg):
 
 
 def run():
-    main('~/Desktop/phisionet_data/phisionet_2.h5')
+    main('~/Desktop/phisionet_dataset.h5')
 
 run()
