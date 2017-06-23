@@ -13,7 +13,6 @@ _logger = logging.getLogger(__name__)
 
 
 def baseline_removal(path, name, group):
-    _logger.debug('Creating fitered dataset')
     create_filtered_dataset(path=path, name=name, group=group, filtmethod='medianFIR', save_dfile=path)
 
 
@@ -38,7 +37,7 @@ def create_filtered_dataset(path, name, group, filtmethod='medianFIR', save_dfil
     """
     if save_dfile is None:
         save_dfile = dfile.replace('raw', filtmethod) if 'raw' in dfile else dfile.split('.')[0] + '_{}.csv'.format(filtmethod)
-    X = fetch_signal(path=path, name=name, group=group) # 1 record per row
+    X = load_signal(path=path, name=name, group=group) # 1 record per row
     X_filt = globals()[filtmethod](X['signal'].T, **kwargs)
     save_signal(signal=X_filt, mdata=X['mdata'], path=path, name=name, group=filtmethod)
 
@@ -55,16 +54,26 @@ def plot_models(models, names, colors):
     plt.show()
 
 
-def fetch_signal(path, name, group):
+def load_signal(path, name, group):
     opened_file = st_hdf5.HDF(path, 'r+')
-    signal = opened_file.get_signal(name=name, group=group)
+
+    try:
+        signal = opened_file.get_signal(name=name, group=group)
+    except Exception as e:
+        _logger.debug(e)
+
     opened_file.close()
     return signal
 
 
 def save_signal(signal, mdata, path, name, group):
     opened_file = st_hdf5.HDF(path, 'r+')
-    signal = opened_file.add_signal(signal=signal, mdata=mdata, name=name, group=group)
+
+    try:
+        signal = opened_file.add_signal(signal=signal, mdata=mdata, name=name, group=group)
+    except Exception as e:
+        _logger.debug(e)
+
     opened_file.close()
 
 
@@ -73,10 +82,12 @@ def fetch_phisionet_path(nb_sz):
 
 
 def create_rpeak_dataset(path, name, group, save_dfile=None):
-    X = fetch_signal(path=path, name=name, group=group) # 1 record per row
+    X = load_signal(path=path, name=name, group=group) # 1 record per row
     signal_to_filter = X['signal'][0,:].T
     rpeaks = ecg.hamilton_segmenter(signal=signal_to_filter, sampling_rate=X['mdata']['fs'])
-    save_signal(signal=rpeaks['rpeaks'], mdata='', path=path, name='rpeaks', group=group)
+    save_signal(signal=rpeaks['rpeaks'], mdata='', path=path, name='rpeaks_'+name, group=group)
+
+
 
 
 def setup_logging(loglevel = 'INFO'):
@@ -90,27 +101,10 @@ def setup_logging(loglevel = 'INFO'):
                         format=logformat, datefmt="%Y-%m-%d %H:%M:%S")
 
 
-def main(arg):
+def main(*args):
     setup_logging('DEBUG')
     _logger.debug("Starting Gaussian Fit...")
     path = '~/Desktop/phisionet_dataset.h5'
+    
 
-    try:
-        baseline_removal(path=path, name='sz_'+str(arg),
-                         group='raw')
-    except Exception as e:
-        _logger.debug(e)
-
-    # X = fetch_signal(path = path, name='sz_'+str(arg),
-    #                  group = 'medianFIR')
-    # _logger.debug(X['mdata']['fs'])
-    # _logger.debug(X['signal'][:,0])
-    _logger.debug('Creating rpeak dataset')
-    create_rpeak_dataset(path=path, name='sz_'+str(arg), group='medianFIR')
-    # rpeaks = fetch_signal(path=path, name='peaks', group='medianFIR')
-    # # gaussian_fit.gaussian_fit(X['signal'][:,0], rpeak)
-    # _logger.debug(header)
-    # _logger.debug(signals['signal'])
-
-
-main(2)
+# main(1, 2, 3, 4, 5, 6, 7)
