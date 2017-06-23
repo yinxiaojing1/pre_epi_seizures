@@ -61,6 +61,7 @@ def load_signal(path, name, group):
         signal = opened_file.get_signal(name=name, group=group)
     except Exception as e:
         _logger.debug(e)
+        signal = None
 
     opened_file.close()
     return signal
@@ -88,8 +89,6 @@ def create_rpeak_dataset(path, name, group, save_dfile=None):
     save_signal(signal=rpeaks['rpeaks'], mdata='', path=path, name='rpeaks_'+name, group=group)
 
 
-
-
 def setup_logging(loglevel = 'INFO'):
     """Setup basic logging
 
@@ -101,10 +100,16 @@ def setup_logging(loglevel = 'INFO'):
                         format=logformat, datefmt="%Y-%m-%d %H:%M:%S")
 
 
-def main(*args):
+def main(arg):
     setup_logging('DEBUG')
     _logger.debug("Starting Gaussian Fit...")
     path = '~/Desktop/phisionet_dataset.h5'
-    
+    name = 'sz_'+str(arg)
+    group = 'medianFIR'
+    X = load_signal(path, name, group)
+    rpeaks = load_signal(path,'rpeaks_'+name, group)
+    _logger.debug(rpeaks)
 
-# main(1, 2, 3, 4, 5, 6, 7)
+    Kparam, xxbin, xxbinphase = gaussian_fit.gaussian_fit(X['signal'].T, rpeaks['signal'].T)
+
+main(1)

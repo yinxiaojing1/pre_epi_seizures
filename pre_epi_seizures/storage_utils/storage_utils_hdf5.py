@@ -17,60 +17,26 @@ def setup_logging(loglevel):
                         format=logformat, datefmt="%Y-%m-%d %H:%M:%S")
 
 
-def load_from_file_hdf5(path):
-    opened_file = open_file(path)
-    list_signals_names = list_signals_hdf5(opened_file)
-    _logger.debug(list_signals_names)
 
-    for signal_name in list_signals_names:
-        try: 
-            header, signal = load_header_signals_hdf5(opened_file, signal_name[1])
+def load_signal(path, name, group):
+    opened_file = st_hdf5.HDF(path, 'r+')
 
-        except Exception as e: 
-            _logger.debug(e)
+    try:
+        signal = opened_file.get_signal(name=name, group=group)
+    except Exception as e:
+        _logger.debug(e)
+        signal = None
 
-    close_file(opened_file)
-    return header, signal
+    opened_file.close()
+    return signal
 
 
-def save_to_file_hdf5(path):
-    opened_file = open_file(path)
-    save_header_signals_hdf5(opened_file)
-    close_file(opened_file)
+def save_signal(signal, mdata, path, name, group):
+    opened_file = st_hdf5.HDF(path, 'r+')
 
+    try:
+        signal = opened_file.add_signal(signal=signal, mdata=mdata, name=name, group=group)
+    except Exception as e:
+        _logger.debug(e)
 
-def list_signals_hdf5(file, group='raw'):
-    list_signals = file.list_signals(group='raw')
-    return list_signals['signals']
-
-
-def save_signal_hdf5(file, signal, group, mdata, name, compress=False):
-    file.add_signal(signal=signal, mdata=mdata, name='signals')
-
-
-def load_header_signals_hdf5(file, name):
-    header = file.get_header()
-    signals = file.get_signal(name=name)
-    return header, signals
-
-
-def open_file(path):
-    return st_hdf5.HDF(path, 'r+')
-
-
-def close_file(file):
-    file.close()
-
-
-def main(arg):
-    setup_logging('DEBUG')
-    _logger.debug("Starting crazy calculations...")
-    header, signals = load_from_file_hdf5(arg)
-    _logger.debug(header)
-    _logger.debug(signals['signal'])
-
-
-def run():
-    main('~/Desktop/phisionet_dataset.h5')
-
-run()
+    opened_file.close()
