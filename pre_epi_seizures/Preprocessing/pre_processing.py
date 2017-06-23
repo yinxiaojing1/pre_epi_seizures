@@ -1,7 +1,8 @@
 from biosppy import storage as st_hdf5
-import preprocessing
+
 from Filtering import medianFIR, filterIR5to20, filter_signal, gaussian_fit
-from rpeak_detector import rpeak_detector
+
+from biosppy.signals import ecg
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -12,20 +13,11 @@ _logger = logging.getLogger(__name__)
 
 
 def baseline_removal(path, name, group):
-    setup_logging('DEBUG')
-    nb_sz = 1
-    name = 'sz_'+str(nb_sz)
-    path = fetch_phisionet_path(nb_sz)
-    group = 'raw'
-    # models = [ecg_raw, X.T]
-    # names = ['Raw ECG', 'Filtered']
-    # colors = ['Red']
-    # plot_models(models, names, colors)
     _logger.debug('Creating fitered dataset')
-    create_filtered_dataset(dfile=path, name=name, group=group, filtmethod='medianFIR', save_dfile=path)
+    create_filtered_dataset(path=path, name=name, group=group, filtmethod='medianFIR', save_dfile=path)
 
 
-def create_filtered_dataset(dfile, name, group, filtmethod='medianFIR', save_dfile=None, multicolumn=False, **kwargs):
+def create_filtered_dataset(path, name, group, filtmethod='medianFIR', save_dfile=None, multicolumn=False, **kwargs):
     """
     Load dataset from a hdf5 file, filter with filtmethod save it.
     Parameters:
@@ -46,9 +38,9 @@ def create_filtered_dataset(dfile, name, group, filtmethod='medianFIR', save_dfi
     """
     if save_dfile is None:
         save_dfile = dfile.replace('raw', filtmethod) if 'raw' in dfile else dfile.split('.')[0] + '_{}.csv'.format(filtmethod)
-    X = fetch_signal(path=dfile, name=name, group=group) # 1 record per row
+    X = fetch_signal(path=path, name=name, group=group) # 1 record per row
     X_filt = globals()[filtmethod](X['signal'].T, **kwargs)
-    save_signal(signal=X_filt, mdata=X['mdata'], path=save_dfile, name=name, group=filtmethod)
+    save_signal(signal=X_filt, mdata=X['mdata'], path=path, name=name, group=filtmethod)
 
 
 def plot_models(models, names, colors):
@@ -80,50 +72,11 @@ def fetch_phisionet_path(nb_sz):
     return '~/Desktop/phisionet_dataset.h5'
 
 
-def dataset_segmentation(dfile, name, group, save_dfile=None, rpeaks_list=None, rdetector='UNSW_RPeakDetector', lim=[-100, 250], **kwargs):
-    """
-    Load dataset from csv file, apply ECG segmentation using fixed-sized window around detected R peaks,
-    save the resulting segments into a csv (multi-index dataframe).
-    The R peaks are detected using rdetector function.
-    Parameters:
-    -----------
-    dfile: str
-        Path pointing to csv file containing 1 record per column.
-    save_dfile: str (default: None)
-        Path pointing to new csv file. If None, append '_segments' to dfile name.
-    rpeaks_list: list of arrays (default: None)
-        R peak locations (1 array per signal). If None, computes the rpeaks using rdetector.
-    rdetector: str (default: UNSW_RPeakDetector)
-        Name of the R peak detector function defined in the global scope. For instance,
-        'UNSW_RPeakDetector'.
-    lim: list of int (default: [-100, 250])
-        Lower and upper bound w.r.t detected R peaks [number of samples].
-    kwargs: dict
-        Additional arguments to rdetector function (e.g. fs).
-    """
-    signal = fetch_signal(path=dfile, name=name, group=group)
-    X = signal['signal']
-    y = [1]
-
-    # rpeaks_list = globals()[rdetector](X, **kwargs) if rpeaks_list is None else rpeaks_list
-    rpeak_list = rpeak_detector(signal=X,
-                                sampling_rate=signal['fs'], method='christov')
-    X_new, y_new = [], []
-    lb, ub = lim
-    ssize = ub-lb
-    for xx, yy, Rpeaks in zip(X, y, rpeaks_list):
-        if len(Rpeaks)==0:
-            continue
-        xx_segments = np.vstack([xx[lb+rpeak:ub+rpeak] for rpeak in Rpeaks if len(xx[lb+rpeak:ub+rpeak])==ssize])
-        y_new.append([yy]*len(xx_segments))
-        X_new.append(xx_segments)
-    y_new = np.array(list(itertools.chain.from_iterable(y_new)))
-    if len(y_new) == 0:
-        raise ValueError('Could not perform segmentation on any record.')
-    if save_dfile is None:
-        save_dfile = dfile.split('.')[0] + '_segments.csv'
-    save_dataset_csv(X_new, y_new, save_dfile)
-
+def create_rpeak_dataset(path, name, group, save_dfile=None):
+    X = fetch_signal(path=path, name=name, group=group) # 1 record per row
+    signal_to_filter = X['signal'][0,:].T
+    rpeaks = ecg.hamilton_segmenter(signal=signal_to_filter, sampling_rate=X['mdata']['fs'])
+    save_signal(signal=rpeaks['rpeaks'], mdata='', path=path, name='rpeaks', group=group)
 
 
 def setup_logging(loglevel = 'INFO'):
@@ -139,23 +92,25 @@ def setup_logging(loglevel = 'INFO'):
 
 def main(arg):
     setup_logging('DEBUG')
-    _logger.debug("Starting crazy calculations...")
+    _logger.debug("Starting Gaussian Fit...")
     path = '~/Desktop/phisionet_dataset.h5'
 
-    # try:
-    #     baseline_removal(path=path, name='sz_'+str(arg),
-    #                      group = 'raw')
-    # except Exception as e:
-    #     _logger.debug(e)
+    try:
+        baseline_removal(path=path, name='sz_'+str(arg),
+                         group='raw')
+    except Exception as e:
+        _logger.debug(e)
 
-    X = fetch_signal(path = path, name='sz_'+str(arg),
-                     group = 'raw')
-
-    rpeak = rpeak_detector(signal=X['signal'].T, sampling_rate=X['mdata']['fs'], method='christov')
-
-    gaussian_fit(X['signal'], rpeak)
-    _logger.debug(header)
-    _logger.debug(signals['signal'])
+    # X = fetch_signal(path = path, name='sz_'+str(arg),
+    #                  group = 'medianFIR')
+    # _logger.debug(X['mdata']['fs'])
+    # _logger.debug(X['signal'][:,0])
+    _logger.debug('Creating rpeak dataset')
+    create_rpeak_dataset(path=path, name='sz_'+str(arg), group='medianFIR')
+    # rpeaks = fetch_signal(path=path, name='peaks', group='medianFIR')
+    # # gaussian_fit.gaussian_fit(X['signal'][:,0], rpeak)
+    # _logger.debug(header)
+    # _logger.debug(signals['signal'])
 
 
 main(2)
