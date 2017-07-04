@@ -1,11 +1,17 @@
-from pre_epi_seizures.storage_utils.storage_utils_hdf5 import save_signal, load_signal
+from pre_epi_seizures.logging_utils.formatter_logging\
+import logger as _logger
+
+from pre_epi_seizures.storage_utils.storage_utils_hdf5\
+import save_signal, load_signal
 
 from biosppy.signals import ecg
 
-def create_rpeak_dataset(path, name, group, save_dfile=None):
+def create_rpeak_dataset(path, name_list, group_list, save_dfile=None):
+    _logger.info('Detecting the R-peaks')
+
     X = load_signal(path=path, name=name, group=group) # 1 record per row
-    signal_to_filter = X['signal'][0,:].T
-    rpeaks = ecg.hamilton_segmenter(signal=signal_to_filter, sampling_rate=X['mdata']['fs'])
+    signal_to_filter = X['signal']
+    rpeaks = ecg.hamilton_segmenter(signal=signal_to_filter.T, sampling_rate=X['mdata']['fs'])
     save_signal(signal=rpeaks['rpeaks'], mdata='', path=path, name='rpeaks_'+name, group=group)
 
 

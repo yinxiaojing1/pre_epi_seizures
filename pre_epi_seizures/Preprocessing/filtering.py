@@ -1,10 +1,14 @@
-from pre_epi_seizures.storage_utils.storage_utils_hdf5 import save_signal, load_signal
+from pre_epi_seizures.logging_utils.formatter_logging\
+    import logger as _logger
 
-from Filtering import medianFIR, filterIR5to20, filter_signal, gaussian_fit
+from pre_epi_seizures.storage_utils.storage_utils_hdf5\
+    import save_signal, load_signal, delete_signal
 
-from formatter_logging import logger
+from Filtering import medianFIR, filterIR5to20,\
+    filter_signal, gaussian_fit
 
 def baseline_removal(path, name, group):
+    _logger.info('Removing the baseline ...')
     create_filtered_dataset(path=path, name=name, group=group, filtmethod='medianFIR', save_dfile=path)
 
 
@@ -29,8 +33,8 @@ def create_filtered_dataset(path, name, group, filtmethod, save_dfile=None, mult
     """
     if save_dfile is None:
         save_dfile = dfile.replace('raw', filtmethod) if 'raw' in dfile else dfile.split('.')[0] + '_{}.csv'.format(filtmethod)
-    X = load_signal(path=path, name=name, group=group) # 1 record per row
-    X_filt = globals()[filtmethod](X['signal'].T, **kwargs)
-    logger.debug(X_filt)
-    stop
-    save_signal(signal=X_filt.T, mdata=X['mdata'], path=path, name=name, group=filtmethod)
+    delete_signal(path,name,[filtmethod])
+    X = load_signal(path=path, name_list=name, group_list=group) # 1 record per row
+    X_filt = globals()[filtmethod](X[0]['signal'].T, **kwargs)
+    _logger.debug(X_filt)
+    save_signal(signal=X_filt.T, mdata=X[0]['mdata'], path=path, name=name[0], group=filtmethod)

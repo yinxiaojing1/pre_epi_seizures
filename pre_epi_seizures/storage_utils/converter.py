@@ -12,6 +12,13 @@ def converter_phisionet_hdf5(*args):
 
     opened_file.close()
 
+
+
+def converter_nehon_khoden_hdf5(*args):
+
+
+    
+
 def _converter_phisionet_hdf5(file, nb_sz):
     header, signals = fetch_header_signals_phisionet(nb_sz)
     print header, signals

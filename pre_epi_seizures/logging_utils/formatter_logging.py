@@ -19,5 +19,5 @@ logger.setLevel(logging.DEBUG)
 console = logging.StreamHandler()
 logger.addHandler(console)
 
-formatter = MyFormatter(fmt='[%(asctime)s]:%(funcName)s:%(message)s',datefmt='%Y-%m-%d %H:%M:%S.%f')
+formatter = MyFormatter(fmt='[%(asctime)s]:%(funcName)s:%(levelno)s:%(message)s',datefmt='%Y-%m-%d %H:%M:%S.%f')
 console.setFormatter(formatter)
