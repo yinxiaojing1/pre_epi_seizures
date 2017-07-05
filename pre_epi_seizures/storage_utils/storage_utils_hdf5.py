@@ -17,10 +17,15 @@ def load_signal(path, name_list, group_list):
     return return_list
 
 
-def save_signal(path, signal, mdata, name, group):
+def save_signal(path, signal_list, mdata_list, name_list, group_list):
     opened_file = st_hdf5.HDF(path, 'a')
-    add_signal(opened_file=opened_file, signal=signal,
+    
+    for group in group_list:
+        for signal, mdata, name in zip(signal_list,
+                                       mdata_list, name_list):
+            add_signal(opened_file=opened_file, signal=signal,
                mdata=mdata, name=name, group=group)
+
     opened_file.close()
 
 
@@ -33,6 +38,7 @@ def get_signal(opened_file, name, group):
         signal = None
     return signal
 
+
 def add_signal(opened_file, signal, mdata, name, group):
     _logger.info('Saving [signal: %s][group: %s]', name, group)
     try:
@@ -40,6 +46,7 @@ def add_signal(opened_file, signal, mdata, name, group):
                                         name=name, group=group)
     except Exception as e:
         _logger.debug(e)
+
 
 def delete_signal(path, name_list, group_list):
     opened_file = st_hdf5.HDF(path, 'a')
@@ -50,9 +57,27 @@ def delete_signal(path, name_list, group_list):
 
     opened_file.close()
 
+
 def _delete_signal(opened_file, name, group):
     _logger.info('deleting [signal: %s][group: %s]', name, group)
     try:
         opened_file.del_signal(group=group, name=name)
     except Exception as e:
         _logger.debug(e)
+
+
+def list_group_signals(path,group):
+    opened_file = st_hdf5.HDF(path, 'a')
+    list_signals(group='', recursive=True)
+
+def _add_event(opened_file, ts, values, mdata, group, name):
+    _logger.info('adding [event: %s][group: %s]', name, group)
+    try:
+        opened_file.add_event(ts, values, mdata, group, name)
+    except Exception as e:
+        _logger.debug(e)
+
+def add_event(path, ts, values, mdata, group, name):
+    opened_file = st_hdf5.HDF(path, 'a')
+    _add_event(opened_file, ts, values, mdata, group, name)
+    opened_file.close()

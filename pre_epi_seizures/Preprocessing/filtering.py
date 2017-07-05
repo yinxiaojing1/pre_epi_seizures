@@ -34,7 +34,8 @@ def create_filtered_dataset(path, name, group, filtmethod, save_dfile=None, mult
     if save_dfile is None:
         save_dfile = dfile.replace('raw', filtmethod) if 'raw' in dfile else dfile.split('.')[0] + '_{}.csv'.format(filtmethod)
     delete_signal(path,name,[filtmethod])
-    X = load_signal(path=path, name_list=name, group_list=group) # 1 record per row
+    X = load_signal(path=path, name_list=[name], group_list=[group]) # 1 record per row
     X_filt = globals()[filtmethod](X[0]['signal'].T, **kwargs)
     _logger.debug(X_filt)
-    save_signal(signal=X_filt.T, mdata=X[0]['mdata'], path=path, name=name[0], group=filtmethod)
+    save_signal(path=path, signal_list=[X_filt.T], 
+                mdata_list=[X[0]['mdata']], name_list=[name], group_list=[filtmethod])
