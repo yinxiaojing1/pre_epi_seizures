@@ -7,19 +7,18 @@ from biosppy import storage as st_hdf5
 import sys
 
 
-def load_signal(path, name_list, group_list):
+def load_signal(path, group_name_list):
     opened_file = st_hdf5.HDF(path, 'a')
-    return_list = [get_signal(opened_file=opened_file, name=name,
-                              group=group)
-                   for group in group_list
-                   for name in name_list]
+    return_dict = {group_name: get_signal(opened_file=opened_file,
+                                group_name=group_name)
+         for group_name in group_name_list}
     opened_file.close()
-    return return_list
+    return return_dict
 
 
 def save_signal(path, signal_list, mdata_list, name_list, group_list):
     opened_file = st_hdf5.HDF(path, 'a')
-    
+
     for group in group_list:
         for signal, mdata, name in zip(signal_list,
                                        mdata_list, name_list):
@@ -29,7 +28,9 @@ def save_signal(path, signal_list, mdata_list, name_list, group_list):
     opened_file.close()
 
 
-def get_signal(opened_file, name, group):
+def get_signal(opened_file, group_name):
+    group = group_name[0]
+    name = group_name[1]
     _logger.info('Loading [signal: %s][group: %s]', name, group)
     try:
         signal = opened_file.get_signal(name=name, group=group)
@@ -66,9 +67,11 @@ def _delete_signal(opened_file, name, group):
         _logger.debug(e)
 
 
-def list_group_signals(path,group):
-    opened_file = st_hdf5.HDF(path, 'a')
-    list_signals(group='', recursive=True)
+def list_group_signals(path, group):
+    opened_file = st_hdf5.HDF(path, 'r')
+    list_signals = opened_file.list_signals(group=group, recursive=False)
+    opened_file.close()
+    return list_signals
 
 def _add_event(opened_file, ts, values, mdata, group, name):
     _logger.info('adding [event: %s][group: %s]', name, group)
@@ -77,7 +80,10 @@ def _add_event(opened_file, ts, values, mdata, group, name):
     except Exception as e:
         _logger.debug(e)
 
+
 def add_event(path, ts, values, mdata, group, name):
     opened_file = st_hdf5.HDF(path, 'a')
     _add_event(opened_file, ts, values, mdata, group, name)
     opened_file.close()
+
+

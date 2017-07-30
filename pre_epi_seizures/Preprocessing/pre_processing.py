@@ -1,13 +1,21 @@
-from pre_epi_seizures.storage_utils.storage_utils_hdf5 import  load_signal, save_signal
+from pre_epi_seizures.storage_utils.storage_utils_hdf5 import \
+    load_signal, save_signal
+
+from pre_epi_seizures.storage_utils.data_handlers import *
 
 from pre_epi_seizures.logging_utils.formatter_logging import logger as _logger
 
 from filtering import baseline_removal, create_filtered_dataset
 
-from segmentation import create_rpeak_dataset, create_heart_beat_dataset
+from segmentation import create_rpeak_dataset, create_heart_beat_dataset,\
+    compute_beats
 
-from Filtering.gaussian_fit import get_phase, mean_extraction
+from Filtering.gaussian_fit import get_phase, mean_extraction,\
+    beat_fitter, ecg_model
 
+from Filtering.filter_signal import filter_signal
+
+from biosppy.signals import ecg
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -18,134 +26,198 @@ import copy
 import memory_profiler
 
 
-def plot_models(times, models, names, colors):
+def plot_single_model(time, model, names, color, start, end):
+    print 'here0'
+    plt.figure()
+    print len(model)
+    for i in xrange(0, len(model)):
+        print model[i,:]
+        plt.subplot(len(model), 1, i+1)
+        plt.plot(model[i,:], color=color)
+        # plt.axvline(x=30*60)
+        plt.xlim([start, end])
+        plt.ylim([-500, 500])
+
+    plt.subplots_adjust(0.09, 0.04, 0.94, 0.94, 0.26, 0.46)
+
+def plot_single_model_fft(time, model, names, color, start, end):
+    plt.figure()
+    print len(model)
+    for i in xrange(0, len(model)):
+        plt.subplot(len(model), 1, i+1)
+        sig = model[i, start:end]
+        yf = sp.fft(sig)
+        P = 1.0 / 1000
+        xf = np.linspace(0, 1.0 / (2.0 * P), len(sig) // 2)
+        plt.plot(
+            xf, 2.0 / len(sig) * np.abs(yf[0:len(sig) // 2]), color=color)
+        plt.xlim([0, 100])
+        plt.ylim([0, 100])
+
+
+    plt.subplots_adjust(0.09, 0.04, 0.94, 0.94, 0.26, 0.46)
+
+
+
+def plot_models(times, models, names, colors, start, end):
     plt.figure()
     for ii, (time, model, name) in enumerate(zip(times, models, names), 1):
         plt.subplot(len(models), 1, ii)
         plt.title(name)
         for ts, sig, color in zip(time.T, model.T, colors):
             plt.plot(ts, sig, color=color)
+            plt.xlim([start, end])
+            plt.ylim([-500, 500])
             # if scatter not None:
             #     plt.scatter(scat, color=scatter_color)
 
     plt.subplots_adjust(0.09, 0.04, 0.94, 0.94, 0.26, 0.46)
-    plt.show()
+
+
+
+def plot_models_scatter(time_scatter_models, scatter_models,
+                        time_models, models, names, colors, start, end):
+    plt.figure()
+    for ii, (time_scatter_model, scatter_model, time_model, model, name)\
+        in enumerate(zip(time_scatter_models, scatter_models, 
+                         time_models, models, names), 1):
+        plt.subplot(len(models), 1, ii)
+        plt.title(name)
+        for ts_scatter, sig_scatter, ts, sig, color\
+            in zip(time_scatter_model.T, scatter_model.T, time_model.T, model.T, colors):
+            plt.plot(ts, sig, color=color)
+            plt.scatter(ts_scatter, sig_scatter, color='g')
+            plt.xlim([start,end])
+            plt.ylim([-500,500])
+            #     plt.scatter(scat, color=scatter_color)
+
+    plt.subplots_adjust(0.09, 0.04, 0.94, 0.94, 0.26, 0.46)
+
+
+def fft_plot(times, models, names, colors):
+    plt.figure()
+    for ii, (time, model, name) in enumerate(zip(times, models, names), 1):
+        plt.subplot(len(models), 1, ii)
+        plt.title(name)
+        for ts, sig, color in zip(time.T, model.T, colors):
+            yf = sp.fft(sig)
+            P = 1.0 / 1000
+            xf = np.linspace(0, 1.0 / (2.0 * P), len(sig) // 2)
+            plt.plot(
+                xf, 2.0 / len(sig) * np.abs(yf[0:len(sig) // 2]), color=color)
+            plt.xlim([0, 100])
+            plt.ylim([0, 5])
+
+            # if scatter not None:
+            #     plt.scatter(scat, color=scatter_color)
+
+    plt.subplots_adjust(0.09, 0.04, 0.94, 0.94, 0.26, 0.46)
+
+
+# def plot_one_model(time, model, names, color)
 
 
 def shape_array(array):
     return np.array([array]).T
 
 
-# @profile
-def main(arg):
+def main():
 
-    # _logger.debug("Starting Gaussian Fit...")
-    # _logger.debug("vlfsn")
+    #signal
+    time_before_seizure = 30
+    time_after_seizure = 10
+    path_to_load = '~/Desktop/seizure_datasets.h5'
+    name_list = [str(time_before_seizure*60) + '_' + str(time_after_seizure*60)]
+    group_list = ['raw']
 
-# #*****************phisionet data*******************************
-#     path = '~/Desktop/phisionet_dataset.h5'
-#     name = ['sz_'+str(arg)]
-#     group = ['medianFIR', 'raw']
-
-#     # # baseline_removal(path, name, 'raw')
-#     # # create_rpeak_dataset(path, name, group)
-#     X = load_signal(path, name, group)
-
-#     # path = '~/Desktop/dummy.h5'
-#     # # rpeaks = load_signal(path,'rpeaks_'+name, group)
-
-#     _logger.debug(X[0]['signal'])
-#     _logger.debug(X[0]['mdata'])
-
-    # heart_beat, rpeak = create_heart_beat_dataset(path=path,
-    #                                               name=name,
-    #                                               group=group,
-    #                                               save_dfile=None)
-
-    # _logger.debug(np.asmatrix(rpeaks['signal'].T))
-    # models = [X['signal'][40*200:60*200], X_raw['signal'][40*200:60*200]]
-    # names = ['Filtered', 'Raw' ]
-    # colors = ['red']
-    # plot_models(models, names, colors)
-
-#****************************************************************
-    # path = '~/Desktop/HSM_data.h5'
-    # name = ['FA77748S']
-    # group = ['/PATIENT1/crysis']
-
-    # raw = load_signal(path, name, group)
-
-    # begin_seizure_seconds = raw[0]['mdata']['crysis_time_seconds']
-    # begin_seizure_sample = int(1000*begin_seizure_seconds[0])
-
-    # sampling_rate_hertz = 1000
-
-    # signal = raw[0]['signal']
-    # no_seizure_ecg_raw = signal[0:begin_seizure_sample,0]
-
-    # ecg_10min_5min_raw = signal[begin_seizure_sample
-    #                              -sampling_rate_hertz*10*60:
-    #                              begin_seizure_sample
-    #                              + sampling_rate_hertz*5*60]
+    # Raw signal 
+    signal_structure_raw = load_signal(path_to_load,zip(group_list, name_list))
+    # one_signal_structure_raw = get_one_signal_structure(signal_structure, zip(group_list, name_list)[0])
+    # records_raw = get_multiple_records(one_signal_structure_raw)
 
 
-    path_to_save = '~/Desktop/seizures_datasets_new.h5'
-    # mdata_list = [raw[0]['mdata']]
-    # signal_list = [ecg_10min_5min_raw]
-    name_list = ['10_15', 'rpeaks_10_15']
-    group_list= ['raw', 'medianFIR']
-
-    # save_signal(path_to_save, signal_list,
-                # mdata_list, name_list, group_list)
-    # ecg_10min_5min_raw = X[0]['signal']
-    # ecg_10min_5min_medianFIR = X[1]['signal']
+    # Baseline removal
+    group_list_baseline_removal = ['medianFIR']
+    try:
+        signal_structure_baseline_removal = load_signal(path_to_load,zip(group_list_baseline_removal, name_list))
+    except Exception as e:
+        _logger.debug(e)
+        baseline_removal(path_to_load, name_list[0], group_list[0])
+        signal_structure_baseline_removal = load_signal(path_to_load,zip(group_list_baseline_removal, name_list))
 
 
-    # create_rpeak_dataset(path_to_save, name, group)
-    # _logger.debug(begin_seizure_sample)
 
-    X = load_signal(path_to_save, name_list, group_list)
-    
+    # create_rpeak_dataset(path_to_load, zip(group_list_baseline_removal, name_list))
 
-    signal = X[2]['signal'].T
-    rpeaks = X[3]['signal'].T
+    f_loss = lambda label:'rpeaks_'+label
 
-    _logger.debug(signal[0,rpeaks])
-    _logger.debug(X[2]['mdata'])
+    labels = map(str, range(0,6))
 
-    # phase = get_phase(signal[0,:], rpeaks[0,:])
-    # _logger.debug(phase)
-    # # mean_extraction(signal, phase)
+    print labels
+    rpeaks_names = map(f_loss, labels)
+    print rpeaks_names
 
-    # baseline_removal(path_to_save, name_list, group_list)
-    # create_rpeak_dataset(path_to_save, name_list[0], group_list[1])
+    group_list = group_list_baseline_removal * len(labels)
+    print group_list
 
-    # decimated = sp.signal.decimate(raw[0]['signal'], 2)
+    rpeaks = load_signal(path_to_load ,zip(group_list, rpeaks_names))
+
+    print rpeaks
+
+    stop
+
+    one_signal_structure = get_one_signal_structure(signal_structure_baseline_removal, zip(group_list_baseline_removal, name_list)[0])
+    records = get_multiple_records(one_signal_structure)
+
+    signal = records[1,:]
+
+    signal = filter_signal(signal=signal, ftype='FIR', band='lowpass',
+                  order=50, frequency=40,
+                  sampling_rate=1000)
+
+    rpeaks = ecg.hamilton_segmenter(signal=signal,
+                                    sampling_rate=1000)
+    print rpeaks
+    phase = get_phase(signal, rpeaks['rpeaks'])
+
+    beats = compute_beats(signal, rpeaks['rpeaks'])
+    # plt.plot(beats[5])
+    # plt.show()
+
+    print phase
+    values = beat_fitter(beats[0],phase[1000:2000])
+
+    print values
+    stop
+    # create_rpeak_dataset(path_to_load, zip(group_list_baseline_removal, name_list))
+
+    # Plot the dataset
+    # records_baseline_removal = records
+    # Fs = 1000
+    # N = len(records_baseline_removal[0, :])
+    # T = (N - 1) / Fs
+    # time = np.linspace(0, T, N, endpoint=False)
+    # names = ['1', '1', '1', '2', '2', '5']
+    # color = 'red'
+    # start = 0
+    # end = 1000
+    # plot_single_model(time, beats, names, color, start, end)
+    # # plot_single_model_fft(time, np.array([signal]), names, color, start, end)
+    # plt.show()
     # stop
-    
 
-    # baseline_removal(path_to_save, ['10_15'], ['raw'])
+    values = beat_fitter(signal[start:end], phase[start:end])
+    model = ecg_model(values, phase[start:end])
+    print values
+    print 'The model is ... '
+    print model
+    # plt.figure()
+    # plt.plot(phase)
+    # plt.show()
 
-    Fs = X[2]['mdata']['sample_rate']
+    start = 0
+    end = len(model)
+    plot_single_model(time, np.array([model]), names, color, start, end)
+    plt.show()
 
-    N = len(signal[0,:])
-    T = (N - 1) / Fs
-
-    time = np.linspace(0, T, N, endpoint=False)
-    _logger.debug(len(time))
-    _logger.debug(N)
-
-    time = np.array([time])
-
-    _logger.debug('time %s', time)
-    _logger.debug('time %s', signal)
-
-    start = 105*1000
-    end = 110*1000
-    times = [time.T]
-    models = [signal.T]
-    names = ['raw', 'medianFIR', 'rpeaks']
-    colors = ['red']
-    plot_models(times, models, names, colors)
-
-main(3)
+main()
