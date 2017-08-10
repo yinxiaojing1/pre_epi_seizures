@@ -36,7 +36,7 @@ def get_signal(opened_file, group_name):
         signal = opened_file.get_signal(name=name, group=group)
     except Exception as e:
         _logger.debug(e)
-        signal = None
+
     return signal
 
 

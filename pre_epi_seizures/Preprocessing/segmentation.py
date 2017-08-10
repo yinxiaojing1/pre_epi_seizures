@@ -12,11 +12,13 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
+import functools
+
 def shape_array(array):
     return np.array([array]).T
 
 
-def create_rpeak_dataset(path, group_name_list):
+def create_rpeak_dataset(path, group_name_list, sampling_rate):
     _logger.info('Detecting the R-peaks')
     X = load_signal(path=path, group_name_list=group_name_list)
 
@@ -24,33 +26,39 @@ def create_rpeak_dataset(path, group_name_list):
         dataset = get_multiple_records(get_one_signal_structure(X, group_name_list[0]))
         labels = map(str, range(0,len(dataset)))
 
-        rpeaks_name = 'rpeaks'
+        rpeaks_name = group_name[1] + '_rpeaks_'
         print  dataset
 
-        rpeaks = map(detect_rpeaks, dataset)
+        import functools
+        rpeaks = map(functools.partial(detect_rpeaks,
+                     sampling_rate=sampling_rate), dataset)
         print rpeaks
 
-        name_list = map(create_rpeak_label, labels)
+        # stop
+        name_list = [rpeaks_name + label for label in labels]
         print name_list
 
         mdata_list = [''] * len(labels)
         print mdata_list
 
-        group_list = [group_name[0]] * len(labels)
-        print group_list
+        group_list = [group_name[0]]
+
+        delete_signal(path, name_list, group_list)
 
         save_signal(path=path, signal_list=rpeaks,
                 mdata_list=mdata_list, name_list=name_list, group_list=group_list)
 
 
-def detect_rpeaks(record):
+def detect_rpeaks(record, sampling_rate=1000):
     rpeaks = ecg.hamilton_segmenter(signal=record,
-                                    sampling_rate=1000)
+                                    sampling_rate=sampling_rate)
+    # rpeaks = ecg.christov_segmenter(signal=record,
+    #                                 sampling_rate=sampling_rate)
     return rpeaks['rpeaks']
 
 
-def create_rpeak_label(label):
-    return 'rpeaks_' + label
+def create_rpeak_label(name, label):
+    return name + '_rpeaks_' + label
 
 
 # # def compute_rpeaks(signal, Fs, method='hamilton'):

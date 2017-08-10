@@ -67,6 +67,7 @@ def ecg_model(values, phase):
     ai, bi, thetai = np.split(values, 3)
     dthetai = np.fmod(np.pi + phase - thetai[:,None], 2*np.pi) - np.pi
     return np.sum(ai[:,None] * np.exp(-dthetai**2 / (2*bi**2)[:,None]), axis=0)
+
 # Loss function to use when performing Nonlinear Least Squares Optimization
 f_loss = lambda values, mnphase, x: x-ecg_model(values, mnphase)
 

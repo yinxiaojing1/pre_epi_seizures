@@ -5,7 +5,7 @@ from pre_epi_seizures.storage_utils.data_handlers import *
 
 from pre_epi_seizures.logging_utils.formatter_logging import logger as _logger
 
-from filtering import baseline_removal, create_filtered_dataset
+from filtering import baseline_removal, noise_removal, create_filtered_dataset
 
 from segmentation import create_rpeak_dataset, create_heart_beat_dataset,\
     compute_beats
@@ -15,8 +15,15 @@ from Filtering.gaussian_fit import get_phase, mean_extraction,\
 
 from Filtering.filter_signal import filter_signal
 
+from Filtering.eksmoothing import EKSmoothing
+
+from resampling import resample_rpeaks
+
+from visual_inspection import visual_inspection
+
 from biosppy.signals import ecg
 
+import time
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy as sp
@@ -126,15 +133,18 @@ def main():
     #signal
     time_before_seizure = 30
     time_after_seizure = 10
+    # path_to_load = '~/Desktop/phisionet_seizures.h5'
+    sampling_rate = 1000
     path_to_load = '~/Desktop/seizure_datasets.h5'
     name_list = [str(time_before_seizure*60) + '_' + str(time_after_seizure*60)]
-    group_list = ['raw']
+    group_list_raw = ['raw']
 
     # Raw signal 
-    signal_structure_raw = load_signal(path_to_load,zip(group_list, name_list))
+    signal_structure_raw = load_signal(path_to_load,zip(group_list_raw, name_list))
     # one_signal_structure_raw = get_one_signal_structure(signal_structure, zip(group_list, name_list)[0])
     # records_raw = get_multiple_records(one_signal_structure_raw)
 
+    # stop # ========================================================
 
     # Baseline removal
     group_list_baseline_removal = ['medianFIR']
@@ -142,82 +152,126 @@ def main():
         signal_structure_baseline_removal = load_signal(path_to_load,zip(group_list_baseline_removal, name_list))
     except Exception as e:
         _logger.debug(e)
-        baseline_removal(path_to_load, name_list[0], group_list[0])
+        baseline_removal(path_to_load, name_list[0], group_list_raw[0], sampling_rate)
         signal_structure_baseline_removal = load_signal(path_to_load,zip(group_list_baseline_removal, name_list))
 
+    # stop # =========================================================
 
+    # Noise removal 
+    group_list_noise_removal = ['FIR_lowpass_40hz']
+    try:
+        signal_structure_noise_removal = load_signal(path_to_load,zip(group_list_noise_removal, name_list))
+    except Exception as e:
+        print e
+        _logger.debug(e)
+        noise_removal(path_to_load, name_list[0], group_list_raw[0], sampling_rate)
+        signal_structure_noise_removal = load_signal(path_to_load,zip(group_list_noise_removal, name_list))
 
-    # create_rpeak_dataset(path_to_load, zip(group_list_baseline_removal, name_list))
+    # stop # =========================================================
 
-    f_loss = lambda label:'rpeaks_'+label
-
-    labels = map(str, range(0,6))
-
-    print labels
-    rpeaks_names = map(f_loss, labels)
-    print rpeaks_names
-
+    # Rpeak detection
+    # create_rpeak_dataset(path_to_load, zip(group_list_noise_removal, name_list))
+    names = lambda label: name_list[0] + '_rpeaks_'+label
+    labels = map(str, range(0,5))
+    rpeaks_names = map(names, labels)
     group_list = group_list_baseline_removal * len(labels)
-    print group_list
 
-    rpeaks = load_signal(path_to_load ,zip(group_list, rpeaks_names))
+    try:
+        make_new_rpeaks
+        rpeaks_signal_structure = load_signal(path_to_load ,zip(group_list, rpeaks_names))
+    except Exception as e:
+        print e
+        _logger.debug(e)
+        create_rpeak_dataset(path_to_load, zip(group_list_noise_removal, name_list), sampling_rate)
+        rpeaks_signal_structure = load_signal(path_to_load ,zip(group_list, rpeaks_names))
 
-    print rpeaks
+    # stop # =========================================================
 
-    stop
+    # Visual inspection of rpeak detection
+    patient_nr = 4
 
     one_signal_structure = get_one_signal_structure(signal_structure_baseline_removal, zip(group_list_baseline_removal, name_list)[0])
     records = get_multiple_records(one_signal_structure)
+    mdata = get_mdata_dict(one_signal_structure)
 
-    signal = records[1,:]
-
-    signal = filter_signal(signal=signal, ftype='FIR', band='lowpass',
-                  order=50, frequency=40,
-                  sampling_rate=1000)
-
-    rpeaks = ecg.hamilton_segmenter(signal=signal,
-                                    sampling_rate=1000)
-    print rpeaks
-    phase = get_phase(signal, rpeaks['rpeaks'])
-
-    beats = compute_beats(signal, rpeaks['rpeaks'])
-    # plt.plot(beats[5])
-    # plt.show()
-
-    print phase
-    values = beat_fitter(beats[0],phase[1000:2000])
-
-    print values
-    stop
-    # create_rpeak_dataset(path_to_load, zip(group_list_baseline_removal, name_list))
-
-    # Plot the dataset
-    # records_baseline_removal = records
-    # Fs = 1000
-    # N = len(records_baseline_removal[0, :])
-    # T = (N - 1) / Fs
-    # time = np.linspace(0, T, N, endpoint=False)
-    # names = ['1', '1', '1', '2', '2', '5']
-    # color = 'red'
-    # start = 0
-    # end = 1000
-    # plot_single_model(time, beats, names, color, start, end)
-    # # plot_single_model_fft(time, np.array([signal]), names, color, start, end)
-    # plt.show()
     # stop
+    one_signal_structure = get_one_signal_structure(rpeaks_signal_structure, zip(group_list, rpeaks_names)[patient_nr])
+    rpeaks = [get_multiple_records(get_one_signal_structure(rpeaks_signal_structure, group_name)) for group_name in zip(group_list, rpeaks_names)]
 
-    values = beat_fitter(signal[start:end], phase[start:end])
-    model = ecg_model(values, phase[start:end])
-    print values
-    print 'The model is ... '
-    print model
-    # plt.figure()
-    # plt.plot(phase)
+
+    Fs = sampling_rate
+    N = len(records[0,:])
+    T = (N - 1) / Fs
+    t = np.linspace(0, T, N, endpoint=False)
+    print time
+
+    rpeaks_resample = resample_rpeaks(np.diff(rpeaks[patient_nr]), rpeaks[patient_nr], t)
+    # rpeaks = rpeaks[patient_nr]
+    # signal = records[patient_nr,:]
+
+    # visual_inspection(signal, rpeaks, rpeaks_resample, time_before_seizure,
+    #             0, time[-1], sampling_rate)
+
+    # signal_to_filter = signal
+    # rpeaks = ecg.hamilton_segmenter(signal=signal_to_filter,
+    #                                 sampling_rate=sampling_rate)
+    tmp = time.time()
+    filtered = EKSmoothing(records, rpeaks,
+        fs=sampling_rate, bins=250, verbose=False, 
+        oset=False, savefolder=None)
+    s = time.time() - tmp
+
+    path_to_load = '~/Desktop/seizure_datasets.h5'
+    name_list = [str(time_before_seizure*60) + '_' + str(time_after_seizure*60)]
+    group_list_esksmooth = ['esksmooth']
+
+    save_signal(path=path, signal_list=filtered,
+                mdata_list=[mdata], name_list=name_list, group_list=group_list_esksmooth)
+
+    print 'seconds elapsed:' 
+    print s
+
+    # print filtered[0]
+    # plt.subplot(2,1,1)
+    # plt.plot(signal_to_filter)
+    # plt.subplot(2,1,2)
+    # plt.plot(filtered[0])
     # plt.show()
 
-    start = 0
-    end = len(model)
-    plot_single_model(time, np.array([model]), names, color, start, end)
-    plt.show()
+    stop
+
+
+    # print rpeaks
+    # phase = get_phase(signal, rpeaks)
+
+    # mnx, sdx, mnphase = mean_extraction(signal[0:5*60*1000], phase[0:5*60*1000], bins = 1000)
+
+    # print mnx
+
+    # print phase
+    # values = beat_fitter(mnx,mnphase)
+
+    # print values
+    # model = ecg_model(values, mnphase)
+
+    # filtered = EKSmoothing(signal, [rpeaks['rpeaks']], fs=1000., bins=250, verbose=True, oset=False, savefolder=None)
+
+    plt.figure()
+    # plt.plot(mnx)
+    plt.plot(filtered)
+
+
+    # beats = compute_beats(signal, rpeaks)
+    # plt.figure()
+    # plt.plot(beats[beat_nr])
+
+    # print phase
+    # values = beat_fitter(beats[beat_nr],phase[beat_nr*1000:(beat_nr+1)*1000])
+
+    # print values
+    # model = ecg_model(values, phase[beat_nr*1000:(beat_nr+1)*1000])
+
+    # plt.plot(model)
+    # plt.show()
 
 main()

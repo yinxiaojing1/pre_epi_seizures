@@ -9,13 +9,31 @@ from pre_epi_seizures.storage_utils.data_handlers import *
 from Filtering import medianFIR, filterIR5to20,\
     filter_signal, gaussian_fit
 
-def baseline_removal(path, name, group):
-    _logger.info('Removing the baseline ...')
-    create_filtered_dataset(path=path, name=name, group=group, filtmethod='medianFIR', save_dfile=path)
+from Filtering.eksmoothing import EKSmoothing
 
+def baseline_removal(path, name, group, sampling_rate):
+    _logger.info('Removing the baseline ...')
+    create_filtered_dataset(path=path, name=name,
+            group=group, filtmethod='medianFIR',
+            sampling_rate=sampling_rate)
+
+
+def noise_removal(path, name, group, sampling_rate):
+    _logger.info('Removing noise ...')
+    create_filtered_dataset(path=path, name=name, group=group, filtmethod='FIR_lowpass_40hz')
+
+def eks_smoothing(path, name, group, sampling_rate):
+    try:
+        # make_new_rpeaks
+        rpeaks_signal_structure = load_signal(path_to_load ,zip(group_list, rpeaks_names))
+    except Exception as e:
+        print e
+        _logger.debug(e)
+        create_rpeak_dataset(path_to_load, zip(group_list_baseline_removal, name_list), sampling_rate)
+        rpeaks_signal_structure = load_signal(path_to_load ,zip(group_list, rpeaks_names))
 
 def create_filtered_dataset(path, name, group, filtmethod,
-                            save_dfile=None, multicolumn=False,
+                            save_dfile=None, multicolumn=False, sampling_rate=1000,
                             **kwargs):
     """
     Load dataset from a hdf5 file, filter with filtmethod save it.
@@ -40,7 +58,22 @@ def create_filtered_dataset(path, name, group, filtmethod,
     X = load_signal(path=path, group_name_list = zip([group], [name])) # 1 record per row
     one_signal_structure = get_one_signal_structure(X, zip([group], [name])[0])
     dataset = get_multiple_records(one_signal_structure)
-    X_filt = globals()[filtmethod](dataset, **kwargs)
-    _logger.debug(X_filt)
+    mdata = get_mdata_dict(one_signal_structure)
+
+    if filtmethod == 'medianFIR':
+        X_filt = globals()[filtmethod](dataset, **kwargs)
+        _logger.debug(X_filt)
+
+    elif filtmethod == 'FIR_lowpass_40hz':
+        X_filt = globals()['filter_signal'](dataset, ftype='FIR', band='lowpass',
+                  order=50, frequency=40,
+                  sampling_rate=sampling_rate)
+        _logger.debug(X_filt)
+
+
+
+    else:
+        stop
+
     save_signal(path=path, signal_list=[X_filt],
-                mdata_list=[''], name_list=[name], group_list=[filtmethod])
+                mdata_list=[mdata], name_list=[name], group_list=[filtmethod])

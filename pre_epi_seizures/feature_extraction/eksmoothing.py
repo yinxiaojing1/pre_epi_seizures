@@ -8,7 +8,6 @@ import os
 
 from datetime import datetime
 
-import matplotlib.pyplot as plt
 import numpy as np
 import scipy
 import scipy.signal as ss
@@ -33,20 +32,29 @@ def get_phase(x, peaks):
     array 1D
         Phase vector.
     """
+    start = 0
+    end = 10*1000
+    plt.plot(0.05*x[start:end])
     phase = np.zeros(len(x))
-    # plt.plot(peaks, 'o')
-    # plt.show()
+    plt.plot(phase[start:end])
     for pb, pu in zip(peaks[:-1],peaks[1:]):
         phase[pb:pu] = np.linspace(0, 2*np.pi, pu - pb, endpoint=False)
 
+    plt.plot(phase[start:end])
 
     if peaks[0] > 0:
         phase[:peaks[0]] = np.linspace(0, 2*np.pi, max(peaks[0], peaks[1] - peaks[0]), endpoint=False)[-peaks[0]:]
-
+    
+    plt.plot(phase[start:end])
     if peaks[-1] < len(x)-1:
         phase[peaks[-1]:] = np.linspace(0, 2*np.pi, max(len(x)-peaks[-1], peaks[-1] - peaks[-2]), endpoint=False)[:len(x)-peaks[-1]]
+
+    plt.plot(phase[start:end])
+
     phase = np.fmod(phase, 2*np.pi)
     phase[np.where(phase>np.pi)[0]] -= 2*np.pi
+    plt.plot(phase[start:end])
+    plt.show()
     return phase
 
 def phase_shift(phase, theta):
@@ -80,6 +88,7 @@ def ecg_model(values, phase):
     ai, bi, thetai = np.split(values, 3)
     dthetai = np.fmod(np.pi + phase - thetai[:,None], 2*np.pi) - np.pi
     return np.sum(ai[:,None] * np.exp(-dthetai**2 / (2*bi**2)[:,None]), axis=0)
+
 # Loss function to use when performing Nonlinear Least Squares Optimization
 f_loss = lambda values, mnphase, x: x-ecg_model(values, mnphase)
 
@@ -364,24 +373,11 @@ def EKSmoothing(X, R_list, fs=500., bins=250, verbose=False, oset=False, savefol
     R. Sameni, A Nonlinear Bayesian Filtering Framework for ECG Denoising, 2007.
     """
     X = np.atleast_2d(X)
-    # print 'X'
-    # print X
     Xeks_out = np.full(X.shape, -1, dtype=float)
-    # print 'Xeks_out'#***
-    # print Xeks_out#***
-    # # stop
     for i, (x, rpeaks) in enumerate(zip(X, R_list)):
         if verbose: print ("[{}] - {} / {} ...".format(str(datetime.now())[:-7], i+1, len(X))),
-        # print x #***
-        # plt.plot(x) #***
-        # # stop
         phase = get_phase(x, rpeaks)
-        # print 'phase' #***
-        # plt.plot(phase) #***
-        # plt.show() #****
         mnx, sdx, mnphase = mean_extraction(x, phase, bins=bins)
-        # plt.plot(mnx) #***
-        # plt.show() #****
         values = beat_fitter(mnx, mnphase)
         N = int(len(values)/3) # number of gaussian kernels
         fm = fs / np.diff(rpeaks) # heart rate

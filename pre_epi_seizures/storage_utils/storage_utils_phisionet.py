@@ -80,5 +80,4 @@ def main(arg):
 
 
 def run():
-    main(1)
-
+    main(1, 2, 3, 4, 5, 6, 7)

@@ -21,6 +21,10 @@ def get_one_signal_structure(signals_structure, group_name):
     return signals_structure[group_name]
 
 
+def get_mdata_dict(one_signal_structure): 
+    return one_signal_structure['mdata']
+
+
 def get_all_seizure_times_seconds(signals_structure):
     return {group_name:
              get_seizure_times_seconds(one_signal_structure)
