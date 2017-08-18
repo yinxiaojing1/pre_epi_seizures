@@ -53,15 +53,17 @@ time_after_seizure = 5
 record, mdata = create_datasets_phisionet(time_before_seizure*60,time_after_seizure*60,
                                 seizure_onsets_seconds, 1, 2, 3, 4, 5, 6, 7)
 
-path_to_save = '~/Desktop/phisionet_seizures.h5'
-name_list = [str(time_before_seizure*60) + '_' + str(time_after_seizure*60)]
-group_list_raw = ['raw']
-mdata_list = [mdata]
-signal_list = [record]
-
-save_signal(path_to_save, signal_list, mdata_list, name_list, group_list_raw)
-
 print record
 print mdata
+
+# path_to_save = '~/Desktop/phisionet_seizures.h5'
+# name_list = [str(time_before_seizure*60) + '_' + str(time_after_seizure*60)]
+# group_list_raw = ['raw']
+# mdata_list = [mdata]
+# signal_list = [record]
+
+# save_signal(path_to_save, signal_list, mdata_list, name_list, group_list_raw)
+
+
 
 

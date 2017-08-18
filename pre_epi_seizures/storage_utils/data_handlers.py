@@ -5,6 +5,10 @@ def get_multiple_records(one_signal_structure):
     return one_signal_structure['signal']
 
 
+def get_list_group_signals(group, list_signals_structure):
+    return [group_name[1] for group_name in list_signals_structure['signals']]
+
+
 def get_record(one_signal_structure): 
     return get_multiple_records(one_signal_structure)[:,0]
 

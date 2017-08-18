@@ -11,14 +11,13 @@ def compute_PCA_sklearn(beats_array):
 
 def compute_PC(beats_array):
     norm_covariance = np.cov(np.asarray(beats_array))
-    print np.shape(norm_covariance)
-    return np.linalg.eigh(norm_covariance)
+    return np.linalg.eigh(norm_covariance)[0]
 
 
 def trace_evol_PC(beats_total_array):
     print len(beats_total_array)
     return np.asarray([compute_PC(beats_total_array[i-5:i]) 
-                for i in xrange(5, len(beats_total_array), 1)])
+                for i in xrange(5, len(beats_total_array)+1, 1)])
 
 
 

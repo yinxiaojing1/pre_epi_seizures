@@ -5,7 +5,15 @@ from pre_epi_seizures.storage_utils.data_handlers import *
 
 from pre_epi_seizures.logging_utils.formatter_logging import logger as _logger
 
+from pre_epi_seizures.Preprocessing.pre_processing import \
+    load_baseline_removal, load_noise_removal, load_rpeaks, load_kalman
+
+from pre_epi_seizures.Preprocessing.visual_inspection import \
+    visual_inspection
+
+
 from heart_rate_variability import inst_heart_rate
+
 
 from morphology import compute_baseline_model
 
@@ -13,7 +21,7 @@ from segmentation import compute_fixed_beats
 
 from pca import compute_PC, trace_evol_PC
 
-from resampling import resample_rpeaks
+from resampling import resample_rpeaks, interpolate_signal, interpolate
 
 # # from filtering import baseline_removal, create_filtered_dataset
 
@@ -37,15 +45,17 @@ import memory_profiler
 
 def main():
 
-#signal
     #signal
-    time_before_seizure = 10
+    time_before_seizure = 30
     time_after_seizure = 10
-    path_to_load = '~/Desktop/phisionet_seizures.h5'
-    sampling_rate = 200
-    # path_to_load = '~/Desktop/seizure_datasets.h5'
+    # path_to_load = '~/Desktop/phisionet_seizures.h5'
+    sampling_rate = 1000
+    path_to_load = '~/Desktop/seizure_datasets.h5'
     name_list = [str(time_before_seizure*60) + '_' + str(time_after_seizure*60)]
     group_list_raw = ['raw']
+    group_list_baseline_removal = ['medianFIR']
+    group_list_noise_removal = ['FIR_lowpass_40hz']
+    group_list_esksmooth = ['esksmooth']
 
     # Raw signal 
     signal_structure_raw = load_signal(path_to_load,zip(group_list_raw, name_list))
@@ -55,108 +65,135 @@ def main():
     # stop # ========================================================
 
     # Baseline removal
-    group_list_baseline_removal = ['medianFIR']
-    try:
-        signal_structure_baseline_removal = load_signal(path_to_load,zip(group_list_baseline_removal, name_list))
-    except Exception as e:
-        _logger.debug(e)
-        baseline_removal(path_to_load, name_list[0], group_list_raw[0], sampling_rate)
-        signal_structure_baseline_removal = load_signal(path_to_load,zip(group_list_baseline_removal, name_list))
+    records_baseline_removal, mdata_baseline_removal = load_baseline_removal(path_to_load, group_list_raw, name_list, sampling_rate, compute_flag = False)
 
     # stop # =========================================================
 
     # Noise removal 
-    group_list_noise_removal = ['FIR_lowpass_40hz']
-    try:
-        signal_structure_noise_removal = load_signal(path_to_load,zip(group_list_noise_removal, name_list))
-    except Exception as e:
-        print e
-        _logger.debug(e)
-        noise_removal(path_to_load, name_list[0], group_list_raw[0], sampling_rate)
-        signal_structure_noise_removal = load_signal(path_to_load,zip(group_list_noise_removal, name_list))
+    records_noise_removal, mdata_noise_removal = load_noise_removal(path_to_load, group_list_baseline_removal, name_list, sampling_rate, compute_flag = False)
 
+
+    # Noise removal kalman
+
+    records_kalman, mdata_kalman = load_kalman(path_to_load, group_list_baseline_removal, name_list, sampling_rate, compute_flag = False)
+ 
     # stop # =========================================================
 
     # Rpeak detection
-    # create_rpeak_dataset(path_to_load, zip(group_list_noise_removal, name_list))
-    names = lambda label: name_list[0] + '_rpeaks_'+label
-    labels = map(str, range(0,5))
-    rpeaks_names = map(names, labels)
-    group_list = group_list_noise_removal * len(labels)
+    # rpeaks_noise_removal = load_rpeaks(path_to_load, group_list_noise_removal, name_list, sampling_rate, compute_flag = False)
 
-    try:
-        make_new_rpeaks
-        rpeaks_signal_structure = load_signal(path_to_load ,zip(group_list, rpeaks_names))
-    except Exception as e:
-        print e
-        _logger.debug(e)
-        create_rpeak_dataset(path_to_load, zip(group_list_baseline_removal, name_list), sampling_rate)
-        rpeaks_signal_structure = load_signal(path_to_load ,zip(group_list, rpeaks_names))
 
-    # Alocate data *****************************************
-    nr_patient = 2
+    # stop # =========================================================
+    # Allocate time array
+    Fs = 250
+    N = len(records_kalman[0,:])
+    T = (N - 1) / Fs
+    t = np.linspace(0, T, N, endpoint=False)
+    factor = 2
+
+    # Visual inspection of rpeak detection
+    start = 280
+    end = 300
     seizure_nr = 1
 
-    one_signal_structure = get_one_signal_structure(signal_structure_baseline_removal, zip(group_list_baseline_removal, name_list)[0])
-    records = get_multiple_records(one_signal_structure)
-
-    one_signal_structure = get_one_signal_structure(rpeaks_signal_structure, zip(group_list, rpeaks_names)[seizure_nr])
-    rpeaks = [get_multiple_records(get_one_signal_structure(rpeaks_signal_structure, group_name)) for group_name in zip(group_list, rpeaks_names)]
-
-    print records
-    # ******************************************************
-    Fs = 1000
-    N = len(records[0,:])
-    T = (N - 1) / Fs
-    time = np.linspace(0, T, N, endpoint=False)
-    print time
-
-    rpeaks_resample = resample_rpeaks(np.diff(rpeaks[nr_patient]), rpeaks[nr_patient], time)
-    # rpeaks_resample = filter_signal(signal=rpeaks_resample, ftype='FIR', band='lowpass',
-    #               order=100, frequency=40,
-    #               sampling_rate=Fs)
-    plt.subplot(2,1,1)
-    plt.plot(np.diff(rpeaks[nr_patient]))
-    plt.subplot(2,1,2)
-    plt.plot(rpeaks_resample)
-    plt.show()
-
-
-    signal = records[seizure_nr,:]
-    rpeaks = rpeaks[seizure_nr]
-
-    stop 
-
-    beat_nr = 10
-
-    start = 0 * 1000
-    end = 4 * 60 * 1000
-
-
-    beats = compute_fixed_beats(signal, rpeaks)
-    print np.shape(beats[0:5])
-    pca = compute_PC(beats[0:5])
-    pca = np.dot(pca, beats[0:5] )
-    # print pca
+    if seizure_nr < 3:
+        Fs = 1000
+        N = len(records_baseline_removal[0,:])
+        T = (N - 1) / Fs
+        t_new = np.linspace(0, T, N, endpoint=False)
+        signal_inter = records_baseline_removal[seizure_nr]
+        rpeaks_RAM = ecg.hamilton_segmenter(signal=signal_inter,
+                                    sampling_rate=sampling_rate)['rpeaks']
+    else:
+        signal = records_kalman[seizure_nr]
+        signal_inter, t_new = interpolate(t, signal, 1000)
+        rpeaks_RAM = ecg.hamilton_segmenter(signal=signal_inter,
+                                    sampling_rate=sampling_rate)['rpeaks']
 
     # stop
-    # pca = trace_evol_PC(beats[0:4]) 
-    print np.shape(pca)
-    plt.plot(pca[2,:])
-    plt.show()
-    stop
-#     plt.subplot(5,1,1)
-#     plt.plot(pca[:,4])
-#     plt.subplot(5,1,2)
-#     plt.plot(pca[:,3])
-#     plt.subplot(5,1,3)
-#     plt.plot(pca[:,2])
-#     plt.subplot(5,1,4)
-#     plt.plot(pca[:,1])
-#     plt.subplot(5,1,5)
-#     plt.plot(pca[:,0])
+    y = np.diff(rpeaks_RAM)
 
-#     plt.show()
+    # visual_inspection(signal_inter, rpeaks_RAM, y, t, time_before_seizure,
+    #             start, end, sampling_rate)
+
+    t_rpeaks = t_new[rpeaks_RAM[1:]]
+    y_new, t_n = interpolate(t_rpeaks, y, 2)
+    print (len(t)-1)/250
+    print (len(t_n)-1)/2
+    time_before_seizure = time_before_seizure*60
+    print time_before_seizure
+    #rpeaks
+    # rpeaks = rpeaks_noise_removal[seizure_nr]
+    # rpeaks_resample = resample_rpeaks(np.diff(rpeaks), rpeaks, t)
+    # rpeaks = find_rpeaks(rpeaks, start * sampling_rate,
+    #     end * sampling_rate)
+
+    #signal
+    # signal_baseline_removal = records_baseline_removal[seizure_nr,:]
+    # signal_noise_removal = records_noise_removal[seizure_nr,:]
+
+    #plot
+    plt.subplot(2,1,1)
+    plt.plot(t_new, signal_inter)
+    plt.plot(t_new[rpeaks_RAM], signal_inter[rpeaks_RAM], 'o')
+    # plt.axvline(x=time_before_seizure*60, color = 'g')
+    plt.subplot(2,1,2)
+    plt.plot(t_n, y_new)
+    plt.axvline(x=time_before_seizure, color='g')
+    plt.plot()
+    # plt.xlim([start, end])
+    # plt.subplot(2,1,2)
+    # plt.plot(t, signal_baseline_removal)
+    # plt.xlim([start, end])
+    plt.show()
+    # # stop
+
+    beats = compute_fixed_beats(signal_inter, rpeaks_RAM)
+    print np.shape(beats[0:5])
+    pca = compute_PC(beats[0:5])
+
+    pca = np.dot(pca, beats[0:5])
+    print np.shape(pca)
+
+    evol = trace_evol_PC(beats)
+    print np.shape(evol) 
+    evol = evol.T
+
+    t_evol = t_new[rpeaks_RAM[6:-1]]
+    print len(t_evol)
+
+
+    ev = [interpolate(t_evol, eigen, 2) for eigen in evol]
+
+    plt.subplot(6,1,1)
+    plt.plot(ev[4][1], 1*1000*60/y_new[1:len(ev[4][1])+1])
+    plt.axvline(x=time_before_seizure, color='g')
+    plt.legend(['HRV', 'Seizure onset'])
+    plt.ylabel('bpm')
+    plt.subplot(6,1,2)
+    plt.plot(ev[4][1], ev[4][0])
+    plt.axvline(x=time_before_seizure, color='g')
+    plt.legend(['Eigen-Value 1', 'Seizure onset'])
+    plt.subplot(6,1,3)
+    plt.plot(ev[3][1], ev[3][0])
+    plt.axvline(x=time_before_seizure, color='g')
+    plt.legend(['Eigen-Value 2', 'Seizure onset'])
+    plt.subplot(6,1,4)
+    plt.plot(ev[2][1], ev[2][0])
+    plt.axvline(x=time_before_seizure, color='g')
+    plt.legend(['Eigen-Value 3', 'Seizure onset'])
+    plt.subplot(6,1,5)
+    plt.plot(ev[1][1], ev[1][0])
+    plt.axvline(x=time_before_seizure, color='g')
+    plt.legend(['Eigen-Value 4', 'Seizure onset'])
+    plt.subplot(6,1,6)
+    plt.plot(ev[0][1], ev[0][0])
+    plt.axvline(x=time_before_seizure, color='g')
+    plt.legend(['Eigen-Value 5', 'Seizure onset'])
+    plt.xlabel('t (s)')
+    plt.subplots_adjust(0.09, 0.1, 0.94, 0.94, 0.26, 0.46)
+
+    plt.show()
 # #     # print(pca.explained_variance_ratio_)
 #     # print(pca.components_) 
 

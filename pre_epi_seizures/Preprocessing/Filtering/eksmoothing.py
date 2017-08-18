@@ -33,7 +33,9 @@ def get_phase(x, peaks):
     array 1D
         Phase vector.
     """
+    print 'here'
     phase = np.zeros(len(x))
+    print len(phase)
     # plt.plot(peaks, 'o')
     # plt.show()
     for pb, pu in zip(peaks[:-1],peaks[1:]):
@@ -83,7 +85,7 @@ def ecg_model(values, phase):
 # Loss function to use when performing Nonlinear Least Squares Optimization
 f_loss = lambda values, mnphase, x: x-ecg_model(values, mnphase)
 
-def beat_fitter(x, phase, max_runs=3000, values0=None, bounds=None):
+def beat_fitter(x, phase, max_runs=10, values0=None, bounds=None):
     """
     Automated beat fitter: compute the gaussian kernel parameters (ai,bi,thetai)
     using Nonlinear Least Squares Optimization.
@@ -136,7 +138,8 @@ def beat_fitter(x, phase, max_runs=3000, values0=None, bounds=None):
         bounds_thetai = [np.maximum(-np.pi, thetai-steps*np.array([20,5,5,5,20])), np.minimum(np.pi, thetai+steps*np.array([20,5,5,5,20]))]
         bounds = np.hstack((bounds_ai, bounds_bi, bounds_thetai))
     ## Nonlinear Least Squares Optimization using Trust Region Reflective algorithm
-    values = least_squares(f_loss, x0=values0, args=(phase, x), bounds=bounds, method='trf', max_nfev=max_runs)['x']
+    values = least_squares(f_loss, x0=values0, args=(phase, x), bounds=bounds, method='trf', max_nfev=max_runs, verbose=0)['x']
+ 
     return values
 
 # def EKSmoother(Y, X0, P0, Q, R, Wmean, Vmean, Inits, InovWlen=250, tau=None, gamma=1., RadaptWlen=250):

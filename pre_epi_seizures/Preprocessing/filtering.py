@@ -66,7 +66,7 @@ def create_filtered_dataset(path, name, group, filtmethod,
 
     elif filtmethod == 'FIR_lowpass_40hz':
         X_filt = globals()['filter_signal'](dataset, ftype='FIR', band='lowpass',
-                  order=50, frequency=40,
+                  order=10, frequency=40,
                   sampling_rate=sampling_rate)
         _logger.debug(X_filt)
 

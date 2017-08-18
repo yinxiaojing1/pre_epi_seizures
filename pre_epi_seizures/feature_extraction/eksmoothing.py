@@ -32,11 +32,7 @@ def get_phase(x, peaks):
     array 1D
         Phase vector.
     """
-    start = 0
-    end = 10*1000
-    plt.plot(0.05*x[start:end])
-    phase = np.zeros(len(x))
-    plt.plot(phase[start:end])
+    print 'get_phase'
     for pb, pu in zip(peaks[:-1],peaks[1:]):
         phase[pb:pu] = np.linspace(0, 2*np.pi, pu - pb, endpoint=False)
 

@@ -2,12 +2,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def visual_inspection(signal, rpeaks, heart_rate, time_before_seizure, start, end, sampling_rate):
-    Fs = sampling_rate
-    N = len(signal)
-    T = (N - 1) / Fs
-    time = np.linspace(0, T, N, endpoint=False)
-    print time
+def visual_inspection(signal, rpeaks, heart_rate, time, time_before_seizure, start, end, sampling_rate):
+    
 
     plt.subplot(2,1,1)
     plt.plot(time, signal)

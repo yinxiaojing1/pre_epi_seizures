@@ -14,7 +14,7 @@ from pre_epi_seizures.storage_utils.storage_utils_hdf5 import  load_signal, save
 # @profile
 def converter(*args):
     path_list = get_file_list(*args)
-
+    print path_list
     for path in path_list:
         edf_file = pyedflib.EdfReader(path)
         signal, mdata= load_ecg_signal(edf_file)
@@ -27,8 +27,8 @@ def converter(*args):
             group = '/'+name_patient +'/crysis'
         else: 
             group = '/'+name_patient +'/free'
-
-        save_signal(path='/home/sargo/Desktop/HSM_data.h5', signal=signal, mdata=mdata, name=name, group=group)
+        print 'Saving ...'
+        save_signal(path='/home/sargo/Desktop/HSM_data.h5', signal_list=[signal], mdata_list=[mdata], name_list=[name], group_list=[group])
         edf_file._close()
 
 def create_mdata(header, crysis_time_seconds):
@@ -103,6 +103,7 @@ def get_file_list(*args):
 
 
 def fetch_files_list(path_list):
+    print path_list
     return [path + i for path in path_list for i in os.listdir(path) if os.path.isfile(os.path.join(path,i)) and \
          '.edf' in i]
 
@@ -111,4 +112,4 @@ def fetch_path_list(*args):
     return ['/mnt/' + 'PATIENT'+str(arg) + '/HSM/'for arg in args]
 
 
-converter(1,2,4,5)
+converter(2)

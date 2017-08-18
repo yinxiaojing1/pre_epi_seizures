@@ -52,8 +52,7 @@ def create_rpeak_dataset(path, group_name_list, sampling_rate):
 def detect_rpeaks(record, sampling_rate=1000):
     rpeaks = ecg.hamilton_segmenter(signal=record,
                                     sampling_rate=sampling_rate)
-    # rpeaks = ecg.christov_segmenter(signal=record,
-    #                                 sampling_rate=sampling_rate)
+
     return rpeaks['rpeaks']
 
 
@@ -61,12 +60,12 @@ def create_rpeak_label(name, label):
     return name + '_rpeaks_' + label
 
 
-# # def compute_rpeaks(signal, Fs, method='hamilton'):
-# #     if method='hamilton':
-# #         return ecg.hamilton_segmenter(signal=signal_to_filter[i,:], sampling_rate=Fs)
+def find_rpeaks(rpeaks, start, end): 
+    samples = np.arange(start, end, 1)
+    goodvalues = samples
+    ix = np.in1d(rpeaks.ravel(), goodvalues).reshape(rpeaks.shape)
+    return rpeaks[np.where(ix)[0]]
 
-
-# # def interp_rpeaks(rpeaks, )
 
 def compute_beats(signal, rpeaks):
     return [signal[rpeak - 400:rpeak + 600] for rpeak in rpeaks[1:-2]]

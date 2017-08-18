@@ -1,4 +1,3 @@
-
 from pre_epi_seizures.logging_utils.formatter_logging import\
     logger as _logger
 
@@ -43,10 +42,6 @@ def list_all_files_patient(path_to_load, patient_number):
     return [(item[1], item[0]) for item in list_sorted]
 
 
-def list_seizures_from_file(one_signal_structure):
-    one_signal_structure
-
-
 def get_record_dataset_seizure(path_to_load,
                                samples_before_seizure, samples_after_seizure,
                                sample_seizure, group_name_all_list,
@@ -80,10 +75,12 @@ def get_record_dataset_seizure(path_to_load,
         group_name_next_file = group_name_all_list[
             group_name_all_list.index(group_name_seizure) + 1]
 
+        print group_name_next_file
         next_record = get_record(
-            one_signal_structure=load_signal(
+            one_signal_structure=get_one_signal_structure(load_signal(
                 path=path_to_load,
-                group_name_list=[group_name_next_file]))
+                group_name_list=[group_name_next_file]),
+            group_name=group_name_next_file))
 
         next_record_to_append = next_record[
             :diff_after_seizure - samples_record]
@@ -91,6 +88,7 @@ def get_record_dataset_seizure(path_to_load,
         total_record = np.concatenate((total_record, next_record_to_append))
 
     return total_record[diff_before_seizure:diff_after_seizure]
+
 
 
 def get_record_dataset_seizure_file(path_to_load,
@@ -124,8 +122,10 @@ def get_record_dataset_seizure_file(path_to_load,
 
     _logger.debug(np.shape(np.asarray(dataset_seizures_file)))
 
+    dataset_seizures_file = [(group_name_file_seizure[1] + '_' + str(i), seizure)
+        for i, seizure in enumerate(dataset_seizures_file)]
     # stop
-    return dataset_seizures_file 
+    return dataset_seizures_file
 
 
 def create_seizure_dataset_patient(path_to_load, path_to_save,
@@ -144,7 +144,7 @@ def create_seizure_dataset_patient(path_to_load, path_to_save,
     # stop
     # X = load_signal(path=path_to_load,
     #                 group_name_list=group_name_list)
-    stop
+
     dataset_list =\
         [get_record_dataset_seizure_file(
             path_to_load,
@@ -154,12 +154,26 @@ def create_seizure_dataset_patient(path_to_load, path_to_save,
             group_name_file_seizure=group_name)
             for group_name in group_name_seizure_list]
 
-    dataset_list = [val for sublist in dataset_list for val in sublist]
+    # dataset_list = [val for sublist in dataset_list for val in sublist]
+
+    print dataset_list 
+    save_dataset(path_to_save, time_before_seizure, time_after_seizure, patient_number, dataset_list)
 
     # mdata = group_name_seizure_list
 
     _logger.error('the dataset_list is the following: %s', dataset_list)
     return dataset_list
+
+def save_dataset(path_to_save, time_before_seizure, time_after_seizure, patient_number, dataset_list_files):
+    group_list = ['/' + str(time_before_seizure) + '_' + str(time_after_seizure) + '/raw']
+    for dataset_list_file in dataset_list_files:
+        name_list = [seizure_record[0] for seizure_record in dataset_list_file]
+        signal_list = [seizure_record[1] for seizure_record in dataset_list_file]
+        print name_list
+        print signal_list
+        mdata_list=[{'fs':1000}]*len(dataset_list_file)
+        print mdata_list
+        save_signal(path_to_save, signal_list, mdata_list, name_list, group_list)
 
 
 def create_seizure_dataset(path_to_load, path_to_save,
@@ -210,7 +224,7 @@ def create_seizure_dataset(path_to_load, path_to_save,
 
 _logger.setLevel(10)
 path_to_load = '~/Desktop/HSM_data.h5'
-path_to_save = '~/Desktop/seizure_datasets_tests.h5'
+path_to_save = '~/Desktop/seizure_datasets_new.h5'
 patient_number = 1
 
 time_before_seizure = 30 * 60
@@ -218,7 +232,7 @@ time_after_seizure = 10 * 60
 
 dataset = create_seizure_dataset(path_to_load, path_to_save,
                                  time_before_seizure,
-                                 time_after_seizure, 2)
+                                 time_after_seizure, 1, 2, 4, 5, 6)
 
 _logger.debug('the dataset is the following: %s', dataset)
 _logger.debug(np.shape(dataset))

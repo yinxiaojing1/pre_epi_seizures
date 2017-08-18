@@ -73,6 +73,7 @@ def list_group_signals(path, group):
     opened_file.close()
     return list_signals
 
+
 def _add_event(opened_file, ts, values, mdata, group, name):
     _logger.info('adding [event: %s][group: %s]', name, group)
     try:
