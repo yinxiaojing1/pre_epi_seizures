@@ -8,6 +8,7 @@ import sys
 
 
 def load_signal(path, group_name_list):
+    print group_name_list
     opened_file = st_hdf5.HDF(path, 'a')
     return_dict = {group_name: get_signal(opened_file=opened_file,
                                 group_name=group_name)

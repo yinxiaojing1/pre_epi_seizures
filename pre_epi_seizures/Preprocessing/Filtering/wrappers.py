@@ -36,7 +36,7 @@ def filterIR5to20(X, fs=500., order=None, **kwargs):
     return filter_signal(X, order=order, sampling_rate=fs, ftype='FIR', band='bandpass', frequency=[5., 20.], **kwargs)
 
 
-def _medianFIR(signal, fs=500, lpfilter=True, **kwargs):
+def _medianFIR(signal, fs=1000, lpfilter=True, **kwargs):
     """
     Filter a signal with two median filters and apply a lowpass FIR, flattop window,
     cutoff 40Hz. This procedure follows the same median filter bank structure as [1].
@@ -67,10 +67,13 @@ def _medianFIR(signal, fs=500, lpfilter=True, **kwargs):
     if a2 % 2 == 0:
         a2 += 1
 
+    print 'Baseline_removal'
     # baseline wander
     med1 = scipy.signal.medfilt(signal, a1)
     med2 = scipy.signal.medfilt(med1, a2)
     inter = signal - med2
+
+    print 'done'
     # low-pass
     if lpfilter:
         filtered = filter_signal(inter, ftype='FIR', band='lowpass', order=order,
