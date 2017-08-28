@@ -15,18 +15,18 @@ import numpy as np
 import time
 
 def baseline_removal(signal_arguments, sampling_rate):
-
     signal_list = signal_arguments['feature_group_to_process']
     _logger.info('Removing the baseline ...')
     feature = 'medianFIR'
-    ti = time.time()
+    # signal = np.asmatrix(signal_list)
+    # signal = np.asarray(signal_list)
+    feature_mdata = [{'fs': sampling_rate}] * len(signal_list)
+    print feature_mdata
+
     feature_signal_list = [create_filtered_dataset(signal, filtmethod='medianFIR',
             sampling_rate=sampling_rate) for signal in signal_list]
-    tf = time.time() - ti
-    print tf, 
-    print 'seconds'
-    stop
-    return feature_signal_list, feature
+
+    return feature_signal_list, feature_mdata
 
 
 
@@ -34,15 +34,15 @@ def noise_removal(path, name, group, sampling_rate):
     _logger.info('Removing noise ...')
     create_filtered_dataset(path=path, name=name, group=group, filtmethod='FIR_lowpass_40hz')
 
-def eks_smoothing(path, name, group, sampling_rate):
-    try:
-        # make_new_rpeaks
-        rpeaks_signal_structure = load_signal(path_to_load ,zip(group_list, rpeaks_names))
-    except Exception as e:
-        print e
-        _logger.debug(e)
-        create_rpeak_dataset(path_to_load, zip(group_list_baseline_removal, name_list), sampling_rate)
-        rpeaks_signal_structure = load_signal(path_to_load ,zip(group_list, rpeaks_names))
+
+def eks_smoothing(signal_arguments, sampling_rate):
+   signal_list = signal_arguments['feature_group_to_process']
+   rpeak_list = signal_arguments['rpeak_group_to_process']
+   print rpeak_list
+   filtered = EKSmoothing(signal_list, rpeak_list, fs=sampling_rate)
+   mdata_list = [{'fs': sampling_rate}]*len(filtered)
+   return filtered, mdata_list
+
 
 def create_filtered_dataset(signal, filtmethod,
                             sampling_rate):
@@ -65,11 +65,15 @@ def create_filtered_dataset(signal, filtmethod,
     kwargs: dict
         Additional arguments to filtmethod function (e.g. fs).
     """
-    print signal
-    print len(signal)
     if filtmethod == 'medianFIR':
-        signal = np.asmatrix(signal)
-        X_filt = globals()[filtmethod](signal, fs=500)
+        print np.shape(signal)
+        print type(signal)
+        print signal
+        ti = time.time()
+        X_filt = globals()[filtmethod](signal, fs=1000)
+        tf = time.time() - ti
+        print tf, 
+        print 'seconds'
         _logger.debug(X_filt)
 
     elif filtmethod == 'FIR_lowpass_40hz':
@@ -77,6 +81,9 @@ def create_filtered_dataset(signal, filtmethod,
                   order=10, frequency=40,
                   sampling_rate=sampling_rate)
         _logger.debug(X_filt)
+
+
+
 
     print X_filt
     return X_filt

@@ -14,39 +14,40 @@ import matplotlib.pyplot as plt
 
 import functools
 
-def shape_array(array):
-    return np.array([array]).T
+
+def hrv_computation(signal_arguments, sampling_rate):
+    rpeaks_list = signal_arguments['feature_group_to_process']
+    print rpeaks_list
+    hrv_list = map(compute_hrv, rpeaks_list)
+    print hrv_list[1]
+    mdata = [''] * len(hrv_list)
+    return hrv_list, mdata
 
 
-def create_rpeak_dataset(path, group_name_list, sampling_rate):
-    _logger.info('Detecting the R-peaks')
-    X = load_signal(path=path, group_name_list=group_name_list)
+def rpeak_detection(signal_arguments, sampling_rate):
+    signal_list = signal_arguments['feature_group_to_process']
+    rpeaks = map(functools.partial(detect_rpeaks,
+                 sampling_rate=sampling_rate), signal_list)
+    print rpeaks
+    mdata = [''] * len(rpeaks)
+    return rpeaks, mdata
 
-    for group_name in group_name_list:
-        dataset = get_multiple_records(get_one_signal_structure(X, group_name_list[0]))
-        labels = map(str, range(0,len(dataset)))
 
-        rpeaks_name = group_name[1] + '_rpeaks_'
-        print  dataset
+def QRS_fixed_segmentation(signal_arguments, sampling_rate):
+    signal_list = signal_arguments['feature_group_to_process']
+    rpeaks_list = signal_arguments['rpeak_group_to_process']
+    # print rpeaks_list
 
-        import functools
-        rpeaks = map(functools.partial(detect_rpeaks,
-                     sampling_rate=sampling_rate), dataset)
-        print rpeaks
+    beats = [compute_QRS(signal, rpeaks, sampling_rate) 
+        for signal, rpeaks in zip(signal_list, rpeaks_list)]
 
-        # stop
-        name_list = [rpeaks_name + label for label in labels]
-        print name_list
+    print 'done'
+    mdata = [''] * len(rpeaks)
+    return beats, mdata
 
-        mdata_list = [''] * len(labels)
-        print mdata_list
-
-        group_list = [group_name[0]]
-
-        delete_signal(path, name_list, group_list)
-
-        save_signal(path=path, signal_list=rpeaks,
-                mdata_list=mdata_list, name_list=name_list, group_list=group_list)
+def compute_hrv(rpeaks):
+    print rpeaks
+    return 1.0/np.diff(rpeaks)
 
 
 def detect_rpeaks(record, sampling_rate=1000):
@@ -56,10 +57,6 @@ def detect_rpeaks(record, sampling_rate=1000):
     return rpeaks['rpeaks']
 
 
-def create_rpeak_label(name, label):
-    return name + '_rpeaks_' + label
-
-
 def find_rpeaks(rpeaks, start, end): 
     samples = np.arange(start, end, 1)
     goodvalues = samples
@@ -67,9 +64,8 @@ def find_rpeaks(rpeaks, start, end):
     return rpeaks[np.where(ix)[0]]
 
 
-def compute_beats(signal, rpeaks):
-    return [signal[rpeak - 400:rpeak + 600] for rpeak in rpeaks[1:-2]]
-
+def compute_QRS(signal, rpeaks, sampling_rate):
+    return [signal[rpeak - int(0.4*sampling_rate):rpeak + int(0.6*sampling_rate)] for rpeak in rpeaks[1:-1]]
 
 
 def create_heart_beat_dataset(path, name, group, save_dfile=None):

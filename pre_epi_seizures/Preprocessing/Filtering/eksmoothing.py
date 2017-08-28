@@ -35,7 +35,6 @@ def get_phase(x, peaks):
     """
     print 'here'
     phase = np.zeros(len(x))
-    print len(phase)
     # plt.plot(peaks, 'o')
     # plt.show()
     for pb, pu in zip(peaks[:-1],peaks[1:]):
@@ -59,6 +58,9 @@ def mean_extraction(x, phase, bins=250, align_baseline=False):
     """ECG Mean extractor (see OSET)"""
     mnphase, mnx, sdx = np.zeros(bins), np.zeros(bins), np.full(bins, -1, dtype=float)
     idx = np.where(np.logical_or(phase>=np.pi-np.pi/bins, phase<-np.pi+np.pi/bins))[0]
+    print 'idx'
+    print idx
+    stop
     if len(idx)>0:
         mnphase[0], mnx[0], sdx[0] = -np.pi, np.mean(x[idx]), np.std(x[idx], ddof=1)
     for i in range(1, bins):
