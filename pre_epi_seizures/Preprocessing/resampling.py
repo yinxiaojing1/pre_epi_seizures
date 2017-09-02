@@ -1,6 +1,8 @@
 import scipy as sp
 import numpy as np
 import functools
+import matplotlib.pyplot as plt
+
 
 def resample_rpeaks(rpeaks_interval, rpeaks, time_array): 
     inter = sp.interpolate.interp1d(rpeaks[1:], rpeaks_interval, kind='linear')
@@ -49,3 +51,20 @@ def interpolate_signal(signal_array, new_sampling_rate, sampling_rate):
     print total_samples_up
     signal_array_up = inter(total_samples_up)
     return signal_array_up
+
+def interpolate(signal_array, new_domain, domain):
+
+    domain = np.sort(domain)
+    
+    try:
+        f = sp.interpolate.interp1d(domain, signal_array, kind='cubic')
+
+        new_signal = f(new_domain);
+        return new_signal
+
+    except Exception as e:
+        print e
+        return []
+    # plt.plot(new_signal)
+    # plt.show()
+

@@ -6,6 +6,10 @@ import save_signal, load_signal, delete_signal
 
 from pre_epi_seizures.storage_utils.data_handlers import *
 
+from Filtering.eksmoothing import *
+
+from resampling import *
+
 from biosppy.signals import ecg
 
 import numpy as np
@@ -44,6 +48,37 @@ def QRS_fixed_segmentation(signal_arguments, sampling_rate):
     print 'done'
     mdata = [''] * len(rpeaks)
     return beats, mdata
+
+
+def beat_phase_segmentation(signal_arguments, sampling_rate):
+    signal_list = signal_arguments['feature_group_to_process']
+    rpeaks_list = signal_arguments['rpeak_group_to_process']
+
+    beats = [compute_beat_phase(signal, rpeaks, sampling_rate) for signal, rpeaks in zip(signal_list, rpeaks_list)]
+
+
+    mdata = ['']*len(beats)
+
+
+    # the signals are saved in reverse order since 
+    # it isn't possible to save them in h5py datasets
+    return beats, mdata
+
+
+def compute_beat_phase(signal, rpeaks, sampling_rate):
+
+    phase = get_phase(signal, rpeaks)
+    idx_up = np.where(abs(np.diff(phase)) > 6)[0]
+
+    beats = [signal[i:f+1] for i,f in zip(idx_up[0:-1], idx_up[1:])]
+    domains = [np.linspace(-np.pi, np.pi, len(beat), endpoint=False) for beat in beats]
+
+    new_domain = np.linspace(-3, 3, 1000)
+    new_beats = [interpolate(beat, new_domain, domain) for beat, domain in zip(beats, domains)]
+
+    return new_beats
+
+
 
 def compute_hrv(rpeaks):
     print rpeaks

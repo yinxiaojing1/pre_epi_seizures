@@ -99,13 +99,13 @@ def kmeans_class(data, rpeaks, time_before_seizure, time_after_seizure):
     print hist3
 
     plt.subplot(4, 1, 1)
-    plt.bar(range(len(hist0)),hist0,width=0.5, color = 'g')
+    plt.bar(range(len(hist0)),hist0/len(beat_inter_ictal),width=0.5, color = 'g')
     plt.subplot(4, 1, 2)
-    plt.bar(range(len(hist1)),hist1,width=0.5, color = 'orange')
+    plt.bar(range(len(hist1)),hist1/len(beat_pre_ictal),width=0.5, color = 'orange')
     plt.subplot(4, 1, 3)
-    plt.bar(range(len(hist2)),hist2,width=0.5, color = 'red')
+    plt.bar(range(len(hist2)),hist2/len(beat_ictal),width=0.5, color = 'red')
     plt.subplot(4, 1, 4)
-    plt.bar(range(len(hist3)),hist3,width=0.5, color = 'bu')
+    plt.bar(range(len(hist3)),hist3/len(beat_post_ictal),width=0.5, color = 'bu')
     # plt.subplot(4, 1, 1)
     # plt.plot(template[0], color=color_inter_ictal)
     # plt.subplot(4, 1, 2)

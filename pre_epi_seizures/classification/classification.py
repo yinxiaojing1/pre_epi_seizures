@@ -1,4 +1,4 @@
-from pre_epi_seizures.Preprocessing.pre_processing import load_feature
+from pre_epi_seizures.Preprocessing.pre_processing import *
 
 from labels import *
 from scaling import scale
@@ -21,13 +21,24 @@ decimated_dataset_name = baseline_removal_dataset_name + '/' + 'decimation'
 eks_dataset_name = decimated_dataset_name + '/' + 'eks_smoothing'
 interpolated_dataset_name = eks_dataset_name + '/' + 'interpolation'
 
-interpolated = load_feature(path_to_load, 'interpolation', sampling_rate=500, files='existent', feature_group_to_process=eks_dataset_name)
-rpeaks = load_feature(path_to_load, 'rpeak_detection', files='existent', feature_group_to_process=interpolated_dataset_name)
-QRS = load_feature(path_to_load, 'QRS_fixed_segmentation', files='existent', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')
+interpolated = load_feature(path_to_load, 'interpolation', sampling_rate=500, files='existent', feature_group_to_process=eks_dataset_name)[0]
+rpeaks = load_feature(path_to_load, 'rpeak_detection', files='existent', feature_group_to_process=interpolated_dataset_name)[0]
+beats = load_feature(path_to_load, 'beat_phase_segmentation', files='existent', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')[0]
 
+len(beats)
+len(rpeaks)
+# print beats
+# print rpeaks
+# stop
 start = 280
 end = 290
-sz_nr = 11
+sz_nr = 1
+data = beats[sz_nr]
+plt.plot(data[0])
+plt.show()
+len(beats)
+len(rpeaks)
+fiducial = rpeaks[sz_nr]
 signal = interpolated
 signal_t = rpeaks
 n = np.linspace(0, (len(signal[sz_nr])-1)/1000, len(signal[sz_nr]))
@@ -46,14 +57,15 @@ plt.xlim([start, end])
 plt.xlabel('time[s]')
 plt.show()
 
-data = QRS[sz_nr]
-fiducial = rpeaks[sz_nr]
+
+# print data
 
 labels = create_labels(1000, 5, 5, 30, 10)
 
 fiducial_labels = create_fiducial_labels(fiducial, labels)
 
-data = scale(data)
+data = scale(np.asarray(data))
+print data
 unsurpervised_exploration(data, fiducial_labels, method='kmeans')
 
 # kmeans_class(QRS[sz_nr], rpeaks[sz_nr], time_before_seizure, time_after_seizure)

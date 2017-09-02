@@ -40,14 +40,46 @@ def get_phase(x, peaks):
     for pb, pu in zip(peaks[:-1],peaks[1:]):
         phase[pb:pu] = np.linspace(0, 2*np.pi, pu - pb, endpoint=False)
 
-
     if peaks[0] > 0:
         phase[:peaks[0]] = np.linspace(0, 2*np.pi, max(peaks[0], peaks[1] - peaks[0]), endpoint=False)[-peaks[0]:]
 
     if peaks[-1] < len(x)-1:
         phase[peaks[-1]:] = np.linspace(0, 2*np.pi, max(len(x)-peaks[-1], peaks[-1] - peaks[-2]), endpoint=False)[:len(x)-peaks[-1]]
+
+
+
     phase = np.fmod(phase, 2*np.pi)
-    phase[np.where(phase>np.pi)[0]] -= 2*np.pi
+    phase[np.where(phase>=np.pi)[0]] -= 2*np.pi
+    # for pb, pu in zip(peaks[:-1],peaks[1:]):
+    #     x = phase[pb:pu]
+    #     plt.subplot(2,1,1)
+    #     plt.plot(x)
+    #     x[np.where(x>np.pi)[0]] -= 2*np.pi
+    #     plt.subplot(2,1,2)
+    #     plt.plot(x)
+    #     plt.show()
+    #     idx = np.where(x[1:] < x[:-1])
+    #     print idx
+    #     # print phase[np.where(x[1:] <= x[:-1])]
+    #     x = np.delete(x, idx)
+    #     print np.where(x[1:] <= x[:-1])
+
+    # phase = np.fmod(phase, 2*np.pi)
+
+    # for pb, pu in zip(peaks[:-1],peaks[1:]):
+    #     x = phase[pb:pu]
+    #     print np.where(x[1:] <= x[:-1])
+
+    # phase[np.where(phase>np.pi)[0]] -= 2*np.pi
+
+    # for pb, pu in zip(peaks[:-1],peaks[1:]):
+    #     x = phase[pb:pu]
+    #     print np.where(x[1:] <= x[:-1])
+
+    # for domain in domains:
+    #     plt.plot(domain)
+    #     plt.show()
+
     return phase
 
 def phase_shift(phase, theta):

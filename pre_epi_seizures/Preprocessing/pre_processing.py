@@ -8,8 +8,7 @@ from pre_epi_seizures.logging_utils.formatter_logging import logger as _logger
 from filtering import baseline_removal, noise_removal,\
     create_filtered_dataset, eks_smoothing
 
-from segmentation import rpeak_detection, create_heart_beat_dataset,\
-    find_rpeaks, detect_rpeaks, hrv_computation, QRS_fixed_segmentation
+from segmentation import *
 
 from resampling import resample_rpeaks, interpolate_signal,\
     interpolation, decimation
@@ -92,11 +91,14 @@ def load_feature(path_to_load, feature_to_load, files='just_new_data', sampling_
         names_to_save = get_names(list_group_signals(path_to_load, feature_group_to_process)['signals'])
 
     if files=='existent':
+        print 'heereeeeeeeee'
         feature_group_name_extracted = list_group_signals(path_to_load, feature_group_extracted[0])['signals']
+        print feature_group_name_extracted
         try:
             signal_structure = load_signal(path_to_load, feature_group_name_extracted)
             extracted_features = [get_multiple_records(get_one_signal_structure(signal_structure, group_name)) for group_name in feature_group_name_extracted]
-            return extracted_features
+            mdata = [get_mdata_dict(get_one_signal_structure(signal_structure, group_name)) for group_name in feature_group_name_extracted]
+            return extracted_features, mdata
         except Exception as e:
             _logger.debug(e)
 
@@ -112,10 +114,13 @@ def load_feature(path_to_load, feature_to_load, files='just_new_data', sampling_
             dict_to_process[k] = [feature_groups_required[k][i]]
         print dict_to_process
         extracted_features, mdata_features = globals()[feature_to_load](dict_to_process, sampling_rate)
+        print type(mdata_features)
+        
+
         # print extracted_features
         # print mdata_features
         delete_signal(path_to_load, [name], feature_group_extracted)
-        save_signal(path_to_load, extracted_features, mdata_features, [name], feature_group_extracted)
+        save_signal(path_to_load, extracted_features, [mdata_features], [name], feature_group_extracted)
 
     # # Memory Intensive
     # extracted_features, mdata_features = globals()[feature_to_load](feature_groups_required, sampling_rate)
@@ -161,165 +166,78 @@ def main():
     # rpeaks = load_feature(path_to_load, 'rpeak_detection', files='existent', feature_group_to_process=baseline_removal_dataset_name)
 
     # hrv = load_feature(path_to_load, 'hrv_computation', files='existent', feature_group_to_process=baseline_removal_dataset_name + '/' + 'rpeak_detection')
-    eks = load_feature(path_to_load, 'eks_smoothing', files='existent', feature_group_to_process=baseline_removal_dataset_name + '/' + 'decimation', rpeak_group_to_process=baseline_removal_dataset_name + '/' + 'decimation' + '/' + 'rpeak_detection')
+    # eks = load_feature(path_to_load, 'eks_smoothing', files='existent', feature_group_to_process=baseline_removal_dataset_name + '/' + 'decimation', rpeak_group_to_process=baseline_removal_dataset_name + '/' + 'decimation' + '/' + 'rpeak_detection')[0]
+    # # stop
+    # # time_array_to_interpolate = np.linspace(0, 40*60 - 1.0/500, 40*60*500)
+    # # print time_array_to_interpolate
+    # interpolated = load_feature(path_to_load, 'interpolation', sampling_rate=500, files='existent', feature_group_to_process=eks_dataset_name)[0]
+    # rpeaks = load_feature(path_to_load, 'rpeak_detection', files='existent', feature_group_to_process=interpolated_dataset_name)[0]
+
+    beat = load_feature(path_to_load, 'beat_phase_segmentation', files='all_new', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')
     # stop
-    # time_array_to_interpolate = np.linspace(0, 40*60 - 1.0/500, 40*60*500)
-    # print time_array_to_interpolate
-    interpolated = load_feature(path_to_load, 'interpolation', sampling_rate=500, files='existent', feature_group_to_process=eks_dataset_name)
-    rpeaks = load_feature(path_to_load, 'rpeak_detection', files='existent', feature_group_to_process=interpolated_dataset_name)
+    # ploting
+    start = (time_before_seizure + time_after_seizure) * 60 -5
+    end = start + 5
+    sz_nr = 11
+    signal = interpolated
+    signal_t = eks
+    n = np.linspace(0, (len(signal[sz_nr])-1)/1000, len(signal[sz_nr]))
+    n_t = np.linspace(0, (len(signal_t[sz_nr])-1)/1000, len(signal_t[sz_nr]))
 
-    QRS = load_feature(path_to_load, 'QRS_fixed_segmentation', files='existent', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')
-
-    sz_nr = 1
-    data = QRS[sz_nr]
-    rpeaks = rpeaks[sz_nr]
-    # print QRS[0]
-    # plt.plot(QRS[0][4])
-    # plt.show()
-    # stop
-
-    # Time labels
-    ti_inter_ictal = 0
-    i_sample_inter_ictal = sampling_rate * ti_inter_ictal * 60
-    tf_inter_ictal = 5
-    f_sample_inter_ictal = sampling_rate * tf_inter_ictal * 60
-    inter_ictal = np.arange(i_sample_inter_ictal, f_sample_inter_ictal)
-    color_inter_ictal = 'green'
-
-    ti_pre_ictal = tf_inter_ictal
-    i_sample_pre_ictal = sampling_rate * ti_pre_ictal * 60
-    tf_pre_ictal = time_before_seizure
-    f_sample_pre_ictal = sampling_rate * tf_pre_ictal * 60
-    pre_ictal = np.arange(i_sample_pre_ictal, f_sample_pre_ictal)
-    color_pre_ictal = 'orange'
-
-    ti_ictal = time_before_seizure
-    i_sample_ictal = sampling_rate * ti_ictal * 60
-    tf_ictal = time_before_seizure + 5
-    f_sample_ictal = sampling_rate * tf_ictal * 60
-    ictal = np.arange(i_sample_ictal, f_sample_ictal)
-    color_ictal = 'red'
-
-    ti_post_ictal = tf_ictal
-    i_sample_post_ictal = sampling_rate * ti_post_ictal * 60
-    tf_post_ictal = time_before_seizure + time_after_seizure
-    f_sample_post_ictal = sampling_rate * tf_post_ictal * 60
-    post_ictal = np.arange(f_sample_post_ictal, f_sample_post_ictal)
-    color_post_ictal = 'blue'
-
-
-    beat_inter_ictal = np.where(np.logical_and(rpeaks>=i_sample_inter_ictal, rpeaks<f_sample_inter_ictal))[0]
-    beat_pre_ictal = np.where(np.logical_and(rpeaks>=i_sample_pre_ictal, rpeaks<f_sample_pre_ictal))[0]
-    beat_ictal = np.where(np.logical_and(rpeaks>=i_sample_ictal, rpeaks<f_sample_ictal))[0]
-    beat_post_ictal = np.where(np.logical_and(rpeaks>=i_sample_post_ictal, rpeaks<f_sample_post_ictal))[0]
-
-    print beat_inter_ictal
-    print beat_pre_ictal
-    print beat_ictal
-    print beat_post_ictal
-
-    init = 300
-    cluster_inter_ictal = beat_inter_ictal[init]
-    cluster_pre_ictal = beat_pre_ictal[init]
-    cluster_ictal = beat_ictal[init]
-    cluster_post_ictal = beat_post_ictal[init]
-
-    centroids = data[np.asarray([cluster_inter_ictal, cluster_pre_ictal, cluster_ictal, cluster_post_ictal])]
-
-    beat_inter_ictal = np.where(np.logical_and(rpeaks>=i_sample_inter_ictal, rpeaks<f_sample_inter_ictal))[0][-1]
-    beat_pre_ictal = np.where(np.logical_and(rpeaks>=i_sample_pre_ictal, rpeaks<f_sample_pre_ictal))[0][-1]
-    beat_ictal = np.where(np.logical_and(rpeaks>=i_sample_ictal, rpeaks<f_sample_ictal))[0][-1]
-    beat_post_ictal = np.where(np.logical_and(rpeaks>=i_sample_post_ictal, rpeaks<f_sample_post_ictal))[0][-1]
-
-    # clusters = {'first':[cluster_inter_ictal, cluster_pre_ictal, cluster_ictal, cluster_post_ictal]}
-    # template = centroid_templates(data, clusters, 4)[0]
-    clusters = kmeans(data=data, k=4, init=centroids, max_iter=3000, n_init=10, tol=0.0001)
-    centroids = clusters['clusters'].keys()
-    cluster_0 = clusters['clusters'][centroids[1]]
-
-    print len(cluster_0)
-    # print np.shape(template)
-    # print np.shape(data)
-
-    hist0, bins = np.histogram(clusters['clusters'][centroids[0]], bins=[0, beat_inter_ictal, beat_pre_ictal, beat_ictal, beat_post_ictal])
-    hist1, bins = np.histogram(clusters['clusters'][centroids[1]], bins=[0, beat_inter_ictal, beat_pre_ictal, beat_ictal, beat_post_ictal])
-    hist2, bins = np.histogram(clusters['clusters'][centroids[2]], bins=[0, beat_inter_ictal, beat_pre_ictal, beat_ictal, beat_post_ictal])
-    hist3, bins = np.histogram(clusters['clusters'][centroids[3]], bins=[0, beat_inter_ictal, beat_pre_ictal, beat_ictal, beat_post_ictal])
-
-    print hist0
-    print hist1
-    print hist2
-    print hist3
-
-    plt.bar(range(len(hist0)),hist0,width=0.5, color = 'g')
-    plt.bar(range(len(hist1)),hist1,width=0.5, color = 'orange')
-    plt.bar(range(len(hist2)),hist2,width=0.5, color = 'r')
-    plt.bar(range(len(hist3)),hist3,width=0.5, color = 'b')
-    # plt.subplot(4, 1, 1)
-    # plt.plot(template[0], color=color_inter_ictal)
-    # plt.subplot(4, 1, 2)
-    # plt.plot(template[1], color=color_pre_ictal)
-    # plt.subplot(4, 1, 3)
-    # plt.plot(template[2], color=color_ictal)
-    # plt.subplot(4, 1, 4)
-    # plt.plot(template[3], color=color_post_ictal)
-    # plt.show()
-
-    # plt.subplot(4, 1, 1)
-    # plt.plot(data[clusters[0]], color=color_inter_ictal)
-    # plt.subplot(4, 1, 2)
-    # plt.plot(template[1], color=color_pre_ictal)
-    # plt.subplot(4, 1, 3)
-    # plt.plot(template[2], color=color_ictal)
-    # plt.subplot(4, 1, 4)
-    # plt.plot(template[3], color=color_post_ictal)
-    # plt.hist(cluster_0, bins=[0, beat_inter_ictal, beat_pre_ictal, beat_ictal, beat_post_ictal], histtype='bar', ec='black')
-    # plt.hist(cluster_0, bins='auto', histtype='bar', ec='black')
+    plt.subplot(1,2,1)
+    plt.title('interpolated ECG')
+    plt.plot(n, signal[sz_nr])
+    plt.plot(n[rpeaks[sz_nr]], signal[sz_nr][rpeaks[sz_nr]], 'o', color='g')
+    plt.xlim([start, end])
+    plt.xlabel('time[s]')
+    plt.subplot(1,2,2)
+    plt.title('Detrended and Denoised ECG')
+    plt.plot(n_t, signal_t[sz_nr])
+    plt.xlim([start, end])
+    plt.xlabel('time[s]')
     plt.show()
 
-    # # ploting
-    # start = 280
-    # end = 290
-    # sz_nr = 1
-    # signal = interpolated
-    # signal_t = eks
-    # n = np.linspace(0, (len(signal[sz_nr])-1)/1000, len(signal[sz_nr]))
-    # n_t = np.linspace(0, (len(signal_t[sz_nr])-1)/1000, len(signal_t[sz_nr]))
+    #phase 
+    signal = signal[sz_nr]
+    rpeaks = rpeaks[sz_nr]
+    phase = get_phase(signal, rpeaks)
 
-    # plt.subplot(1,2,1)
-    # plt.title('interpolated ECG')
-    # plt.plot(n, signal[sz_nr])
-    # plt.plot(n[rpeaks[sz_nr]], signal[sz_nr][rpeaks[sz_nr]], 'o', color='g')
-    # plt.xlim([start, end])
-    # plt.xlabel('time[s]')
-    # plt.subplot(1,2,2)
-    # plt.title('Detrended and Denoised ECG')
-    # plt.plot(n_t, signal_t[sz_nr])
-    # plt.xlim([start, end])
-    # plt.xlabel('time[s]')
-    # plt.show()
+    # print np.diff(phase)
+    bins = 500
+    data = np.zeros((len(rpeaks),bins))
 
-    # #phase 
-    # signal = signal[sz_nr]
-    # rpeaks = rpeaks[sz_nr]
-    # phase = get_phase(signal, rpeaks)
+    plt.figure()
+    idx_up = np.where(abs(np.diff(phase)) > 6)[0]
+    plt.plot(abs(np.diff(phase)))
+    plt.plot(phase)
+    plt.plot(signal*0.05)
+    plt.xlim([start * sampling_rate, end * sampling_rate])
 
-    # idx_up = np.where(phase==np.pi)[0]
-    # idx_down = np.where(phase==(-1*np.pi))[0]
-    # # mean_extraction(signal, phase, bins=1000)
-    # print phase
-    # print idx_up
-    # print idx_down
-    # signal = signal[rpeaks[0]:rpeaks[-1]]
-    # phase = phase[rpeaks[0]:rpeaks[-1]]
-    # print len(signal)
-    # print len(phase)
-    # plt.plot(signal*0.05)
-    # plt.plot(phase)
+
+    plt.figure()
+    idx_up = np.where(abs(np.diff(phase)) > 6)[0]
+    plt.plot(abs(np.diff(phase)))
+    plt.plot(phase)
+    plt.plot(signal*0.05)
+    plt.xlim([0 * sampling_rate, 5 * sampling_rate])
+    plt.show()
+
+    # print len(idx_up
+
+    beats = zip(idx_up[0:-1], idx_up[1:])
+
+    data = [signal[i:f] for i,f in beats]
+    print len(data)
+    print len(rpeaks)
+
+
+    sample = len(data) - 1
+    plt.plot(data[sample]*0.05)
+    plt.plot(phase[beats[sample][0]:beats[sample][1]])
     # plt.xlim([start*1000, end*1000])
-    # plt.show()
+    plt.show()
 
-    # fig_phase = plt.figure()
+    # fig_phase = plt.figure()t
     # phase = get_phase(interpolated[sz_nr], rpeaks[sz_nr])
     # print phase[0]
 
