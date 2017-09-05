@@ -119,7 +119,7 @@ def ecg_model(values, phase):
 # Loss function to use when performing Nonlinear Least Squares Optimization
 f_loss = lambda values, mnphase, x: x-ecg_model(values, mnphase)
 
-def beat_fitter(x, phase, max_runs=10, values0=None, bounds=None):
+def beat_fitter(x, phase, max_runs=30, values0=None, bounds=None):
     """
     Automated beat fitter: compute the gaussian kernel parameters (ai,bi,thetai)
     using Nonlinear Least Squares Optimization.

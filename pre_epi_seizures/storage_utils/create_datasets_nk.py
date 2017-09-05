@@ -141,6 +141,11 @@ def create_seizure_dataset_patient(path_to_load, path_to_save,
         patient_number=patient_number)
 
     _logger.debug(group_name_seizure_list)
+    group_list = ['/' + str(time_before_seizure) + '_' + str(time_after_seizure) + '/raw']
+
+    group_name_already_saved = list_group_signals(path_to_load, group_list[0])
+    print group_name_already_saved
+    stop
     # stop
     # X = load_signal(path=path_to_load,
     #                 group_name_list=group_name_list)

@@ -31,10 +31,17 @@ def compute_cluster_labels(n_cluster, cluster_assignment, labels):
     return np.asarray([hist_inter_ictal, hist_pre_ictal, hist_ictal, hist_post_ictal])
 
 def unsurpervised_exploration(data, labels, method='kmeans'):
-    initial_centroids = random_centroids_from_data(labels)
-    print initial_centroids
-    n_cluster=4
-    kmeans = KMeans(n_clusters=n_cluster, init=data[initial_centroids]).fit(data)
+
+    # # Four clusters
+    # initial_centroids = random_centroids_from_data(labels)
+    # print initial_centroids
+    # n_cluster=4
+    # kmeans = KMeans(n_clusters=n_cluster, init=data[initial_centroids]).fit(data)
+
+    # Varying number of cluster, random initialization
+    n_cluster=3
+    kmeans = KMeans(n_clusters=n_cluster, init='random', n_init=30).fit(data)
+
     hist = compute_cluster_labels(n_cluster, kmeans.labels_, labels)
     # print np.true_divide(hist[0],sum(hist[0]))
     # print hist[0]/sum(hist[0])
@@ -57,14 +64,9 @@ def unsurpervised_exploration(data, labels, method='kmeans'):
 
     print kmeans.cluster_centers_
     plt.figure()
-    plt.subplot(4, 1, 1)
-    plt.plot(kmeans.cluster_centers_[0,:])
-    plt.subplot(4, 1, 2)
-    plt.plot(kmeans.cluster_centers_[1,:])
-    plt.subplot(4, 1, 3)
-    plt.plot(kmeans.cluster_centers_[2,:])
-    plt.subplot(4, 1, 4)
-    plt.plot(kmeans.cluster_centers_[3,:])
+    for i in xrange(0, n_cluster):
+        plt.subplot(n_cluster, 1, i + 1)
+        plt.plot(kmeans.cluster_centers_[i,:])
     plt.show()
 
     stop

@@ -8,7 +8,6 @@ import sys
 
 
 def load_signal(path, group_name_list):
-    print group_name_list
     opened_file = st_hdf5.HDF(path, 'a')
     return_dict = {group_name: get_signal(opened_file=opened_file,
                                 group_name=group_name)
@@ -19,7 +18,6 @@ def load_signal(path, group_name_list):
 
 def save_signal(path, signal_list, mdata_list, name_list, group_list):
     opened_file = st_hdf5.HDF(path, 'a')
-
     for group in group_list:
         for signal, mdata, name in zip(signal_list,
                                        mdata_list, name_list):
@@ -36,6 +34,7 @@ def get_signal(opened_file, group_name):
     try:
         signal = opened_file.get_signal(name=name, group=group)
     except Exception as e:
+        print e
         _logger.debug(e)
 
     return signal
@@ -43,6 +42,7 @@ def get_signal(opened_file, group_name):
 
 def add_signal(opened_file, signal, mdata, name, group):
     _logger.info('Saving [signal: %s][group: %s]', name, group)
+    print 'addd'
     try:
         signal = opened_file.add_signal(signal=signal, mdata=mdata,
                                         name=name, group=group)

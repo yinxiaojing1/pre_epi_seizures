@@ -10,6 +10,10 @@ from filtering import baseline_removal, noise_removal,\
 
 from segmentation import *
 
+from hrv import *
+
+from rqa import *
+
 from resampling import resample_rpeaks, interpolate_signal,\
     interpolation, decimation
 
@@ -27,6 +31,7 @@ from biosppy.signals import ecg
 from biosppy.clustering import centroid_templates, kmeans
 
 from memory_profiler import profile
+
 
 import time
 import matplotlib.pyplot as plt
@@ -68,9 +73,9 @@ def load_feature(path_to_load, feature_to_load, files='just_new_data', sampling_
 
     auxiliary_inputs = {k:feature_groups_required[k] for k in feature_groups_required.keys() if 'group' not in k and 'process' not in k}
 
+
     if files=='all_new':
         names_to_save = get_names(list_group_signals(path_to_load, feature_group_to_process)['signals'])
-        print feature_groups_required
         feature_group_to_process
         for k in feature_groups_required.keys():
             feature_groups_required[k] = list_group_signals(path_to_load, feature_groups_required[k])['signals']
@@ -91,7 +96,6 @@ def load_feature(path_to_load, feature_to_load, files='just_new_data', sampling_
         names_to_save = get_names(list_group_signals(path_to_load, feature_group_to_process)['signals'])
 
     if files=='existent':
-        print 'heereeeeeeeee'
         feature_group_name_extracted = list_group_signals(path_to_load, feature_group_extracted[0])['signals']
         print feature_group_name_extracted
         try:
@@ -106,22 +110,16 @@ def load_feature(path_to_load, feature_to_load, files='just_new_data', sampling_
         signal_structure = load_signal(path_to_load, feature_groups_required[k])
         feature_groups_required[k] = [get_multiple_records(get_one_signal_structure(signal_structure, group_name)) for group_name in feature_groups_required[k]]
 
-    print feature_groups_required
 
     for i, name in enumerate(names_to_save):
         dict_to_process = {}
         for k in feature_groups_required.keys():
             dict_to_process[k] = [feature_groups_required[k][i]]
-        print dict_to_process
         extracted_features, mdata_features = globals()[feature_to_load](dict_to_process, sampling_rate)
-        print type(mdata_features)
-        
-
         # print extracted_features
         # print mdata_features
         delete_signal(path_to_load, [name], feature_group_extracted)
-        save_signal(path_to_load, extracted_features, [mdata_features], [name], feature_group_extracted)
-
+        save_signal(path_to_load, extracted_features, mdata_features, [name], feature_group_extracted)
     # # Memory Intensive
     # extracted_features, mdata_features = globals()[feature_to_load](feature_groups_required, sampling_rate)
 
@@ -170,82 +168,127 @@ def main():
     # # stop
     # # time_array_to_interpolate = np.linspace(0, 40*60 - 1.0/500, 40*60*500)
     # # print time_array_to_interpolate
-    # interpolated = load_feature(path_to_load, 'interpolation', sampling_rate=500, files='existent', feature_group_to_process=eks_dataset_name)[0]
+    interpolated = load_feature(path_to_load, 'interpolation', sampling_rate=500, files='existent', feature_group_to_process=eks_dataset_name)[0]
     # rpeaks = load_feature(path_to_load, 'rpeak_detection', files='existent', feature_group_to_process=interpolated_dataset_name)[0]
+    # hrv = load_feature(path_to_load, 'hrv_computation', files='existent', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')[0]
+    # beat = load_feature(path_to_load, 'beat_phase_segmentation', files='existent', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')[0]
+    # sameni = load_feature(path_to_load, 'sameni_evolution', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'beat_phase_segmentation')[0]
+    rqa = load_feature(path_to_load, 'rqa_computation', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'beat_phase_segmentation')[0]
 
-    beat = load_feature(path_to_load, 'beat_phase_segmentation', files='all_new', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')
+    print rqa
     # stop
+
     # ploting
-    start = (time_before_seizure + time_after_seizure) * 60 -5
+    # print sameni
+    # stop
+    start = time_before_seizure * 60
     end = start + 5
-    sz_nr = 11
-    signal = interpolated
-    signal_t = eks
+    sz_nr = 0
+    signal = rqa
+    # signal_t = hrv
     n = np.linspace(0, (len(signal[sz_nr])-1)/1000, len(signal[sz_nr]))
-    n_t = np.linspace(0, (len(signal_t[sz_nr])-1)/1000, len(signal_t[sz_nr]))
-
-    plt.subplot(1,2,1)
-    plt.title('interpolated ECG')
-    plt.plot(n, signal[sz_nr])
-    plt.plot(n[rpeaks[sz_nr]], signal[sz_nr][rpeaks[sz_nr]], 'o', color='g')
-    plt.xlim([start, end])
-    plt.xlabel('time[s]')
-    plt.subplot(1,2,2)
-    plt.title('Detrended and Denoised ECG')
-    plt.plot(n_t, signal_t[sz_nr])
-    plt.xlim([start, end])
-    plt.xlabel('time[s]')
-    plt.show()
-
-    #phase 
-    signal = signal[sz_nr]
-    rpeaks = rpeaks[sz_nr]
-    phase = get_phase(signal, rpeaks)
-
-    # print np.diff(phase)
-    bins = 500
-    data = np.zeros((len(rpeaks),bins))
+    # n_t = np.linspace(0, (len(signal_t[sz_nr])-1)/1000, len(signal_t[sz_nr]))
 
     plt.figure()
-    idx_up = np.where(abs(np.diff(phase)) > 6)[0]
-    plt.plot(abs(np.diff(phase)))
-    plt.plot(phase)
-    plt.plot(signal*0.05)
-    plt.xlim([start * sampling_rate, end * sampling_rate])
-
-
-    plt.figure()
-    idx_up = np.where(abs(np.diff(phase)) > 6)[0]
-    plt.plot(abs(np.diff(phase)))
-    plt.plot(phase)
-    plt.plot(signal*0.05)
-    plt.xlim([0 * sampling_rate, 5 * sampling_rate])
+    # plt.subplot(1,2,1)
+    # plt.title('interpolated ECG')
+    plt.plot(signal[sz_nr])
+    # plt.plot(n[rpeaks[sz_nr]], signal[sz_nr][rpeaks[sz_nr]], 'o', color='g')
+    # plt.xlim([start, end])
+    # plt.xlabel('time[s]')
+    # plt.subplot(1,2,2)
+    # plt.title('Detrended and Denoised ECG')
+    # plt.plot(signal_t[sz_nr])
+    # # plt.xlim([start, end])
+    # plt.xlabel('time[s]')
     plt.show()
+    # stop
+    # #phase 
+    # signal = signal[sz_nr]
 
-    # print len(idx_up
+    # features = ecg.ecg(signal=signal, sampling_rate=1000.0, show=True)
 
-    beats = zip(idx_up[0:-1], idx_up[1:])
+    # # print len(idx_up
 
-    data = [signal[i:f] for i,f in beats]
-    print len(data)
-    print len(rpeaks)
+    # beats = zip(idx_up[0:-1], idx_up[1:])
+
+    # data = [signal[i:f] for i,f in beats]
+    # print len(data)
+    # print len(rpeaks)
 
 
-    sample = len(data) - 1
-    plt.plot(data[sample]*0.05)
-    plt.plot(phase[beats[sample][0]:beats[sample][1]])
-    # plt.xlim([start*1000, end*1000])
-    plt.show()
+    # sample = len(data) - 1
+    # plt.plot(data[sample]*0.05)
+    # plt.plot(phase[beats[sample][0]:beats[sample][1]])
+    # # plt.xlim([start*1000, end*1000])
+    # plt.show()
 
     # fig_phase = plt.figure()t
     # phase = get_phase(interpolated[sz_nr], rpeaks[sz_nr])
     # print phase[0]
 
 
+    # Sameni parameters Evaluation 
+    # bins = len(x)
+    #     rloc = int(bins/2) # r is assumed to be at the center
+    #     thetai = np.zeros(5) # phase loc
+    #     thetai[0] = phase[int(.2*bins)+np.argmax(x[int(.2*bins):int(.45*bins)])]
+    #     idx = int(.44*bins) + np.argmin(x[int(.44*bins):int(.5*bins)])
+    #     thetai[1] = phase[idx]
+    #     thetai[2] = phase[rloc]
+    #     thetai[3] = phase[2*rloc - idx]
+    #     thetai[4] = phase[int(5/8*bins)+np.argmax(x[int(5/8*bins):int(7/8*bins)])]
+    #     bi = np.array([.1, .05, .05, .05, .2]) # width
+    #     ai = np.zeros(5) # amplitude
+    #     ai[0] = np.abs(np.max(x[int(.2*bins):int(.45*bins)]))
+    #     ai[1] = -np.abs(np.min(x))
+    #     ai[2] = np.abs(np.max(x))
+    #     ai[3] = -np.abs(np.min(x))
+    #     ai[4] = np.abs(np.max(x[int(5/8*bins):int(7/8*bins)]))
+    #     values0 = np.hstack((ai, bi, thetai))
+    # parameters = sameni[sz_nr]
+    # plt.figure()
+    # plt.title('T-wave Amplitude/Width/Phase')
+    # plt.subplot(3,1,1)
+    # plt.plot(parameters[:, 4])
+    # plt.subplot(3,1,2)
+    # plt.plot(parameters[:, 9])
+    # plt.subplot(3,1,3)
+    # plt.plot(parameters[:, 14])
+    # plt.show()
+    # plt.title('R-peaks Amplitude/Width/Phase')
+    # plt.subplot(3,1,1)
+    # plt.plot(parameters[:, 2])
+    # plt.subplot(3,1,2)
+    # plt.plot(parameters[:, 7])
+    # plt.subplot(3,1,3)
+    # plt.plot(parameters[:, 12])
+    # plt.show()
+    # plt.title('P-wave Amplitude/Width/Phase')
+    # plt.subplot(3,1,1)
+    # plt.plot(parameters[:, 0])
+    # plt.subplot(3,1,2)
+    # plt.plot(parameters[:, 5])
+    # plt.subplot(3,1,3)
+    # plt.plot(parameters[:, 10])
+    # plt.show()
+    # plt.title('Q-wave Amplitude/Width/Phase')
+    # plt.subplot(3,1,1)
+    # plt.plot(parameters[:, 1])
+    # plt.subplot(3,1,2)
+    # plt.plot(parameters[:, 6])
+    # plt.subplot(3,1,3)
+    # plt.plot(parameters[:, 11])
+    # plt.show()
+
+
+
+
+
     return
 
 
-
+# def settings (a)
 
 if __name__ == '__main__':
     main()

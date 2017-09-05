@@ -23,7 +23,7 @@ interpolated_dataset_name = eks_dataset_name + '/' + 'interpolation'
 
 interpolated = load_feature(path_to_load, 'interpolation', sampling_rate=500, files='existent', feature_group_to_process=eks_dataset_name)[0]
 rpeaks = load_feature(path_to_load, 'rpeak_detection', files='existent', feature_group_to_process=interpolated_dataset_name)[0]
-beats = load_feature(path_to_load, 'beat_phase_segmentation', files='existent', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')[0]
+beats = load_feature(path_to_load, 'QRS_fixed_segmentation', files='existent', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')[0]
 
 len(beats)
 len(rpeaks)
@@ -60,7 +60,7 @@ plt.show()
 
 # print data
 
-labels = create_labels(1000, 5, 5, 30, 10)
+labels = create_labels(1000, 29, 9, 30, 10)
 
 fiducial_labels = create_fiducial_labels(fiducial, labels)
 

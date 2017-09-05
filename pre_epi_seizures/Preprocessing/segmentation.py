@@ -19,14 +19,6 @@ import matplotlib.pyplot as plt
 import functools
 
 
-def hrv_computation(signal_arguments, sampling_rate):
-    rpeaks_list = signal_arguments['feature_group_to_process']
-    print rpeaks_list
-    hrv_list = map(compute_hrv, rpeaks_list)
-    print hrv_list[1]
-    mdata = [''] * len(hrv_list)
-    return hrv_list, mdata
-
 
 def rpeak_detection(signal_arguments, sampling_rate):
     signal_list = signal_arguments['feature_group_to_process']
@@ -51,11 +43,11 @@ def QRS_fixed_segmentation(signal_arguments, sampling_rate):
 
 
 def beat_phase_segmentation(signal_arguments, sampling_rate):
+    print 'fdkfjsadkfjla'
     signal_list = signal_arguments['feature_group_to_process']
     rpeaks_list = signal_arguments['rpeak_group_to_process']
 
     beats = [compute_beat_phase(signal, rpeaks, sampling_rate) for signal, rpeaks in zip(signal_list, rpeaks_list)]
-
 
     mdata = ['']*len(beats)
 
@@ -71,9 +63,9 @@ def compute_beat_phase(signal, rpeaks, sampling_rate):
     idx_up = np.where(abs(np.diff(phase)) > 6)[0]
 
     beats = [signal[i:f+1] for i,f in zip(idx_up[0:-1], idx_up[1:])]
-    domains = [np.linspace(-np.pi, np.pi, len(beat), endpoint=False) for beat in beats]
+    domains = [np.linspace(-np.pi, np.pi, len(beat), endpoint=True) for beat in beats]
 
-    new_domain = np.linspace(-3, 3, 1000)
+    new_domain = np.linspace(-np.pi, np.pi, 1000, endpoint=True)
     new_beats = [interpolate(beat, new_domain, domain) for beat, domain in zip(beats, domains)]
 
     return new_beats

@@ -112,4 +112,4 @@ def fetch_path_list(*args):
     return ['/mnt/' + 'PATIENT'+str(arg) + '/HSM/'for arg in args]
 
 
-converter(2)
+converter(3)
