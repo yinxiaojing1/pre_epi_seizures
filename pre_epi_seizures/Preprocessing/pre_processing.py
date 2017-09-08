@@ -14,10 +14,10 @@ from hrv import *
 
 from rqa import *
 
+from pca import *
+
 from resampling import resample_rpeaks, interpolate_signal,\
     interpolation, decimation
-
-from visual_inspection import visual_inspection
 
 from morphology import *
 # from Filtering.gaussian_fit import get_phase, mean_extraction,\
@@ -156,7 +156,7 @@ def main():
     # group_name_list = list_group_signals(path_to_load, group_list[0])['signals']
     # compress(path_to_load, group_name_list)
 
-    # raw = load_feature(path_to_load, raw_name, files='existent', feature_group_to_process=dataset_name)
+    raw = load_feature(path_to_load, raw_name, files='existent', feature_group_to_process=dataset_name)[0]
 
     # baseline_removal = load_feature(path_to_load, baseline_removal_name, files='existent', feature_group_to_process=raw_dataset_name)
 
@@ -168,25 +168,30 @@ def main():
     # # stop
     # # time_array_to_interpolate = np.linspace(0, 40*60 - 1.0/500, 40*60*500)
     # # print time_array_to_interpolate
-    interpolated = load_feature(path_to_load, 'interpolation', sampling_rate=500, files='existent', feature_group_to_process=eks_dataset_name)[0]
+    # interpolated = load_feature(path_to_load, 'interpolation', sampling_rate=500, files='existent', feature_group_to_process=eks_dataset_name)[0]
     # rpeaks = load_feature(path_to_load, 'rpeak_detection', files='existent', feature_group_to_process=interpolated_dataset_name)[0]
-    # hrv = load_feature(path_to_load, 'hrv_computation', files='existent', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')[0]
+    # hrv = load_feature(path_to_load, 'hrv_computation', files='all_new', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')[0]
     # beat = load_feature(path_to_load, 'beat_phase_segmentation', files='existent', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')[0]
-    # sameni = load_feature(path_to_load, 'sameni_evolution', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'beat_phase_segmentation')[0]
-    rqa = load_feature(path_to_load, 'rqa_computation', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'beat_phase_segmentation')[0]
+    # pca = load_feature(path_to_load, 'pca_beat_amp_computation', files='all_new', feature_group_to_process=interpolated_dataset_name + '/' + 'QRS_fixed_segmentation')[0]
 
-    print rqa
+    # sameni = load_feature(path_to_load, 'sameni_evolution', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'beat_phase_segmentation')[0]
+    # rqa = load_feature(path_to_load, 'rqa_computation', files='all_new', feature_group_to_process=interpolated_dataset_name + '/' + 'QRS_fixed_segmentation')[0]
+    # stop
+    # print rqa
     # stop
 
     # ploting
     # print sameni
     # stop
-    start = time_before_seizure * 60
-    end = start + 5
-    sz_nr = 0
-    signal = rqa
+    start = time_before_seizure*60
+    end = start + 10
+    sz_nr = 5
+    signal = raw
+
+    print signal
+    # stop
     # signal_t = hrv
-    n = np.linspace(0, (len(signal[sz_nr])-1)/1000, len(signal[sz_nr]))
+    # n = np.linspace(0, (len(signal[sz_nr])-1)/1000, len(signal[sz_nr]))
     # n_t = np.linspace(0, (len(signal_t[sz_nr])-1)/1000, len(signal_t[sz_nr]))
 
     plt.figure()
@@ -194,7 +199,7 @@ def main():
     # plt.title('interpolated ECG')
     plt.plot(signal[sz_nr])
     # plt.plot(n[rpeaks[sz_nr]], signal[sz_nr][rpeaks[sz_nr]], 'o', color='g')
-    # plt.xlim([start, end])
+    plt.xlim([start*sampling_rate, end*sampling_rate])
     # plt.xlabel('time[s]')
     # plt.subplot(1,2,2)
     # plt.title('Detrended and Denoised ECG')
@@ -202,6 +207,7 @@ def main():
     # # plt.xlim([start, end])
     # plt.xlabel('time[s]')
     plt.show()
+    stop
     # stop
     # #phase 
     # signal = signal[sz_nr]

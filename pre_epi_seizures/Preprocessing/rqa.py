@@ -5,6 +5,7 @@ from pyrqa.computation import RQAComputation
 from pyrqa.computation import RecurrencePlotComputation
 from pyrqa.image_generator import ImageGenerator
 
+import numpy as np
 
 def rqa_computation(signal_arguments, sampling_rate):
     beats_list = signal_arguments['feature_group_to_process']
@@ -20,8 +21,8 @@ def compute_rqa(list_beats_sz):
 
 def compute_rqa_beat(beat):
     settings = Settings(beat,
-                            embedding_dimension=10,
-                            time_delay=1,
+                            embedding_dimension=3,
+                            time_delay=20,
                             neighbourhood=FixedRadius(0.1),
                             similarity_measure=EuclideanMetric,
                             theiler_corrector=1,
@@ -30,4 +31,11 @@ def compute_rqa_beat(beat):
                             min_white_vertical_line_length=2)
     quantitative = RQAComputation.create(settings, verbose=False)
     result = quantitative.run()
-    return result.determinism
+    features = result.__dict__
+    print np.asarray([(k, features[k]) for k in features.keys()
+                      if 'distribution' not in k
+                      if 'points' not in k
+                      if 'settings' not in k
+                      if 'runtimes' not in k])
+    stop
+    # stop

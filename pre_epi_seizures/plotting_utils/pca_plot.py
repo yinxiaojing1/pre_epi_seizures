@@ -120,13 +120,12 @@ interpolated_dataset_name = eks_dataset_name + '/' + 'interpolation'
 # # print time_array_to_interpolate
 # interpolated = load_feature(path_to_load, 'interpolation', sampling_rate=500, files='existent', feature_group_to_process=eks_dataset_name)[0]
 rpeaks = load_feature(path_to_load, 'rpeak_detection', files='existent', feature_group_to_process=interpolated_dataset_name)[0]
-# hrv = load_feature(path_to_load, 'hrv_computation', files='existent', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')[0]
-# beat = load_feature(path_to_load, 'beat_phase_segmentation', files='existent', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')[0]
-sameni = load_feature(path_to_load, 'sameni_evolution', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'beat_phase_segmentation')[0]
+hrv = load_feature(path_to_load, 'hrv_computation', files='existent', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')[0]
+beat = load_feature(path_to_load, 'beat_phase_segmentation', files='existent', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')[0]
+# sameni = load_feature(path_to_load, 'sameni_evolution', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'beat_phase_segmentation')[0]
 # rqa = load_feature(path_to_load, 'rqa_computation', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'beat_phase_segmentation')[0]
-# pca = load_feature(path_to_load, 'pca_beat_amp_computation', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'QRS_fixed_segmentation')[0]
-# pca_corrected = load_feature(path_to_load, 'pca_beat_amp_computation', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'beat_phase_segmentation')[0]
-rqa = load_feature(path_to_load, 'rqa_computation', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'QRS_fixed_segmentation')[0]
+pca = load_feature(path_to_load, 'pca_beat_amp_computation', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'QRS_fixed_segmentation')[0]
+pca_corrected = load_feature(path_to_load, 'pca_beat_amp_computation', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'beat_phase_segmentation')[0]
 
 # print data[0]
 
@@ -138,12 +137,11 @@ rqa = load_feature(path_to_load, 'rqa_computation', files='existent', feature_gr
 # stop
 
 # Data allocation 3D ------------------------
-data = rqa
+data = pca
 
 
 # Window allocation 2D-----------------------
-windows_list = [rpeak[1:] for rpeak in rpeaks]
-
+windows_list = [rpeak[5:] for rpeak in rpeaks]
 
 # Label allocation -----------------------------
 labels = create_labels(1000,
@@ -156,7 +154,7 @@ labels = create_labels(1000,
 
 
 # Features to plot
-features = [8]
+features = [0]
 
 
 features_to_analyse = feature_allocation(data, features)
@@ -168,7 +166,7 @@ features_to_analyse = scale(features_to_analyse)
 
 # print features_to_analyse
 # stop
-sz_nr = 14
+sz_nr = 12
 
 hist_per_seizure(labels, features_to_analyse, sz_nr)
 

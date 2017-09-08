@@ -20,12 +20,12 @@ def hrv_computation(signal_arguments, sampling_rate):
 
     mdata = [{'fs':sampling_rate}] * len(hrv_list)
 
-    return hrv_sd_list, mdata
+    return hrv_list, mdata
 
 
 def compute_hrv(rpeaks):
     print rpeaks
-    return 1.0/np.diff(rpeaks)
+    return 1.0*60*1000/np.diff(rpeaks)
 
 
 def compute_mean_NN(window, hrv_signal, sampling_rate):

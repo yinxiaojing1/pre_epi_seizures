@@ -12,6 +12,23 @@ from pre_epi_seizures.classification.scaling import *
 import numpy as np
 # from sklearn.preprocessing import *
 
+def plot_ECG_seizure(ecg_data, sz_nr, start, end):
+    plt.figure()
+    # plt.subplot(1,2,1)
+    # plt.title('interpolated ECG')
+    plt.plot(signal[sz_nr])
+    # plt.plot(n[rpeaks[sz_nr]], signal[sz_nr][rpeaks[sz_nr]], 'o', color='g')
+    # plt.xlim([start, end])
+    # plt.xlabel('time[s]')
+    # plt.subplot(1,2,2)
+    # plt.title('Detrended and Denoised ECG')
+    # plt.plot(signal_t[sz_nr])
+    plt.xlim([start, end])
+    # plt.xlabel('time[s]')
+    plt.show()
+    # stop
+
+
 def unspecific_hist(labels, seizure_list, bins):
     hist = dict()
     for k in labels.keys():
@@ -118,7 +135,7 @@ interpolated_dataset_name = eks_dataset_name + '/' + 'interpolation'
 # # stop
 # # time_array_to_interpolate = np.linspace(0, 40*60 - 1.0/500, 40*60*500)
 # # print time_array_to_interpolate
-# interpolated = load_feature(path_to_load, 'interpolation', sampling_rate=500, files='existent', feature_group_to_process=eks_dataset_name)[0]
+interpolated = load_feature(path_to_load, 'interpolation', sampling_rate=500, files='existent', feature_group_to_process=eks_dataset_name)[0]
 rpeaks = load_feature(path_to_load, 'rpeak_detection', files='existent', feature_group_to_process=interpolated_dataset_name)[0]
 # hrv = load_feature(path_to_load, 'hrv_computation', files='existent', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')[0]
 # beat = load_feature(path_to_load, 'beat_phase_segmentation', files='existent', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')[0]
@@ -126,7 +143,6 @@ sameni = load_feature(path_to_load, 'sameni_evolution', files='existent', featur
 # rqa = load_feature(path_to_load, 'rqa_computation', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'beat_phase_segmentation')[0]
 # pca = load_feature(path_to_load, 'pca_beat_amp_computation', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'QRS_fixed_segmentation')[0]
 # pca_corrected = load_feature(path_to_load, 'pca_beat_amp_computation', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'beat_phase_segmentation')[0]
-rqa = load_feature(path_to_load, 'rqa_computation', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'QRS_fixed_segmentation')[0]
 
 # print data[0]
 
@@ -138,7 +154,7 @@ rqa = load_feature(path_to_load, 'rqa_computation', files='existent', feature_gr
 # stop
 
 # Data allocation 3D ------------------------
-data = rqa
+data = sameni
 
 
 # Window allocation 2D-----------------------
@@ -156,9 +172,12 @@ labels = create_labels(1000,
 
 
 # Features to plot
-features = [8]
+features = [0]
 
+start = time_before_seizure * 60
+end = start + 5
 
+plt.plot()
 features_to_analyse = feature_allocation(data, features)
 
 
@@ -168,7 +187,10 @@ features_to_analyse = scale(features_to_analyse)
 
 # print features_to_analyse
 # stop
-sz_nr = 14
+
+
+sz_nr = 11
+
 
 hist_per_seizure(labels, features_to_analyse, sz_nr)
 

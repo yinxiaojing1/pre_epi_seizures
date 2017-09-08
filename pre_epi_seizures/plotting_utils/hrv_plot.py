@@ -4,57 +4,63 @@ from pre_epi_seizures.Preprocessing.pre_processing import *
 
 from pre_epi_seizures.classification.labels import *
 
-from pre_epi_seizures.classification.scaling import *
-
 # from pre_epi_seizures.classification.labels import *
 
 
 import numpy as np
-# from sklearn.preprocessing import *
 
-def unspecific_hist(labels, seizure_list, bins):
+def unspecific_hist(labels, sz, bins):
+
     hist = dict()
     for k in labels.keys():
-        hist_list = [np.histogram(
-                           seizure[labels[k][0][i][0]:
-                           labels[k][0][i][1]], 
-                           bins)[0]
-                for i, seizure in enumerate(seizure_list)]
-
-        hist_array_per_seizure = np.asarray(hist_list)
-        hist_total = np.sum(hist_array_per_seizure,
-                            axis=0)
+        hist_per_seizure = np.asarray([np.histogram(sz[i][labels[k][0][i][0]:labels[k][0][i][1]], bins)[0]
+                                  for i in xrange(len(sz))])
+        hist_total = np.sum(hist_per_seizure, axis=0)
         hist[k] = (hist_total, labels[k][1])
-
     return hist
 
 
-def histogram(hist, bins):
-    w = bins[0]/10
+def plot(hist, bins):
+    w = bins[0]/100
     for i, k in enumerate(hist.keys()):
         plt.subplot(len(hist.keys()), 1, i+1)
         plt.bar(bins , hist[k][0], width=w, color = hist[k][1])
         plt.legend([k])
+    # plt.show()
 
 
-def hist_per_seizure(labels_seizure, data_seizure_list, nr_seizure):
+def hist_per_seizure(data, nr_seizure, windows):
 
-    data = [data_seizure_list[nr_seizure]]
+    windows = windows[nr_seizure]
+    data = data[nr_seizure]
+    labels = create_labels(1000,
+                            windows_list=[windows],
+                            inter_ictal = ((0, 5), 'g'),
+                            pre_ictal = ((25,30), 'orange'),
+                            post_ictal = ((35,40), 'y'),
+                            ictal = ((30,35), 'r'))
 
-    labels = {k: ([labels_seizure[k][0][nr_seizure]], labels_seizure[k][1]) for k in labels_seizure.keys()}
+    print labels
 
-    bins = np.linspace(0, 1, 10)
+    bins = np.linspace(60, 120)
 
-    hist = unspecific_hist(labels, data, bins)
+    hist = unspecific_hist(labels, [data], bins)
+
+    plot(hist, bins[1:])
+
+    # print hist
+
+    # print len(hist['ictal'])
+    # print len(bins)
+    # print hist['ictal'][1]
+
     # stop
-
-    histogram(hist, bins[1:])
-
 
 def plot_per_seizure(labels_seizure,
                      data_seizure_list, nr_seizure):
     plt.figure()
-    data = data_seizure_list[nr_seizure]
+    data = np.asarray([data_seizure_list[nr_seizure]]).T
+
     labels = {k: ([labels_seizure[k][0][nr_seizure]], labels_seizure[k][1]) for k in labels_seizure.keys()}
     print labels
     plot_seizure_duration_per_feature(labels, data)
@@ -76,10 +82,6 @@ def plot_seizure_duration_per_feature(labels,
         # print data_single_feature[down:up,:]
         plt.plot(n, data_single_feature[down:up,:], color = labels[k][1])
 
-
-def feature_allocation(data, feature_list):
-    feature_subset_per_seizure = [seizure[:, feature_list] for seizure in data]
-    return feature_subset_per_seizure
 
 
 #signal
@@ -120,61 +122,53 @@ interpolated_dataset_name = eks_dataset_name + '/' + 'interpolation'
 # # print time_array_to_interpolate
 # interpolated = load_feature(path_to_load, 'interpolation', sampling_rate=500, files='existent', feature_group_to_process=eks_dataset_name)[0]
 rpeaks = load_feature(path_to_load, 'rpeak_detection', files='existent', feature_group_to_process=interpolated_dataset_name)[0]
-# hrv = load_feature(path_to_load, 'hrv_computation', files='existent', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')[0]
+hrv = load_feature(path_to_load, 'hrv_computation', files='existent', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')[0]
 # beat = load_feature(path_to_load, 'beat_phase_segmentation', files='existent', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')[0]
-sameni = load_feature(path_to_load, 'sameni_evolution', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'beat_phase_segmentation')[0]
+# sameni = load_feature(path_to_load, 'sameni_evolution', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'beat_phase_segmentation')[0]
 # rqa = load_feature(path_to_load, 'rqa_computation', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'beat_phase_segmentation')[0]
-# pca = load_feature(path_to_load, 'pca_beat_amp_computation', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'QRS_fixed_segmentation')[0]
-# pca_corrected = load_feature(path_to_load, 'pca_beat_amp_computation', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'beat_phase_segmentation')[0]
-rqa = load_feature(path_to_load, 'rqa_computation', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'QRS_fixed_segmentation')[0]
-
-# print data[0]
-
-#---------------------------------------
-# print hrv[0]
-# print beat[0]
-# print pca[0]
-
-# stop
-
-# Data allocation 3D ------------------------
-data = rqa
 
 
-# Window allocation 2D-----------------------
-windows_list = [rpeak[1:] for rpeak in rpeaks]
 
 
-# Label allocation -----------------------------
+
+
+
+
+# Select features --------------------------------------------------
+
+print len(hrv[0])
+windows = [np.linspace(rpeak[1], rpeak[-1], len(hr)) for rpeak, hr in zip(rpeaks, hrv)]
+
 labels = create_labels(1000,
-                        windows_list=windows_list,
+                        windows_list=windows,
                         inter_ictal = ((0, 5), 'g'),
                         pre_ictal = ((5,10), 'orange'),
                         unspecified=((10,35), 'blue'),
                         post_ictal = ((35,40), 'y'),
                         ictal = ((30,35), 'r'))
 
+nr_sz = 5
 
-# Features to plot
-features = [8]
-
-
-features_to_analyse = feature_allocation(data, features)
-
-
-
-features_to_analyse = scale(features_to_analyse)
-
-
-# print features_to_analyse
-# stop
-sz_nr = 14
-
-hist_per_seizure(labels, features_to_analyse, sz_nr)
-
-# plt.show()
-
-plot_per_seizure(labels, features_to_analyse, sz_nr)
+data = hrv
+hist_per_seizure(data, nr_sz, windows)
+plot_per_seizure(labels, data, nr_sz)
 
 plt.show()
+# stop
+print hrv
 
+print labels
+
+bins = np.linspace(60, 120)
+
+hist = unspecific_hist(labels, data, bins)
+
+# print hist
+
+# print len(hist['ictal'])
+# print len(bins)
+# print hist['ictal'][1]
+
+# stop
+
+plot(hist, bins[1:])
