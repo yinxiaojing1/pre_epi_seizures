@@ -8,23 +8,63 @@ from data_handlers import\
     get_record, get_sampling_frequency, get_seizure_times_seconds,\
     get_one_signal_structure, parse_sample_seizure
 
-
 import numpy as np
 
-
-def fetch_group_seizures(patient_number):
-    return '/PATIENT' + str(patient_number) + '/crysis'
+from datetime import datetime
 
 
-def fetch_group_free(patient_number):
-    return '/PATIENT' + str(patient_number) + '/free'
+def return_dates(list_group):
+    all_date_times = [datetime.strptime(
+                                name[1][len(name[1])-26:len(name[1])-1],
+                                '%Y-%m-%d %H:%M:%S.%f')
+                                for name in list_group['signals']]
+    all_date_times = all_date_times
+    return sorted(all_date_times)
+
+
+def find_index_seizure_file(date_time_seizure,
+                                all_date_times):
+    index = all_date_times.index([all_date_time
+                              for all_date_time in all_date_times
+                              if all_date_time < date_time_seizure][-1])
+    return index
+
+
+def find_indexes_seizure_files(date_time_seizures, all_date_times):
+    return [find_index_seizure_file(data_time_seizure, all_date_times)
+            for data_time_seizure in date_time_seizures]
 
 
 def list_seizures_files_patient(path_to_load, patient_number):
+    # list of all patients
     list_group = list_group_signals(path=path_to_load,
-                                    group=fetch_group_seizures(
-                                        patient_number))
-    return list_group['signals']
+                                    group='PATIENT'+ str(patient_number))
+
+    # import data from selected patient
+    from patients_data_new import patients
+    patients = patients[str(patient_number)]
+
+    # retrieve datetimes from all files
+    all_date_times = return_dates(list_group)
+
+    #compute the number of leads
+    nr_leads = len(list_group['signals'])/len(list(set(all_date_times)))
+
+    #retrieve the datetimes of seizures
+    date_seizures = patients['dates_of_seizure']
+    time_seizures = patients['ictal_on_time']
+    date_time_seizures = [datetime.combine(d_s, t_s)
+                          for d_s,t_s
+                          in zip(date_seizures, time_seizures)]
+
+    #find indexes
+    indexes = find_indexes_seizure_files(date_time_seizures, all_date_times)
+
+    list_files_seizures = [list_group['signals'][index + i]
+                           for index in indexes
+                           for i in xrange(nr_leads)]
+
+    return list_files_seizures
 
 
 def list_free_files_patient(path_to_load, patient_number):
@@ -132,6 +172,7 @@ def create_seizure_dataset_patient(path_to_load, path_to_save,
                                    time_before_seizure,
                                    time_after_seizure, patient_number):
     _logger.debug('searching all files')
+    # stop
     group_name_all_list = list_all_files_patient(path_to_load=path_to_load,
                                                  patient_number=patient_number)
     _logger.debug(group_name_all_list)
@@ -184,6 +225,7 @@ def save_dataset(path_to_save, time_before_seizure, time_after_seizure, patient_
 def create_seizure_dataset(path_to_load, path_to_save,
                            time_before_seizure,
                            time_after_seizure, *args):
+
     seizure_dataset =\
         [create_seizure_dataset_patient(path_to_load,
                                         path_to_save,
@@ -228,16 +270,18 @@ def create_seizure_dataset(path_to_load, path_to_save,
 
 
 _logger.setLevel(10)
-path_to_load = '~/Desktop/HSM_data.h5'
-path_to_save = '~/Desktop/seizure_datasets_new.h5'
+path_to_load = '/Volumes/ASSD/pre_epi_seizures/h5_files/raw_fulldata/HSM_data.h5'
+path_to_save = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new.h5'
 patient_number = 1
 
-time_before_seizure = 30 * 60
-time_after_seizure = 10 * 60
+time_before_seizure = 50 * 60
+time_after_seizure = 20 * 60
+
+
 
 dataset = create_seizure_dataset(path_to_load, path_to_save,
                                  time_before_seizure,
-                                 time_after_seizure, 1, 2, 4, 5, 6)
+                                 time_after_seizure,  4)
 
 _logger.debug('the dataset is the following: %s', dataset)
 _logger.debug(np.shape(dataset))

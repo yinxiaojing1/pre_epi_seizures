@@ -138,7 +138,7 @@ def main():
     time_after_seizure = 10
     # path_to_load = '~/Desktop/phisionet_seizures_new.h5'
     # sampling_rate = 1000
-    path_to_load = '~/Desktop/seizure_datasets_new.h5'
+    path_to_load = '/Users/franciscosargo/seizure_datasets_new.h5'
     # name_list = [str(time_before_seizure*60) + '_' + str(time_after_seizure*60)]
     # group_list_raw = ['raw']
     # group_list_baseline_removal = ['medianFIR']
@@ -156,7 +156,7 @@ def main():
     # group_name_list = list_group_signals(path_to_load, group_list[0])['signals']
     # compress(path_to_load, group_name_list)
 
-    raw = load_feature(path_to_load, raw_name, files='existent', feature_group_to_process=dataset_name)[0]
+    # raw = load_feature(path_to_load, raw_name, files='existent', feature_group_to_process=dataset_name)[0]
 
     # baseline_removal = load_feature(path_to_load, baseline_removal_name, files='existent', feature_group_to_process=raw_dataset_name)
 
@@ -172,9 +172,9 @@ def main():
     # rpeaks = load_feature(path_to_load, 'rpeak_detection', files='existent', feature_group_to_process=interpolated_dataset_name)[0]
     # hrv = load_feature(path_to_load, 'hrv_computation', files='all_new', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')[0]
     # beat = load_feature(path_to_load, 'beat_phase_segmentation', files='existent', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')[0]
-    # pca = load_feature(path_to_load, 'pca_beat_amp_computation', files='all_new', feature_group_to_process=interpolated_dataset_name + '/' + 'QRS_fixed_segmentation')[0]
+    pca = load_feature(path_to_load, 'pca_beat_amp_computation', files='all_new', feature_group_to_process=interpolated_dataset_name + '/' + 'QRS_fixed_segmentation')[0]
 
-    # sameni = load_feature(path_to_load, 'sameni_evolution', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'beat_phase_segmentation')[0]
+    # sameni = load_feature(path_to_load, 'sameni_evolution', files='all_new', feature_group_to_process=interpolated_dataset_name + '/' + 'beat_phase_segmentation')[0]
     # rqa = load_feature(path_to_load, 'rqa_computation', files='all_new', feature_group_to_process=interpolated_dataset_name + '/' + 'QRS_fixed_segmentation')[0]
     # stop
     # print rqa

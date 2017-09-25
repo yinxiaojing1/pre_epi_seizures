@@ -1,13 +1,25 @@
-import pre_epi_seizures
+# import pre_epi_seizures
+
+# from pre_epi_seizures.Preprocessing.pre_processing import *
+
+# from pre_epi_seizures.classification.labels import *
+
+# from pre_epi_seizures.classification.labels import *
+from Tkinter import *
+
+import matplotlib as mpl
+mpl.use('Agg')
+import matplotlib.pyplot as plt
+# print 'yeee'
+import numpy as np
+import pylab
 
 from pre_epi_seizures.Preprocessing.pre_processing import *
 
 from pre_epi_seizures.classification.labels import *
 
-# from pre_epi_seizures.classification.labels import *
+from pre_epi_seizures.classification.labels import *
 
-
-import numpy as np
 
 def unspecific_hist(labels, sz, bins):
 
@@ -90,7 +102,9 @@ time_before_seizure = 30
 time_after_seizure = 10
 # path_to_load = '~/Desktop/phisionet_seizures_new.h5'
 # sampling_rate = 1000
-path_to_load = '~/Desktop/seizure_datasets_new.h5'
+#path_to_load = '~/Desktop/seizure_datasets_new.h5'
+path_to_load = '/Users/franciscosargo/seizure_datasets_new.h5'
+
 # name_list = [str(time_before_seizure*60) + '_' + str(time_after_seizure*60)]
 # group_list_raw = ['raw']
 # group_list_baseline_removal = ['medianFIR']
@@ -128,12 +142,6 @@ hrv = load_feature(path_to_load, 'hrv_computation', files='existent', feature_gr
 # rqa = load_feature(path_to_load, 'rqa_computation', files='existent', feature_group_to_process=interpolated_dataset_name + '/' + 'beat_phase_segmentation')[0]
 
 
-
-
-
-
-
-
 # Select features --------------------------------------------------
 
 print len(hrv[0])
@@ -151,24 +159,25 @@ nr_sz = 5
 
 data = hrv
 hist_per_seizure(data, nr_sz, windows)
+plt.savefig('plots_hrv/hist.png')
+
 plot_per_seizure(labels, data, nr_sz)
+plt.savefig('plots_hrv/time.png')
 
-plt.show()
+pylab.savefig("out.png")
 # stop
-print hrv
+#print hrv
 
-print labels
+# print 'kfnafnalskfnadlkfn'
 
-bins = np.linspace(60, 120)
+# bins = np.linspace(60, 120)
 
-hist = unspecific_hist(labels, data, bins)
+# hist = unspecific_hist(labels, data, bins)
 
-# print hist
+# # print hist
 
-# print len(hist['ictal'])
-# print len(bins)
-# print hist['ictal'][1]
+# # print len(hist['ictal'])
+# # print len(bins)
+# # print hist['ictal'][1]
 
-# stop
-
-plot(hist, bins[1:])
+# # stop

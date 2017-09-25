@@ -32,10 +32,15 @@ def compute_rqa_beat(beat):
     quantitative = RQAComputation.create(settings, verbose=False)
     result = quantitative.run()
     features = result.__dict__
-    print np.asarray([(k, features[k]) for k in features.keys()
+    print np.asarray([features[k] for k in features.keys()
                       if 'distribution' not in k
                       if 'points' not in k
                       if 'settings' not in k
                       if 'runtimes' not in k])
-    stop
+    return np.asarray([features[k] for k in features.keys()
+                      if 'distribution' not in k
+                      if 'points' not in k
+                      if 'settings' not in k
+                      if 'runtimes' not in k])
+    # stop
     # stop

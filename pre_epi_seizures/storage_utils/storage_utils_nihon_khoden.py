@@ -11,24 +11,52 @@ from pre_epi_seizures.logging_utils.formatter_logging import logger
 from pre_epi_seizures.storage_utils.storage_utils_hdf5 import  load_signal, save_signal
 
 
+
 # @profile
 def converter(*args):
     path_list = get_file_list(*args)
-    print path_list
+    # print path_list
     for path in path_list:
-        edf_file = pyedflib.EdfReader(path)
-        signal, mdata= load_ecg_signal(edf_file)
-        print signal
-        logger.debug("the mdata is %s", mdata)
-        name = path[18:26]
-        name_patient = path[5:13]
 
-        if mdata['crysis_time_seconds']:
-            group = '/'+name_patient +'/crysis'
-        else: 
-            group = '/'+name_patient +'/free'
-        print 'Saving ...'
-        save_signal(path='/home/sargo/Desktop/HSM_data.h5', signal_list=[signal], mdata_list=[mdata], name_list=[name], group_list=[group])
+        name_file = path[path.index('F'): path.index('F') + 8]
+        name_patient = path[path.index('P'): path.index('P') + 9]
+
+        print name_patient
+        print 
+        print name_file
+        # stop
+        # stop
+        edf_file = pyedflib.EdfReader(path)
+        # print edf_file
+        # stop
+        ecg_signals = load_ecg_signal(edf_file)
+        signals = ecg_signals[0]
+        names = ecg_signals[1]
+        date_time = ecg_signals[2]
+
+        # stop
+
+        names_files = [name_file + '_' + name + '_' + date_time
+                       for name in names]
+        print names_files
+
+        # stop
+        path = '/Volumes/ASSD/pre_epi_seizures/h5_files/raw_fulldata/HSM_data.h5'
+        # stop
+        save_signal(path=path, signal_list= signals, mdata_list=['']*len(signals), name_list=names_files, group_list=[name_patient])
+
+
+        # stop
+        # logger.debug("the mdata is gr%s", mdata)
+        # name = path[18:26]
+        # name_patient = path[5:13]
+
+        # if mdata['crysis_time_seconds']:
+        #     group = '/'+name_patient +'/crysis'
+        # else: 
+        #     group = '/'+name_patient +'/free'
+        # print 'Saving ...'
+        # save_signal(path='/home/sargo/Desktop/HSM_data.h5', signal_list=[signal], mdata_list=[mdata], name_list=[name], group_list=[group])
         edf_file._close()
 
 def create_mdata(header, crysis_time_seconds):
@@ -39,26 +67,47 @@ def create_mdata(header, crysis_time_seconds):
 def load_ecg_signal(edf_file):
     logger.debug('Loading file %s ...', edf_file.file_name)
     list_signals = edf_file.getSignalLabels()
-    annotations = edf_file.readAnnotations()
-    crysis_time_seconds = find_crysis(annotations)
-    ecg_index= find_ecg_signal(edf_file, list_signals)
+    print list_signals
+    # stop
+    try:
+        annotations = edf_file.readAnnotations()
+    except Exception as e:
+        print e
 
-    return np.array([edf_file.readSignal(ecg_index)]).T, \
-    create_mdata(edf_file.getSignalHeader(ecg_index), 
-                 crysis_time_seconds)
+    # stop
 
+    # crysis_time_seconds = find_crysis(annotations)
+    ecg_indexes= find_ecg_signal(edf_file, list_signals)
 
+    signals = [np.array([edf_file.readSignal(ecg_index[0])]).T
+               for ecg_index in ecg_indexes]
+
+    date_time = get_date_time(edf_file)
+
+    names = [ecg_index[1] for ecg_index in ecg_indexes]
+
+    return signals, names, date_time
+
+def return_index(name, list_signals):
+    try:
+            print name
+            index = list_signals.index(name)
+            return (index, name)
+    except Exception as e:
+            print e
+            return None
 
 def find_ecg_signal(edf_file, list_signals):
     names = ['Ecg', 'ECG-', 'ECG+']
 
-    for name in names:
-        try:
-            print name
-            index = list_signals.index(name)
-            return index
-        except Exception as e:
-            print e
+    list_indexes = [return_index(name, list_signals) for name in names]
+    list_indexes = [index for index in list_indexes if index is not None]
+    return list_indexes
+
+
+def get_date_time(edf_file):
+    d = edf_file.getHeader()['startdate']
+    return d.strftime('%Y-%m-%d %H:%M:%S.%f')
 
 
 def find_crysis(annotations):
@@ -92,24 +141,26 @@ def get_list_signals(edf_file):
 def read_edf_file(file_name):
     edf_file = pyedflib.EdfReader(file_name)
     signal_labels = edf_file.getSignalLabels() 
-
     return edf_file, signal_labels
 
 
 def get_file_list(*args):
     path_list = fetch_path_list(*args)
     files_list = fetch_files_list(path_list)
+    print files_list
+    # print files_list
     return files_list
 
 
 def fetch_files_list(path_list):
     print path_list
+    print 
     return [path + i for path in path_list for i in os.listdir(path) if os.path.isfile(os.path.join(path,i)) and \
          '.edf' in i]
 
 
 def fetch_path_list(*args):
-    return ['/mnt/' + 'PATIENT'+str(arg) + '/HSM/'for arg in args]
+    return ['/Volumes/ASSD/pre_epi_seizures/' + 'PATIENT' + str(arg) + '/' for arg in args]
 
 
-converter(3)
+converter(12)

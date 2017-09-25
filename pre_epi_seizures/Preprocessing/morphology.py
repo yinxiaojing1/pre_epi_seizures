@@ -14,5 +14,6 @@ def compute_parameters_sameni(beat):
     # print 'ne swizure'
     phase = np.linspace(-np.pi, np.pi, 1000, endpoint=True)
     beat = beat_fitter(beat, phase)
+    # print beat
     return beat
 
