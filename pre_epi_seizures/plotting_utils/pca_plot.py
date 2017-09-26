@@ -84,11 +84,11 @@ def feature_allocation(data, feature_list):
 
 #signal
 sampling_rate = 1000
-time_before_seizure = 30
-time_after_seizure = 10
+time_before_seizure = 50
+time_after_seizure = 20
 # path_to_load = '~/Desktop/phisionet_seizures_new.h5'
 # sampling_rate = 1000
-path_to_load = '~/Desktop/seizure_datasets_new.h5'
+path_to_load = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new.h5'
 # name_list = [str(time_before_seizure*60) + '_' + str(time_after_seizure*60)]
 # group_list_raw = ['raw']
 # group_list_baseline_removal = ['medianFIR']

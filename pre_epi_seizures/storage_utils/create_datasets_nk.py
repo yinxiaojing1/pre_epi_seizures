@@ -353,7 +353,7 @@ time_after_seizure = 20 * 60
 
 dataset = create_seizure_dataset(path_to_load, path_to_save,
                                  time_before_seizure,
-                                 time_after_seizure,  4)
+                                 time_after_seizure,  3)
 
 _logger.debug('the dataset is the following: %s', dataset)
 _logger.debug(np.shape(dataset))

@@ -73,7 +73,7 @@ def load_feature(path_to_load, feature_to_load, files='just_new_data', sampling_
 
     auxiliary_inputs = {k:feature_groups_required[k] for k in feature_groups_required.keys() if 'group' not in k and 'process' not in k}
 
-
+    # stop
     if files=='all_new':
         names_to_save = get_names(list_group_signals(path_to_load, feature_group_to_process)['signals'])
         feature_group_to_process
@@ -85,15 +85,24 @@ def load_feature(path_to_load, feature_to_load, files='just_new_data', sampling_
         names_already_processed = get_names(list_group_signals(path_to_load, feature_group_extracted[0])['signals'])
         names_to_save = get_names(list_group_signals(path_to_load, feature_group_to_process)['signals'])
         names_to_save = [name for name in names_to_save if name not in names_already_processed]
-        feature_group_to_process = [(feature_group_to_process, name) for name in names_to_save]
-        stop # Ver melhor
-        print feature_group_to_process
-        stop
+        # feature_group_to_process = [(feature_group_to_process, name) for name in names_to_save]
+        # # stop # Ver melhor
+        # print feature_group_to_process
+        # # stop
+
         print feature_groups_required
+        # stop
+        # print feature_groups_required
+        # # stop
         for k in feature_groups_required.keys():
-            feature_groups_required[k] = list_group_signals(path_to_load, feature_groups_required[k])['signals']
+            feature_groups_required[k] = [(feature_groups_required[k], name) for name in names_to_save]
+        # print feature_groups_required
+        
+        print feature_groups_required
+        # stop
+
         #*****************IMPORTANT CHANGE***************************
-        names_to_save = get_names(list_group_signals(path_to_load, feature_group_to_process)['signals'])
+        # names_to_save = get_names(list_group_signals(path_to_load, feature_group_to_process)['signals'])
 
     if files=='existent':
         feature_group_name_extracted = list_group_signals(path_to_load, feature_group_extracted[0])['signals']
@@ -156,14 +165,14 @@ def main():
     # group_name_list = list_group_signals(path_to_load, group_list[0])['signals']
     # compress(path_to_load, group_name_list)
 
-    raw = load_feature(path_to_load, raw_name, files='existent', feature_group_to_process=dataset_name)[0]
+    # raw = load_feature(path_to_load, raw_name, files='existent', feature_group_to_process=dataset_name)[0]
 
-    baseline_removal = load_feature(path_to_load, baseline_removal_name, files='all_new', feature_group_to_process=raw_dataset_name)
+    baseline_removal = load_feature(path_to_load, baseline_removal_name, files='just_new_data', feature_group_to_process=raw_dataset_name)
 
     # decimated = load_feature(path_to_load, 'decimation', files='existent', feature_group_to_process=baseline_removal_dataset_name)
-    # rpeaks = load_feature(path_to_load, 'rpeak_detection', files='existent', feature_group_to_process=baseline_removal_dataset_name)
+    rpeaks = load_feature(path_to_load, 'rpeak_detection', files='just_new_data', feature_group_to_process=baseline_removal_dataset_name)
 
-    # hrv = load_feature(path_to_load, 'hrv_computation', files='existent', feature_group_to_process=baseline_removal_dataset_name + '/' + 'rpeak_detection')
+    hrv = load_feature(path_to_load, 'hrv_computation', files='just_new_data', feature_group_to_process=baseline_removal_dataset_name + '/' + 'rpeak_detection')
     # eks = load_feature(path_to_load, 'eks_smoothing', files='existent', feature_group_to_process=baseline_removal_dataset_name + '/' + 'decimation', rpeak_group_to_process=baseline_removal_dataset_name + '/' + 'decimation' + '/' + 'rpeak_detection')[0]
     # # stop
     # # time_array_to_interpolate = np.linspace(0, 40*60 - 1.0/500, 40*60*500)
@@ -187,7 +196,7 @@ def main():
     end = start + 10 
     sz_nr = 0
     signal = raw
-
+    stop
     print signal
     # stop
     # signal_t = hrv
