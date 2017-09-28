@@ -22,7 +22,7 @@ def save_signal(path, signal_list, mdata_list, name_list, group_list):
         for signal, mdata, name in zip(signal_list,
                                        mdata_list, name_list):
             add_signal(opened_file=opened_file, signal=signal,
-               mdata=mdata, name=name, group=group)
+                       mdata=mdata, name=name, group=group)
 
     opened_file.close()
 

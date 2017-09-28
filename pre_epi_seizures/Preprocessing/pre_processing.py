@@ -167,12 +167,16 @@ def main():
 
     # raw = load_feature(path_to_load, raw_name, files='existent', feature_group_to_process=dataset_name)[0]
 
-    baseline_removal = load_feature(path_to_load, baseline_removal_name, files='just_new_data', feature_group_to_process=raw_dataset_name)
+    # baseline_removal = load_feature(path_to_load, baseline_removal_name, files='all_new', feature_group_to_process=raw_dataset_name)
 
     # decimated = load_feature(path_to_load, 'decimation', files='existent', feature_group_to_process=baseline_removal_dataset_name)
-    rpeaks = load_feature(path_to_load, 'rpeak_detection', files='just_new_data', feature_group_to_process=baseline_removal_dataset_name)
+    # rpeaks = load_feature(path_to_load, 'rpeak_detection', files='all_new', feature_group_to_process=baseline_removal_dataset_name)
 
     hrv = load_feature(path_to_load, 'hrv_computation', files='just_new_data', feature_group_to_process=baseline_removal_dataset_name + '/' + 'rpeak_detection')
+
+
+    QRS_fixed = load_feature(path_to_load, 'QRS_fixed_segmentation', files='all_new', feature_group_to_process=baseline_removal_dataset_name, rpeak_group_to_process=baseline_removal_dataset_name + '/' + 'rpeak_detection')
+
     # eks = load_feature(path_to_load, 'eks_smoothing', files='existent', feature_group_to_process=baseline_removal_dataset_name + '/' + 'decimation', rpeak_group_to_process=baseline_removal_dataset_name + '/' + 'decimation' + '/' + 'rpeak_detection')[0]
     # # stop
     # # time_array_to_interpolate = np.linspace(0, 40*60 - 1.0/500, 40*60*500)

@@ -23,9 +23,10 @@ def baseline_removal(signal_arguments, sampling_rate):
     feature_mdata = [{'fs': sampling_rate}] * len(signal_list)
     print feature_mdata
 
-    feature_signal_list = [create_filtered_dataset(signal, filtmethod='medianFIR',
-            sampling_rate=sampling_rate) for signal in signal_list]
+    feature_signal_list = [np.asarray([create_filtered_dataset(signal, filtmethod='medianFIR',
+            sampling_rate=sampling_rate)]) for signal in signal_list]
 
+    print feature_signal_list
     return feature_signal_list, feature_mdata
 
 

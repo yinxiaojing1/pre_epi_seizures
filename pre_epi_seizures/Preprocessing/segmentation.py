@@ -22,6 +22,8 @@ import functools
 
 def rpeak_detection(signal_arguments, sampling_rate):
     signal_list = signal_arguments['feature_group_to_process']
+    print signal_list
+    # stop
     rpeaks = map(functools.partial(detect_rpeaks,
                  sampling_rate=sampling_rate), signal_list)
     print rpeaks
@@ -32,6 +34,9 @@ def rpeak_detection(signal_arguments, sampling_rate):
 def QRS_fixed_segmentation(signal_arguments, sampling_rate):
     signal_list = signal_arguments['feature_group_to_process']
     rpeaks_list = signal_arguments['rpeak_group_to_process']
+    # print rpeaks_list
+
+    # print signal_list
     # print rpeaks_list
 
     beats = [compute_QRS(signal, rpeaks, sampling_rate) 
@@ -77,11 +82,11 @@ def compute_hrv(rpeaks):
     return 1.0/np.diff(rpeaks)
 
 
-def detect_rpeaks(record, sampling_rate=1000):
+def detect_rpeaks(feature_array, sampling_rate=1000):
+    record = feature_array[0]
     rpeaks = ecg.hamilton_segmenter(signal=record,
                                     sampling_rate=sampling_rate)
-
-    return rpeaks['rpeaks']
+    return np.asarray([rpeaks['rpeaks']])
 
 
 def find_rpeaks(rpeaks, start, end): 
@@ -92,8 +97,10 @@ def find_rpeaks(rpeaks, start, end):
 
 
 def compute_QRS(signal, rpeaks, sampling_rate):
-    return [signal[rpeak - int(0.4*sampling_rate):rpeak + int(0.6*sampling_rate)] for rpeak in rpeaks[1:-1]]
-
+    signal = signal[0]
+    rpeaks = rpeaks[0]
+    beats = np.asarray([signal[rpeak - int(0.04*sampling_rate):rpeak + int(0.06*sampling_rate)] for rpeak in rpeaks[1:-1]])
+    return beats.T
 
 def create_heart_beat_dataset(path, name, group, save_dfile=None):
     X = load_signal(path=path, name=name, group=group) # 1 record per row

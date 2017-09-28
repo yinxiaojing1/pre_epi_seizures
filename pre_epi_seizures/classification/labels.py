@@ -2,14 +2,15 @@ import numpy as np
 
 
 def _compute_intreval(sampling_rate, windows, label_intreval):
+    # print label_intreval
     intreval = np.where(np.logical_and(label_intreval[0]*sampling_rate*60<=windows, windows<=label_intreval[1]*sampling_rate*60))[0]
     return (intreval[0], intreval[-1])
 
 def create_labels(sampling_rate, windows_list, **args):
-
+    # print windows_list
     for k in args.keys():
-        intreval = [_compute_intreval(sampling_rate, windows, args[k][0])
-                    for windows in windows_list]
+        intreval = [_compute_intreval(sampling_rate, windows, arg)
+                    for windows, arg in zip(windows_list, args[k][0])]
         args[k] = (intreval, args[k][1])
 
     return args 
