@@ -14,7 +14,7 @@ from Filtering.eksmoothing import EKSmoothing
 import numpy as np
 import time
 
-def baseline_removal(signal_arguments, sampling_rate):
+def baseline_removal(signal_arguments, sampling_rate, params):
     signal_list = signal_arguments['feature_group_to_process']
     _logger.info('Removing the baseline ...')
     feature = 'medianFIR'

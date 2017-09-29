@@ -20,7 +20,7 @@ import functools
 
 
 
-def rpeak_detection(signal_arguments, sampling_rate):
+def rpeak_detection(signal_arguments, sampling_rate, params):
     signal_list = signal_arguments['feature_group_to_process']
     print signal_list
     # stop
@@ -31,7 +31,7 @@ def rpeak_detection(signal_arguments, sampling_rate):
     return rpeaks, mdata
 
 
-def QRS_fixed_segmentation(signal_arguments, sampling_rate):
+def QRS_fixed_segmentation(signal_arguments, sampling_rate, params):
     signal_list = signal_arguments['feature_group_to_process']
     rpeaks_list = signal_arguments['rpeak_group_to_process']
     # print rpeaks_list

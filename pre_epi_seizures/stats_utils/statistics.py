@@ -112,7 +112,7 @@ def _create_win(path_to_load, signal_group_name, sampling_rate):
     len_record = get_record_dimension(feature_group)
 
     try:
-        window_str = feature_group[feature_group.index('w'):feature_group.index('msec')]
+        window_str = feature_group[feature_group.index('w')+1:]
     except Exception as e:
         print e
 
@@ -275,6 +275,8 @@ def compute_statistic(path_to_load, path_to_save, statistic_to_load,
                                             sampling_rate)
         path_name_to_save_list = feature_groups_required[k]
 
+    # print 'loaded'
+    # stop
     stat, mdata = globals()[statistic_to_load](feature_groups_extracted, labels, sampling_rate)
     # print feature_groups_extracted
 
@@ -285,9 +287,11 @@ def compute_statistic(path_to_load, path_to_save, statistic_to_load,
 
     group_to_save = group_to_save + '/'  + statistic_to_load + '_' + param_str
     delete_signal(path_to_save, [name_to_save], [group_to_save])
+    
     save_signal(path_to_save, [stat], [mdata], [name_to_save], [group_to_save])
     # print labels
-
+    # print 'save'
+    # stop
     # **************************************************************
 
 
@@ -324,16 +328,25 @@ def main():
     Qrs_fixed_dataset_name = baseline_removal_dataset_name + '/' + 'QRS_fixed_segmentation'
     # dsfsdf
     # raw = load_feature(path_to_load, raw_name, files='existent', feature_group_to_process=dataset_name)[0]
+    hrv_computation = baseline_removal_dataset_name + '/hrv_computation_w:10'
+    hrv_time_domain_features = hrv_computation + '/hrv_time_domain_features_w:10'
+    pca_qrs = Qrs_fixed_dataset_name + '/pca_beat_amp_computation_w:5'
+    
 
-
-
-    set_structure = create_set_from_disk(path_to_load, baseline_removal_dataset_name)
+    dataset_name_to_process = pca_qrs
+    set_structure = create_set_from_disk(path_to_load, dataset_name_to_process)
     # stop
     # save_structure = create_save_structure_single_feature_group([set_structure],
                                                                 # baseline_removal_dataset_name)
     # stop
+    print set_structure
+    stop
+    # stop
+    # stop
+    # print 'fjngaAsjfng'
+    # print set_structure[0]
     compute_statistic(path_to_load, path_to_save, 'histogram',
-                      group_to_save=baseline_removal_dataset_name,
+                      group_to_save=dataset_name_to_process,
                       name_to_save='all_data',
                       pre_ictal_low=10,
                       post_ictal_up=60,
@@ -343,7 +356,7 @@ def main():
 
     for signal_group_name in set_structure:
         compute_statistic(path_to_load, path_to_save, 'histogram',
-                      group_to_save=baseline_removal_dataset_name,
+                      group_to_save=dataset_name_to_process,
                       name_to_save=signal_group_name[1],
                       pre_ictal_low=10,
                       post_ictal_up=60,
@@ -351,6 +364,8 @@ def main():
                       feature_group_to_process=[signal_group_name])
 
 
+    # hists = load_signal(path_to_save, set_structure)
+    print 'DOONEE'
     stop
 
 
