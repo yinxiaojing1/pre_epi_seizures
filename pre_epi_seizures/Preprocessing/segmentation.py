@@ -6,6 +6,9 @@ import save_signal, load_signal, delete_signal
 
 from pre_epi_seizures.storage_utils.data_handlers import *
 
+# from pre_epi_seizures.Preprocessing.pre_processing\
+# import input_default_params
+
 from Filtering.eksmoothing import *
 
 from resampling import *
@@ -20,15 +23,36 @@ import functools
 
 
 
-def rpeak_detection(signal_arguments, sampling_rate, params):
+def rpeak_detection(signal_arguments, sampling_rate, win_params, add_params):
     signal_list = signal_arguments['feature_group_to_process']
-    print signal_list
-    # stop
+    # print signal_list
+    
+    signal_list = [np.asarray([signal]) for signal in signal_list]
+
+    #-----------------------------------------
+    # Default win_params (comment to override)
+    default_win_params = dict()
+    default_win_params['win'] = 'rpeaks'
+    default_win_params['sampleratebeforesegm'] = win_params['samplerate']
+    default_win_params['initbeforesegm'] = win_params['init']
+    default_win_params['finishbeforesegm'] = win_params['finish']
+    
+    #----------------------------------------
+    # Default add_params
+    default_add_params = dict()
+    default_add_params['method'] = 'hamilton'
+
+    #---------------------------------------
+    # Compute feature
+    method = default_add_params['method']
+    sampling_rate = default_win_params['sampleratebeforesegm']
     rpeaks = map(functools.partial(detect_rpeaks,
+                 method=method,
                  sampling_rate=sampling_rate), signal_list)
+
     print rpeaks
-    mdata = [''] * len(rpeaks)
-    return rpeaks, mdata
+
+    return rpeaks, default_win_params, default_add_params
 
 
 def QRS_fixed_segmentation(signal_arguments, sampling_rate, params):
@@ -82,10 +106,11 @@ def compute_hrv(rpeaks):
     return 1.0/np.diff(rpeaks)
 
 
-def detect_rpeaks(feature_array, sampling_rate=1000):
+def detect_rpeaks(feature_array, method, sampling_rate=1000):
     record = feature_array[0]
-    rpeaks = ecg.hamilton_segmenter(signal=record,
-                                    sampling_rate=sampling_rate)
+    if method == 'hamilton':
+        rpeaks = ecg.hamilton_segmenter(signal=record,
+                                        sampling_rate=sampling_rate)
     return np.asarray([rpeaks['rpeaks']])
 
 

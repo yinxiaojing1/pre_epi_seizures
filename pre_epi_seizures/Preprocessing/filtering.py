@@ -14,20 +14,39 @@ from Filtering.eksmoothing import EKSmoothing
 import numpy as np
 import time
 
-def baseline_removal(signal_arguments, sampling_rate, params):
+def baseline_removal(signal_arguments, sampling_rate,
+                     win_params, add_params):
     signal_list = signal_arguments['feature_group_to_process']
     _logger.info('Removing the baseline ...')
     feature = 'medianFIR'
     # signal = np.asmatrix(signal_list)
     # signal = np.asarray(signal_list)
-    feature_mdata = [{'fs': sampling_rate}] * len(signal_list)
-    print feature_mdata
+
+    # -------------------------------
+    # Default win params (comment to override)
+    win_params['win'] = 0.001
+    win_params['init'] = 0
+    win_params['finish'] = 4200
+    win_params['samplerate'] = 1000
+
+    # -------------------------------
+    # Default add params (comment to override)
+    add_params['filt'] = 'medianFIR'
+    add_params['init'] = 0
+    add_params['finish'] = 4200
+
+    # ------------------------------
+    # Compute feature_array_list
+    sampling_rate = win_params['samplerate']
+    filtmethod = add_params['filt']
+    # feature_mdata = [{'fs': sampling_rate}] * len(signal_list)
+    # print feature_mdata
 
     feature_signal_list = [np.asarray([create_filtered_dataset(signal, filtmethod='medianFIR',
             sampling_rate=sampling_rate)]) for signal in signal_list]
 
     print feature_signal_list
-    return feature_signal_list, feature_mdata
+    return feature_signal_list, win_params, add_params
 
 
 

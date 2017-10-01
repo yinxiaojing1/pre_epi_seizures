@@ -3,9 +3,11 @@ import numpy as np
 from resampling import *
 
 
-def hrv_computation(signal_arguments, sampling_rate, params):
+def hrv_computation(signal_arguments, sampling_rate, window_params, add_params):
     signal_list = signal_arguments['feature_group_to_process']
     rpeaks_list = signal_arguments['rpeak_group_to_process']
+    window_msec = params['window']
+
 
     print signal_list
     print rpeaks_list

@@ -34,6 +34,7 @@ def find_indexes_seizure_files(date_time_seizures, all_date_times):
     return [find_index_seizure_file(data_time_seizure, all_date_times)
             for data_time_seizure in date_time_seizures]
 
+
 def get_nr_leads(list_group_all_files):
     # retrieve datetimes from all files
     all_date_times = return_dates(list_group_all_files)
@@ -42,6 +43,7 @@ def get_nr_leads(list_group_all_files):
     nr_leads = len(list_group_all_files['signals'])/len(list(set(all_date_times)))
 
     return nr_leads
+
 
 def list_seizures_files_patient(path_to_load, patient_dict, patient_number):
     # list of all patients
@@ -282,7 +284,15 @@ def create_seizure_dataset_patient(path_to_load, path_to_save,
     return dataset_list
 
 def save_dataset(path_to_save, time_before_seizure, time_after_seizure, patient_number, dataset_list_files):
-    group_list = ['/' + str(time_before_seizure) + '_' + str(time_after_seizure) + '/raw']
+    group_list = ['/' + str(time_before_seizure) + '_' + str(time_after_seizure) + '/raw'
+                   + '_$beginwin_samplerate:1000' 
+                   + '_win:0.001'
+                   + '_init:0_finish:' + str(time_after_seizure + time_before_seizure)
+                   + '_endwin$_'
+                   + '_$beginparams_param:None'
+                   + '_endparam$_'
+                   ]
+
     for dataset_list_file in dataset_list_files:
         name_list = [str(patient_number) + '_' + seizure_record[0] for seizure_record in dataset_list_file]
         signal_list = [seizure_record[1] for seizure_record in dataset_list_file]

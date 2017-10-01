@@ -63,15 +63,69 @@ def get_names(group_name_list):
     return [group_name[1] for group_name in group_name_list]
 
 
-def parms_str(params):
-    str_params = ''
-    for k in params.keys():
-        if k == 'window':
-            str_params += '_w:' + str(params[k])
+def input_default_params(input_params_dict, **default_params_dict):
+    final_win_params = dict()
 
-        else:
-            str_params += '_'+ k + ':' + str(params[k])
+    for k in default_params_dict.keys():
+        try:
+            final_win_params[k] = input_params_dict[k]
+        except Exception as e:
+            final_win_params[k] = default_params_dict[k]
+
+    return final_win_params
+
+def get_final_params(win_input_params,
+                   feature_group_to_process, begin_str, end_str):
+    final_win_params = dict()
+    win_params_from_str = get_params_from_str(
+                            feature_group_to_process, 
+                            begin_str,
+                            end_str)
+
+    for k in win_params_from_str:
+        try:
+            final_win_params[k] = win_input_params[k]
+        except Exception as e:
+            final_win_params[k] = win_params_from_str[k]
+
+    return final_win_params
+
+
+def get_params_from_str(feature_group_to_process, begin_str, end_str):
+    params_from_str = dict()
+    # print feature_group_to_process
+    window_str_info = feature_group_to_process[
+                        feature_group_to_process.index(begin_str)+1:
+                        feature_group_to_process.index(end_str)+6]  
+    a = window_str_info.split('_')
+    a = a[1:-1]
+    for k in a:
+        try:
+            params_from_str[k.split(':')[0]] = float(k.split(':')[1])
+        except Exception as e:
+            print e
+            params_from_str[k.split(':')[0]] = k.split(':')[1]
+
+    win_params_from_str = params_from_str
+    return win_params_from_str
+
+
+def get_str_from_params(params, begin_str, end_str):
+    str_params = begin_str
+    for k in params.keys():
+        str_params += '_' + k + ':' + str(params[k])
+    str_params += end_str
     return str_params
+# def get_str_from_params(params, begin_str, end_str):
+#     for 
+
+
+# def windows_str(params):
+#     str_params += '_[window:' + str(params['window'])
+#     str_params += '-begin:' + str(params['begin'])
+#     str_params += '-endwindow]'
+
+#     return str_params
 
 def load_feature(path_to_load, feature_to_load, files='just_new_data', sampling_rate=1000, **feature_groups_required):
 
@@ -85,13 +139,24 @@ def load_feature(path_to_load, feature_to_load, files='just_new_data', sampling_
 
     # auxiliary_inputs = {k:feature_groups_required[k] for k in feature_groups_required.keys() if 'group' not in k and 'process' not in k}
 
-    params = {k:feature_groups_required[k] for k in feature_groups_required.keys() if 'group' not in k and 'process' not in k}
+    win_inputs = {k[4:]:feature_groups_required[k] for k in feature_groups_required.keys() if 'group' not in k and 'window' in k}
+    param_inputs = {k[6:]:feature_groups_required[k] for k in feature_groups_required.keys() if 'group' not in k and 'param' in k}
 
-    params_string = parms_str(params)
-    feature_group_extracted = [feature_group_extracted[0] + params_string]
-    # print params
-    # stop
-    # stop
+    # print window_inputs
+    # print param_inputs
+
+    # # stop
+    win_final = get_final_params(win_inputs,
+                             feature_group_to_process,
+                             '$beginwin', 
+                             'endwin$')
+
+    param_final = get_final_params(param_inputs,
+                             feature_group_to_process, 
+                             '$beginparam',
+                             'endparam$')
+
+
     print feature_groups_to_process
     if files=='all_new':
         names_to_save = get_names(list_group_signals(path_to_load, feature_group_to_process)['signals'])
@@ -117,7 +182,7 @@ def load_feature(path_to_load, feature_to_load, files='just_new_data', sampling_
             feature_groups_to_process[k] = [(feature_groups_to_process[k], name) for name in names_to_save]
         # print feature_groups_required
         
-        print feature_groups_to_process
+        # print feature_groups_to_process
         # stop
 
         #*****************IMPORTANT CHANGE***************************
@@ -158,12 +223,27 @@ def load_feature(path_to_load, feature_to_load, files='just_new_data', sampling_
         #     dict_to_process[k] = [feature_groups_required[k][i]]
         #*****************************************************
 
-        print dict_to_process
-        extracted_features, mdata_features = globals()[feature_to_load](dict_to_process, sampling_rate, params)
+        # print dict_to_process
+        return_structure = globals()[feature_to_load](dict_to_process,
+                                                      sampling_rate,
+                                                      win_final, param_final)
+        extracted_features = return_structure[0]
+        win_params = return_structure[1]
+        params = return_structure[2]
+        # print params
+        # print win_params
+        win_str = get_str_from_params(win_params, '_$beginwin',
+                                      'endwin$_')
+        param_str = get_str_from_params(params, '_$beginparam',
+                                        'endparam$_')
+
+        feature_group_extracted = [feature_group_extracted[0] + win_str + param_str]
+        # print feature_group_extracted
+        # stop
         # print extracted_features
         # print mdata_features
         delete_signal(path_to_load, [name], feature_group_extracted)
-        save_signal(path_to_load, extracted_features, mdata_features, [name], feature_group_extracted)
+        save_signal(path_to_load, extracted_features,[''] * len(extracted_features), [name], feature_group_extracted)
 
     # # Memory Intensive
     # extracted_features, mdata_features = globals()[feature_to_load](feature_groups_required, sampling_rate)
@@ -179,19 +259,22 @@ def main():
 
     #signal
     sampling_rate = 1000
-    time_before_seizure = 50
-    time_after_seizure = 20
-    # path_to_load = '~/Desktop/phisionet_seizures_new.h5'
-    # sampling_rate = 1000
+    time_before_seizure = 50 * 60
+    time_after_seizure = 20 * 60
     path_to_load = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new.h5'
-    # name_list = [str(time_before_seizure*60) + '_' + str(time_after_seizure*60)]
-    # group_list_raw = ['raw']
-    # group_list_baseline_removal = ['medianFIR']
-    # group_list_noise_removal = ['FIR_lowpass_40hz']
-    # group_list_esksmooth = ['esksmooth']
     dataset_name = str(
-    time_before_seizure*60) + '_' + str(time_after_seizure*60)
-    raw_name = 'raw'
+    time_before_seizure) + '_' + str(time_after_seizure)
+
+    raw_name = ['raw' + '_$beginwin_samplerate:1000' 
+                   + '_win:0.001'
+                   + '_init:0_finish:' + str(time_after_seizure + time_before_seizure)
+                   + '_endwin$_'
+                   + '_$beginparams_param:None'
+                   + '_endparam$_'
+                   ]
+    raw_name = raw_name[0]
+
+
     baseline_removal_name = 'baseline_removal'
     raw_dataset_name = dataset_name + '/' + raw_name
     baseline_removal_dataset_name = raw_dataset_name + '/' + baseline_removal_name
@@ -201,7 +284,13 @@ def main():
     # group_name_list = list_group_signals(path_to_load, group_list[0])['signals']
     # compress(path_to_load, group_name_list)
 
+    # Load existing features --------------------------------------
     # raw = load_feature(path_to_load, raw_name, files='existent', feature_group_to_process=dataset_name)[0]
+
+
+    # Extract the Features -----------------------------------------
+    rpeaks = load_feature(path_to_load, 'rpeak_detection', files='all_new', feature_group_to_process=raw_dataset_name,
+                          param_method='hamilton')
 
     # baseline_removal = load_feature(path_to_load, baseline_removal_name, files='all_new', feature_group_to_process=raw_dataset_name)
 
@@ -225,23 +314,32 @@ def main():
     # # print time_array_to_interpolate
     # interpolated = load_feature(path_to_load, 'interpolation', sampling_rate=500, files='existent', feature_group_to_process=eks_dataset_name)[0]
     # rpeaks = load_feature(path_to_load, 'rpeak_detection', files='existent', feature_group_to_process=interpolated_dataset_name)[0]
-    # hrv = load_feature(path_to_load, 'hrv_computation', files='all_new', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')[0]
-    # beat = load_feature(path_to_load, 'beat_phase_segmentation', files='existent', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')[0]
-    pca = load_feature(path_to_load, 'pca_beat_amp_computation', files='all_new', feature_group_to_process=baseline_removal_dataset_name + '/' + 'QRS_fixed_segmentation', window=5)[0]
+    # hrv = load_feature(path_to_load, 'hrv_computation',
+    #                    files='all_new',
+    #                    feature_group_to_process=interpolated_dataset_name,
+    #                    rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection',
+                       
+                       
+    # # beat = load_feature(path_to_load, 'beat_phase_segmentation', files='existent', feature_group_to_process=interpolated_dataset_name, rpeak_group_to_process=interpolated_dataset_name + '/' + 'rpeak_detection')[0]
+    # pca = load_feature(path_to_load, 'pca_beat_amp_computation',
+    #                    files='all_new',
+    #                    feature_group_to_process=baseline_removal_dataset_name + '/' + 'QRS_fixed_segmentation',
+    #                    window=baseline_removal_dataset_name + '/rpeaks',
+    #                    begin=5)[0]
 
-    # sameni = load_feature(path_to_load, 'sameni_evolution', files='all_new', feature_group_to_process=interpolated_dataset_name + '/' + 'beat_phase_segmentation')[0]
-    # rqa = load_feature(path_to_load, 'rqa_computation', files='all_new', feature_group_to_process=interpolated_dataset_name + '/' + 'QRS_fixed_segmentation')[0]
-    # stop
-    # print rqa
-    # stop
+    # # sameni = load_feature(path_to_load, 'sameni_evolution', files='all_new', feature_group_to_process=interpolated_dataset_name + '/' + 'beat_phase_segmentation')[0]
+    # # rqa = load_feature(path_to_load, 'rqa_computation', files='all_new', feature_group_to_process=interpolated_dataset_name + '/' + 'QRS_fixed_segmentation')[0]
+    # # stop
+    # # print rqa
+    # # stop
 
-    # ploting
-    # print sameni
-    # stop
-    start = 10*60
-    end = start + 10 
-    sz_nr = 0
-    signal = raw
+    # # ploting
+    # # print sameni
+    # # stop
+    # start = 10*60
+    # end = start + 10 
+    # sz_nr = 0
+    # signal = raw
     stop
     print signal
     # stop

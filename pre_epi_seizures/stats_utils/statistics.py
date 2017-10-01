@@ -112,7 +112,12 @@ def _create_win(path_to_load, signal_group_name, sampling_rate):
     len_record = get_record_dimension(feature_group)
 
     try:
-        window_str = feature_group[feature_group.index('w')+1:]
+        window_str = feature_group[feature_group.index('_window'):
+                                   feature_group.index('.')]
+        begginig_win = feature_group[feature_group.index('w'):
+                                   feature_group.index('_')]
+
+
     except Exception as e:
         print e
 
