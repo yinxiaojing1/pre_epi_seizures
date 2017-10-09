@@ -23,36 +23,20 @@ import functools
 
 
 
-def rpeak_detection(signal_arguments, sampling_rate, win_params, add_params):
+def rpeak_detection(signal_arguments, sampling_rate, win_params, add_params, win_param_to_process, param_to_process):
     signal_list = signal_arguments['feature_group_to_process']
-    # print signal_list
-    
-    signal_list = [np.asarray([signal]) for signal in signal_list]
-
-    #-----------------------------------------
-    # Default win_params (comment to override)
-    default_win_params = dict()
-    default_win_params['win'] = 'rpeaks'
-    default_win_params['sampleratebeforesegm'] = win_params['samplerate']
-    default_win_params['initbeforesegm'] = win_params['init']
-    default_win_params['finishbeforesegm'] = win_params['finish']
-    
-    #----------------------------------------
-    # Default add_params
-    default_add_params = dict()
-    default_add_params['method'] = 'hamilton'
+    # signal_list = [np.asarray([signal]) for signal in signal_list]
 
     #---------------------------------------
     # Compute feature
-    method = default_add_params['method']
-    sampling_rate = default_win_params['sampleratebeforesegm']
+    method = add_params['method']
+    sampling_rate = win_param_to_process['samplerate']
     rpeaks = map(functools.partial(detect_rpeaks,
                  method=method,
                  sampling_rate=sampling_rate), signal_list)
 
-    print rpeaks
-
-    return rpeaks, default_win_params, default_add_params
+    mdata = {'rpeaks':0}
+    return rpeaks, mdata
 
 
 def QRS_fixed_segmentation(signal_arguments, sampling_rate, params):
@@ -98,7 +82,6 @@ def compute_beat_phase(signal, rpeaks, sampling_rate):
     new_beats = [interpolate(beat, new_domain, domain) for beat, domain in zip(beats, domains)]
 
     return new_beats
-
 
 
 def compute_hrv(rpeaks):

@@ -1,9 +1,10 @@
-from pre_epi_seizures.Preprocessing.pre_processing import load_feature
+from pre_epi_seizures.Preprocessing.pre_processing import load_feature, get_params_from_str_last
 
 from pre_epi_seizures.classification.labels import create_labels
 
 from pre_epi_seizures.classification.scaling import *
 
+from pre_epi_seizures.Preprocessing.pre_processing import *
 
 from pre_epi_seizures.storage_utils.storage_utils_hdf5 import \
     load_signal, save_signal, delete_signal, list_group_signals
@@ -108,6 +109,19 @@ def _create_win(path_to_load, signal_group_name, sampling_rate):
     # Signal name
     signal_name = signal_group_name[1]
 
+    print feature_group
+
+    win_params_dict = get_params_from_str_last(feature_group,
+                                             '_$beginwin', 'endwin$_')
+
+
+    print win_params_dict
+    stop
+
+    # for k in win_params.keys():
+    #     try:
+    #         win_params[k] = float(win_params[k])
+    # stop
     # Get duration of seizure
     len_record = get_record_dimension(feature_group)
 
@@ -319,6 +333,7 @@ def main():
     # path_to_load = '~/Desktop/phisionet_seizures_new.h5'
     # sampling_rate = 1000
     path_to_load = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new.h5'
+    path_to_map= '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new_map.txt'
 
     path_to_save = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/satistic_datasets.h5'
     dataset_name = str(
@@ -336,27 +351,30 @@ def main():
     hrv_computation = baseline_removal_dataset_name + '/hrv_computation_w:10'
     hrv_time_domain_features = hrv_computation + '/hrv_time_domain_features_w:10'
     pca_qrs = Qrs_fixed_dataset_name + '/pca_beat_amp_computation_w:5'
-    
 
     dataset_name_to_process = pca_qrs
-    set_structure = create_set_from_disk(path_to_load, dataset_name_to_process)
+
+    raw_groups = get_feature_group_name_list(path_to_map,
+                                         'hrv_computation#')
+
+    set_structure = create_set_from_disk(path_to_load, raw_groups[0])
     # stop
     # save_structure = create_save_structure_single_feature_group([set_structure],
                                                                 # baseline_removal_dataset_name)
     # stop
-    print set_structure
-    stop
+    # print set_structure
+    # stop
     # stop
     # stop
     # print 'fjngaAsjfng'
     # print set_structure[0]
-    compute_statistic(path_to_load, path_to_save, 'histogram',
-                      group_to_save=dataset_name_to_process,
-                      name_to_save='all_data',
-                      pre_ictal_low=10,
-                      post_ictal_up=60,
-                      sampling_rate=1000,
-                      feature_group_to_process=set_structure)
+    # compute_statistic(path_to_load, path_to_save, 'histogram',
+    #                   group_to_save=dataset_name_to_process,
+    #                   name_to_save='all_data',
+    #                   pre_ictal_low=10,
+    #                   post_ictal_up=60,
+    #                   sampling_rate=1000,
+    #                   feature_group_to_process=set_structure)
 
 
     for signal_group_name in set_structure:

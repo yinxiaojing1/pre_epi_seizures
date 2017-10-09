@@ -6,6 +6,9 @@ from pre_epi_seizures.storage_utils.storage_utils_hdf5\
 
 from pre_epi_seizures.storage_utils.data_handlers import *
 
+# from pre_processing import \
+#         input_default_params
+
 from Filtering import medianFIR, filterIR5to20,\
     filter_signal, gaussian_fit
 
@@ -13,6 +16,9 @@ from Filtering.eksmoothing import EKSmoothing
 
 import numpy as np
 import time
+
+
+
 
 def baseline_removal(signal_arguments, sampling_rate,
                      win_params, add_params):
@@ -22,31 +28,41 @@ def baseline_removal(signal_arguments, sampling_rate,
     # signal = np.asmatrix(signal_list)
     # signal = np.asarray(signal_list)
 
-    # -------------------------------
-    # Default win params (comment to override)
-    win_params['win'] = 0.001
-    win_params['init'] = 0
-    win_params['finish'] = 4200
-    win_params['samplerate'] = 1000
+    # default_win_params = dict()
+    # default_add_params = dict()
+    # # -------------------------------
+    # # Default win params (comment to override)
+    # default_win_params['win'] = 0.001
+    # default_win_params['init'] = 0
+    # default_win_params['finish'] = 4200
+    # default_win_params['samplerate'] = 1000
 
-    # -------------------------------
-    # Default add params (comment to override)
-    add_params['filt'] = 'medianFIR'
-    add_params['init'] = 0
-    add_params['finish'] = 4200
+    # # -------------------------------
+    # # Default add params (comment to override)
+    # default_add_params['filt'] = 'medianFIR'
+    # default_add_params['init'] = 0
+    # default_add_params['finish'] = 4200
+
+    default_win_params = input_default_params(win_params,
+                            win=0.001,
+                            init=0,
+                            finish=4200,
+                            samplerate=1000)
+
+    default_add_params = input_default_params(win_params,
+                            filt='medianFIR')
+
 
     # ------------------------------
     # Compute feature_array_list
-    sampling_rate = win_params['samplerate']
-    filtmethod = add_params['filt']
-    # feature_mdata = [{'fs': sampling_rate}] * len(signal_list)
-    # print feature_mdata
+    sampling_rate = default_win_params['samplerate']
+    filtmethod = default_add_params['filt']
 
     feature_signal_list = [np.asarray([create_filtered_dataset(signal, filtmethod='medianFIR',
             sampling_rate=sampling_rate)]) for signal in signal_list]
 
-    print feature_signal_list
-    return feature_signal_list, win_params, add_params
+    # print feature_signal_list
+    return feature_signal_list, default_win_params, default_add_params
 
 
 

@@ -12,6 +12,8 @@ import numpy as np
 
 from datetime import datetime
 
+# from __future__ import print_function
+
 
 def return_dates(list_group):
     all_date_times = [datetime.strptime(
@@ -293,6 +295,17 @@ def save_dataset(path_to_save, time_before_seizure, time_after_seizure, patient_
                    + '_endparam$_'
                    ]
 
+    # Save map to .txt
+    # print 'writing'
+    group_name = group_list[0]
+    txtname = path_to_save[:-3] + '_map.txt'
+    f = open(txtname, 'w')
+    f.write(group_name[:group_name.index('raw') + 3]
+             + '#'
+             + group_name[group_name.index('raw') + 3:]
+             + '!' + '\n')  # python will convert \n to os.linesep
+    f.close()  # you can omit in most cases as the destructor will call it
+    # stop
     for dataset_list_file in dataset_list_files:
         name_list = [str(patient_number) + '_' + seizure_record[0] for seizure_record in dataset_list_file]
         signal_list = [seizure_record[1] for seizure_record in dataset_list_file]

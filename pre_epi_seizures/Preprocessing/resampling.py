@@ -55,13 +55,11 @@ def interpolate_signal(signal_array, new_sampling_rate, sampling_rate):
 def interpolate(signal_array, new_domain, domain):
 
     try:
-        print domain[-1]
-        print new_domain[-1]
 
         f = sp.interpolate.interp1d(domain, signal_array, kind='cubic')
 
         new_signal = f(new_domain)
-
+        print 'doneee'
         return new_signal
 
     except Exception as e:
