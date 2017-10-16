@@ -38,7 +38,7 @@ def hrv_computation(signal_arguments, sampling_rate, window_params, add_params, 
 
     mdata = [{'feature_legend': ['hrv']}] * len(hrv_list)
 
-    return hrv_list, mdata
+    return hrv_list, mdata, new_domains_i
 
 
 def hrv_time_features(signal_arguments, sampling_rate, window_params, add_params, win_param_to_process, param_to_process):

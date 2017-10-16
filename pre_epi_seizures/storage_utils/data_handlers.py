@@ -25,6 +25,12 @@ def get_one_signal_structure(signals_structure, group_name):
     return signals_structure[group_name]
 
 
+def get_multiple_records_group_name(signals_structure, group_name):
+    one_signal_structure = get_one_signal_structure(signals_structure, group_name)
+    records = get_multiple_records(one_signal_structure)
+    return records
+
+
 def get_mdata_dict(one_signal_structure):
     # print one_signal_structure
     return one_signal_structure['mdata']

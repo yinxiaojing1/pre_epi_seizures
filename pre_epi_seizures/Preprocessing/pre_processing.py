@@ -62,7 +62,8 @@ def extract_feature(feature, arg_list):
 
 def get_names(group_name_list):
     # print group_name_list
-    return [group_name[1] for group_name in group_name_list]
+    return [group_name[1] for group_name in group_name_list
+            if 'window' not in group_name[1]]
 
 
 def get_list_group_from_str(path_to_load, str):
@@ -146,8 +147,7 @@ def get_params_from_str_last(feature_groups_to_process, begin_str, end_str):
             params_from_str[k.split(':')[0]] = k.split(':')[1]
 
     win_params_from_str = params_from_str
-    print win_params_from_str
-    stop
+
     return win_params_from_str
 
 
@@ -159,13 +159,13 @@ def get_params_from_str(feature_group_to_process, begin_str, end_str):
     window_str_info = feature_group_to_process[
                         feature_group_to_process.index(begin_str)+1:
                         feature_group_to_process.index(end_str)+6]  
+
     print window_str_info
-    # stop
     a = window_str_info.split('_')
     a = a[1:-1]
-    print 'hello'
-    print a 
-    stop
+    # print 'hello'
+    # print a 
+    # stop
     for k in a:
         try:
             params_from_str[k.split(':')[0]] = float(k.split(':')[1])
@@ -252,8 +252,6 @@ def load_feature(path_to_load, path_to_map, feature_to_load, files='just_new', s
     # stop
 
     if feature_group_to_save[0] not in feature_groups_saved_list:
-        print 'shouldn'
-        # stop
         print 'Saving to txt'
         group_name = feature_group_to_save[0]
         txtname = path_to_load[:-3] + '_map.txt'
@@ -307,7 +305,6 @@ def load_feature(path_to_load, path_to_map, feature_to_load, files='just_new', s
     #     signal_structure = load_signal(path_to_load, feature_groups_to_process[k])
     #     feature_groups_to_process[k] = [get_multiple_records(get_one_signal_structure(signal_structure, group_name)) for group_name in feature_groups_to_process[k]]
 
-
     for i, name in enumerate(names_to_save):
         dict_to_process = {}
         for k in feature_groups_to_process.keys():
@@ -323,17 +320,24 @@ def load_feature(path_to_load, path_to_map, feature_to_load, files='just_new', s
         #*****************************************************
 
         # print dict_to_process
-        extracted_features, mdata_list = globals()[feature_to_load](dict_to_process,
+        return_object = globals()[feature_to_load](dict_to_process,
                                                       sampling_rate,
                                                       win_final, param_final,
                                                       win_param_to_process,
                                                       param_to_process)
 
+        extracted_features = return_object[0]
+        mdata_list = return_object[1]
+        window_list = return_object[2]
+
         delete_signal(path_to_load, [name], feature_group_to_save)
+        delete_signal(path_to_load, ['window_' + name], feature_group_to_save)
         save_signal(path_to_load, extracted_features,
                     mdata_list,
                     [name], feature_group_to_save)
-
+        save_signal(path_to_load, window_list,
+                    [''] * len(window_list),
+                    ['window_' + name], feature_group_to_save)
 
     # # Memory Intensive
     # extracted_features, mdata_features = globals()[feature_to_load](feature_groups_required, sampling_rate)
@@ -362,9 +366,11 @@ def main():
     # 1. Raw -----------------------------------------------------------------------------------
     raw_groups = get_feature_group_name_list(path_to_map,
                                              'raw#')
+    # print raw_groups
+    # stop
 
-    # # 2. Baseline removal and denoisings------------------------------------------------------
-    # files = 'just_new'
+    # 2. Baseline removal and denoisings------------------------------------------------------
+    # files = 'all_new'
     # feature_name = 'baseline_removal'
     # for raw_group in raw_groups:
     #     param_filt_variation = ['MedianFIR']
@@ -374,10 +380,11 @@ def main():
     #                      feature_group_to_process=raw_group,
     #                      param_filt = param_filt)
 
-    # # stop
+    # print 'stopppp'
+    # stop
 
-    # 3. Segmentation---------------------------------------------------------------------------
-    # files = 'just_new'
+    # # 3. Segmentation---------------------------------------------------------------------------
+    # files = 'all_new'
     # feature_name = 'rpeak_detection'
     # group_to_process = get_feature_group_name_list(path_to_map,
     #                                          'baseline_removal#')
@@ -389,7 +396,7 @@ def main():
     #                      feature_group_to_process=group,
     #                      param_method = param_method)
 
-    # # stop
+    # stop
 
     # 3.1 HRV computation-----------------------------------------------------------------------
     rpeaks_groups_to_process = get_feature_group_name_list(path_to_map,
@@ -398,9 +405,19 @@ def main():
     files = 'all_new'
     groups_to_process = get_feature_group_name_list(path_to_map,
                                              'baseline_removal#')
+    rpeaks_groups_to_process = [feature_group_name
+                                for feature_group_name in rpeaks_groups_to_process
+                                if 'baseline_removal' in feature_group_name]
+
+    print rpeaks_groups_to_process
+    print groups_to_process
+
+    # stop
     for groups in zip(groups_to_process, rpeaks_groups_to_process):
         win_samplerate_variation = [sampling_rate]
         for win_samplerate in win_samplerate_variation:
+            print groups[1]
+            # stop
             load_feature(path_to_load, path_to_map, feature_name,
                          files=files,
                          feature_group_to_process=groups[1],

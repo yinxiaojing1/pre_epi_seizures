@@ -22,6 +22,7 @@ import numpy as np
 
 # # def create_labels_for_feature
 
+
 def create_save_structure_single_feature_group(set_structure,
                                                feature_group):
     return (feature_group, set_structure)
@@ -29,6 +30,9 @@ def create_save_structure_single_feature_group(set_structure,
 
 def create_set_from_disk(path_to_load, feature_group):
     list_signals = list_group_signals(path_to_load, feature_group)['signals']
+    list_signals = [signal_group_name
+                    for signal_group_name in list_signals
+                    if 'window' not in signal_group_name[1]]
 
     return list_signals
 
@@ -46,9 +50,8 @@ def get_record_dimension(feature_group):
 
 
 def get_before_after(feature_group):
-    len_record_before_str = feature_group[0: feature_group.index('_')]
-    len_record_after_str = feature_group[feature_group.index('_')+1:feature_group.index('/')]
-
+    len_record_before_str = feature_group[1: feature_group.index('_')]
+    len_record_after_str = feature_group[feature_group.index('_')+1:feature_group.index('/raw')]
     return (int(len_record_before_str), int(len_record_after_str))
 
 
@@ -146,9 +149,23 @@ def _create_win(path_to_load, signal_group_name, sampling_rate):
 
     return windows
 
+def _create_win_from_disk(path_to_load, signal_group_name, sampling_rate):
+    feature_group = signal_group_name[0]
+
+    # Signal name
+    signal_name = signal_group_name[1]
+
+    # Window name
+    win_name = 'window_' + signal_name
+
+
+    win_structure = load_signal(path_to_load, [(feature_group, win_name)])
+    window = get_multiple_records_group_name(win_structure, (feature_group, win_name))
+    return window
+
 
 def create_win(path_to_load, list_signals, sampling_rate):
-    windows = [_create_win(path_to_load, signal_group_name, sampling_rate)
+    windows = [_create_win_from_disk(path_to_load, signal_group_name, sampling_rate)
                 for signal_group_name in list_signals]
     return windows
 
@@ -226,6 +243,8 @@ def create_labels_from_list(path_to_load, list_signals,
                             pre_ictal_low, post_ictal_up, sampling_rate=1000):
     windows = create_win(path_to_load, list_signals, sampling_rate)
 
+    print windows
+
     before_after_list= [get_before_after(signal_group_name[0])
                         for signal_group_name in list_signals]
 
@@ -280,6 +299,8 @@ def compute_statistic(path_to_load, path_to_save, statistic_to_load,
 
     param_str = '_preictallow:' + str(pre_ictal_low) + '_postictalup:' + str(post_ictal_up)
 
+
+
     # # create labels
     #     labels[k] = create_labels_feature(path_to_load, feature_groups_required[k],
     # #                                       feature_groups_to_load[k], sampling_rate)
@@ -308,6 +329,8 @@ def compute_statistic(path_to_load, path_to_save, statistic_to_load,
     delete_signal(path_to_save, [name_to_save], [group_to_save])
     
     save_signal(path_to_save, [stat], [mdata], [name_to_save], [group_to_save])
+
+
     # print labels
     # print 'save'
     # stop
@@ -336,6 +359,7 @@ def main():
     path_to_map= '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new_map.txt'
 
     path_to_save = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/satistic_datasets.h5'
+    path_to_map_statistic = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/satistic_datasets_map.txt'
     dataset_name = str(
     time_before_seizure*60) + '_' + str(time_after_seizure*60)
     raw_name = 'raw'
@@ -354,7 +378,7 @@ def main():
 
     dataset_name_to_process = pca_qrs
 
-    raw_groups = get_feature_group_name_list(path_to_map,
+    hrv_groups = get_feature_group_name_list(path_to_map,
                                          'hrv_computation#')
 
     set_structure = create_set_from_disk(path_to_load, raw_groups[0])
@@ -379,7 +403,7 @@ def main():
 
     for signal_group_name in set_structure:
         compute_statistic(path_to_load, path_to_save, 'histogram',
-                      group_to_save=dataset_name_to_process,
+                      group_to_save=raw_groups[0],
                       name_to_save=signal_group_name[1],
                       pre_ictal_low=10,
                       post_ictal_up=60,

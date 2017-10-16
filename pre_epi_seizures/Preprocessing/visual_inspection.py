@@ -13,4 +13,4 @@ def visual_inspection(signal, rpeaks, heart_rate, time, time_before_seizure, sta
     plt.subplot(2, 1, 2)
     plt.plot(time[rpeaks[1]:rpeaks[-1]], heart_rate)
     plt.axvline(x=time_before_seizure*60, color = 'g')
-    plt.show()
+    # plt.show()

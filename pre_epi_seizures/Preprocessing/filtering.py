@@ -20,8 +20,7 @@ import time
 
 
 
-def baseline_removal(signal_arguments, sampling_rate,
-                     win_params, add_params):
+def baseline_removal(signal_arguments, sampling_rate, window_params, add_params, win_param_to_process, param_to_process):
     signal_list = signal_arguments['feature_group_to_process']
     _logger.info('Removing the baseline ...')
     feature = 'medianFIR'
@@ -43,26 +42,33 @@ def baseline_removal(signal_arguments, sampling_rate,
     # default_add_params['init'] = 0
     # default_add_params['finish'] = 4200
 
-    default_win_params = input_default_params(win_params,
-                            win=0.001,
-                            init=0,
-                            finish=4200,
-                            samplerate=1000)
+    # default_win_params = input_default_params(win_params,
+    #                         win=0.001,
+    #                         init=0,
+    #                         finish=4200,
+    #                         samplerate=1000)
 
-    default_add_params = input_default_params(win_params,
-                            filt='medianFIR')
+    # default_add_params = input_default_params(win_params,
+    #                         filt='medianFIR')
 
 
     # ------------------------------
     # Compute feature_array_list
-    sampling_rate = default_win_params['samplerate']
-    filtmethod = default_add_params['filt']
+    sampling_rate = window_params['samplerate']
+    filtmethod = add_params['filt']
+    init = window_params['init']
+    finish = window_params['finish']
 
+    # No resampling is made --- Change needed if resampling different(check HRV code - template for resampling signals, very good)
     feature_signal_list = [np.asarray([create_filtered_dataset(signal, filtmethod='medianFIR',
             sampling_rate=sampling_rate)]) for signal in signal_list]
 
-    # print feature_signal_list
-    return feature_signal_list, default_win_params, default_add_params
+    feature_window_list = [np.asarray([np.linspace(init, finish, (finish - init) * sampling_rate)])] * len(feature_signal_list)
+
+    mdata_list = [{'feature_legend': ['baseline_removal']}] * len(feature_signal_list)
+
+    # Return the objects
+    return feature_signal_list, mdata_list, feature_window_list
 
 
 

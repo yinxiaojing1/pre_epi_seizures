@@ -35,8 +35,9 @@ def rpeak_detection(signal_arguments, sampling_rate, win_params, add_params, win
                  method=method,
                  sampling_rate=sampling_rate), signal_list)
 
-    mdata = {'rpeaks':0}
-    return rpeaks, mdata
+    window_list = rpeaks
+    mdata_list = [{'feature_legend':['rpeaks']}] * len(rpeaks)
+    return rpeaks, mdata_list, window_list
 
 
 def QRS_fixed_segmentation(signal_arguments, sampling_rate, params):

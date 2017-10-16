@@ -24,7 +24,7 @@ def get_input_and_default_params(win_params, add_params, feature_name):
         final_add_params = input_default_params(add_params,
                             filt='medianFIR')
 
-    if feature_name == 'rpeak_detector':
+    if feature_name == 'rpeak_detection':
 
         final_win_params = input_default_params(add_params,
                             win='rpeaks',
