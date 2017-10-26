@@ -85,6 +85,7 @@ def load_segmented_feature_group(segmentation_feature_group):
 
     return segmented_feature_group
 
+
 def _plot_visual_inspection_xlim_var(feature_seg, feature_window_seg, segmentation_seg):
     f1 = plt.figure()
     ax1 = f1.add_subplot(1,1,1) 
@@ -134,12 +135,13 @@ def _plot_visual_inspection(path_to_save, feature,
     for xlim in xrange(xlim_var, len(feature), xlim_var):
         x_down = xlim - xlim_var
         x_up = xlim
+        factor = (x_up/xlim_var)
         # stopp
         feature_seg = feature[x_down:x_up]
         feature_window_seg = feature_window[x_down:x_up]
 
         ind_segmentation_seg = np.where(np.logical_and(segmentation<x_up, segmentation>x_down))[0]
-        segmentation_seg = segmentation[ind_segmentation_seg] - x_down
+        segmentation_seg = segmentation[ind_segmentation_seg] - (x_down + 1)
 
         f1, ax1, feature_line, seg_line, = _plot_visual_inspection_xlim_var(feature_seg, feature_window_seg, segmentation_seg)
         ax1 = _axis_label(ax1, xlabel, ylabel)
@@ -147,7 +149,7 @@ def _plot_visual_inspection(path_to_save, feature,
         ax1 = _axis_set_grid(ax1)
         figure_directory = path_to_save
         fetch_directory(figure_directory)
-        f1.savefig(figure_directory + str(xlim), transparent=False)
+        f1.savefig(figure_directory + str(xlim / (1000)), transparent=False)
         plt.close()
 
 
@@ -157,7 +159,7 @@ def plot_visual_inspection(path_to_save, feature_group_name, feature_array,
                            segmentation_window_array,
                            feature_legend, segmentation_legend):
 
-    name_record = frature_group_name[1]
+    name_record = feature_group_name[1]
     path_to_save = path_to_save + name_record + '/'
 
     print 'here'
@@ -222,7 +224,7 @@ segmented_features_windows,\
                                                  path_to_load,
                                                  segmented_feature_group)
 
-set_feature_group_name = create_set_from_disk(segmentation_feature_group)
+set_feature_group_name = create_set_from_disk(path_to_load, segmentation_feature_group)
 
 # print 'SEGMENTED'
 # print segmented_features
@@ -232,30 +234,30 @@ set_feature_group_name = create_set_from_disk(segmentation_feature_group)
 
 
 # ---------------------- TESTING------------------------------
-sz_nr = 0
+for sz_nr in xrange(0, len(set_feature_group_name)):
 
-# feature_arrays
-feature_array = segmented_features[sz_nr]
-segmentation_array = segmentation_features[sz_nr]
+    # feature_arrays
+    feature_array = segmented_features[sz_nr]
+    segmentation_array = segmentation_features[sz_nr]
 
-feature_window_array = segmented_features_windows[sz_nr]
-segmentation_window_array = segmentation_features_windows[sz_nr]
+    feature_window_array = segmented_features_windows[sz_nr]
+    segmentation_window_array = segmentation_features_windows[sz_nr]
 
-# set_feaure_groups
-feature_group_name = set_feature_group_name[sz_nr]
+    # set_feaure_groups
+    feature_group_name = set_feature_group_name[sz_nr]
 
-# legend
-feature_legend =  segmented_features_mdata[sz_nr]['feature_legend']
-segmentation_legend =  segmentation_features_mdata[sz_nr]['feature_legend']
+    # legend
+    feature_legend =  segmented_features_mdata[sz_nr]['feature_legend']
+    segmentation_legend =  segmentation_features_mdata[sz_nr]['feature_legend']
 
-path_to_save = '/Volumes/ASSD/pre_epi_seizures/plotting_utils/teste'
+    path_to_save = '/Volumes/ASSD/pre_epi_seizures/plotting_utils/visual_inspection/'
 
-plot_visual_inspection(path_to_save, feature_group_name,
-                           feature_array,
-                           feature_window_array, segmentation_array,
-                           segmentation_window_array,
-                           feature_legend, segmentation_legend)
+    plot_visual_inspection(path_to_save, feature_group_name,
+                               feature_array,
+                               feature_window_array, segmentation_array,
+                               segmentation_window_array,
+                               feature_legend, segmentation_legend)
 
-
+    print 'Plotted seizure nr: ' + str(sz_nr)
 
 stop
