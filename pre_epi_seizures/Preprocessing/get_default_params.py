@@ -45,7 +45,7 @@ def get_input_and_default_params(win_params, add_params, feature_name):
                             method='hamilton',
                             resampling='spline')
 
-    if feature_name == 'hrv_features':
+    if feature_name == 'hrv_time_features':
         print 'hrv_features'
         final_win_params = input_default_params(win_params,
                             win=3*60*1000,

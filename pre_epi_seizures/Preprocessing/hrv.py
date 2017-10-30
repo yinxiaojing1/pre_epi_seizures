@@ -6,15 +6,8 @@ from resampling import *
 def hrv_computation(signal_arguments, sampling_rate, window_params, add_params, win_param_to_process, param_to_process):
     signal_list = signal_arguments['feature_group_to_process']
     rpeaks_list = signal_arguments['feature_group_to_process']
-    # window_msec = params['window']
 
-
-    # print signal_list
-    # print rpeaks_list
-
-    # stop
     hrv_list = map(compute_hrv, rpeaks_list[0])
-    # print hrv_list[1]
 
     # resampling 
     domains = [rpeak[1:] for rpeak in rpeaks_list[0]]
@@ -43,23 +36,26 @@ def hrv_computation(signal_arguments, sampling_rate, window_params, add_params, 
 
 def hrv_time_features(signal_arguments, sampling_rate, window_params, add_params, win_param_to_process, param_to_process):
 
-# hrv_mean_list = [compute_mean_NN(10, hrv_signal, sampling_rate) for hrv_signal in hrv_list]
+    hrv_signal_list = signal_arguments['feature_group_to_process']
+    window = window_params['win']
 
-    # hrv_sd_list = [compute_SD_NN(10, hrv_signal, sampling_rate) for hrv_signal in hrv_list]
-
-
+    hrv_time_features = [_hrv_time_features(window, hrv_signal, sampling_rate) for hrv_signal in hrv_signal_list]
     mdata = [{'hrv_time_series': 0}] * len(hrv_list)
 
+    stop
     return hrv_list, mdata
 
-def hrv_time_features(window, hrv_signal_array, sampling_rate):
+def _hrv_time_features(window, hrv_signal_array, sampling_rate):
+    print hrv_signal_array
     hrv_signal = hrv_signal_array[0]
+    print hrv_signal
     mean_NN = compute_mean_NN(window, hrv_signal, sampling_rate)
     SD_NN = compute_SD_NN(window, hrv_signal, sampling_rate)
+    p_NN50 = compute_pNN50(window, hrv_signal, sampling_rate)
     print mean_NN
     print SD_NN
-
-    # stop
+    print p_NN50
+    stop
     return np.asarray([mean_NN, SD_NN])
 
 
@@ -93,6 +89,17 @@ def compute_SD_NN(window, hrv_signal, sampling_rate):
     return [np.std(hrv_signal[i*n_samples:(i*n_samples) + n_samples]) for i in xrange(len(hrv_signal)/n_samples)]
 
 
+def compute_pNN50(window, hrv_signal, sampling_rate):
+    n_samples = window * sampling_rate
+    return [_compute_pNN50(hrv_signal[i*n_samples:(i*n_samples) + n_samples]) for i in xrange(len(hrv_signal)/n_samples)]
+
+
+def _compute_pNN50(segment):
+    print 'segment'
+    print segment
+    p_NN50 = len(np.where(segment == 1/(60*0.05)))
+    return p_NN50
+
 
 def hrv_time_domain_features(signal_arguments, sampling_rate, params):
     signal_list = signal_arguments['feature_group_to_process']
@@ -106,4 +113,3 @@ def hrv_time_domain_features(signal_arguments, sampling_rate, params):
     mdata_list = [{'fs':sampling_rate}] * len(feature_list)
 
     return feature_list, mdata_list
-
