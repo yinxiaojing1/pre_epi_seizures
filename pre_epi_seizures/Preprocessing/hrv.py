@@ -11,7 +11,7 @@ def hrv_computation(signal_arguments, sampling_rate, window_params, add_params, 
 
     # resampling 
     domains = [rpeak[1:] for rpeak in rpeaks_list[0]]
-    new_domains_i = [np.arange(rpeak[1], rpeak[-1] + 1, 1)] * len(rpeaks_list)
+    new_domains_i = [np.arsange(rpeak[1], rpeak[-1] + 1, 1)] * len(rpeaks_list)
     # new_domains = [np.linspace(rpeak[1], rpeak[-1], len(signal[rpeak[1]:rpeak[-1]+1])) for signal in signal_list[0]]
     
     # print 'here'
@@ -39,24 +39,49 @@ def hrv_time_features(signal_arguments, sampling_rate, window_params, add_params
     hrv_signal_list = signal_arguments['feature_group_to_process']
     window = window_params['win']
 
-    hrv_time_features = [_hrv_time_features(window, hrv_signal, sampling_rate) for hrv_signal in hrv_signal_list]
-    mdata = [{'hrv_time_series': 0}] * len(hrv_list)
+    sampling_rate = window_params['samplerate']
+    # stop
+    n_samples = window * sampling_rate
 
-    stop
-    return hrv_list, mdata
+    finish = window_params['finish']
 
-def _hrv_time_features(window, hrv_signal_array, sampling_rate):
-    print hrv_signal_array
-    hrv_signal = hrv_signal_array[0]
-    print hrv_signal
-    mean_NN = compute_mean_NN(window, hrv_signal, sampling_rate)
-    SD_NN = compute_SD_NN(window, hrv_signal, sampling_rate)
-    p_NN50 = compute_pNN50(window, hrv_signal, sampling_rate)
-    print mean_NN
-    print SD_NN
-    print p_NN50
-    stop
-    return np.asarray([mean_NN, SD_NN])
+    window = np.arange(n_samples, finish * sampling_rate, n_samples)
+    windows_list = [window] * len(hrv_signal_list)
+
+    split_list = fixed_window_split(hrv_signal_list, windows_list)
+    # print split
+    # print hrv_time_features
+
+    hrv_time_features = map(_hrv_time_features, split_list)
+    mdata = [{'feature_legend': ['mean_NN', 'SD_NN', 'p_NN50']}] * len(hrv_time_features)
+
+
+    return hrv_time_features, mdata, windows_list
+
+
+def fixed_window_split(feature_list, windows_list):
+    map_arg = zip(feature_list, windows_list)
+    return map(_fixed_window_split, map_arg)
+
+
+def _fixed_window_split(feature_array_window_tuple):
+    return np.split(feature_array_window_tuple[0], feature_array_window_tuple[1], axis=1)[0:-1]
+# def _split(feature, n_samples):
+#     win = np.arange(0, len(feature), n_samples)
+#     split = np.split(hrv_signal_list[0][0], win[1:])
+#     return split
+
+
+def _hrv_time_features(hrv_split_array):
+    print hrv_split_array
+    hrv_feature = [hrv[0] for hrv in hrv_split_array]
+
+    print hrv_feature
+
+    mean_NN = map(compute_mean_NN, hrv_feature)
+    SD_NN = map(compute_SD_NN, hrv_feature)
+    p_NN50 = map(compute_pNN50, hrv_feature)
+    return np.asarray([mean_NN, SD_NN, p_NN50])
 
 
 def rri_corrected_computation(rpeaks, criterion='Malik'):
@@ -77,27 +102,25 @@ def compute_hrv(rpeaks):
     return 1.0*60*1000/np.diff(rpeaks)
 
 
-def compute_mean_NN(window, hrv_signal, sampling_rate):
+def compute_mean_NN(hrv_signal):
+    return np.mean(hrv_signal)
+    # return [np.mean(hrv_signal[i*n_samples:(i*n_samples) + n_samples]) for i in xrange(len(hrv_signal)/n_samples)]
+
+
+def compute_SD_NN(hrv_signal):
     # hrv_signal = hrv_signal_array[0]
-    n_samples = window * sampling_rate
-    return [np.mean(hrv_signal[i*n_samples:(i*n_samples) + n_samples]) for i in xrange(len(hrv_signal)/n_samples)]
+    return np.std(hrv_signal)
 
 
-def compute_SD_NN(window, hrv_signal, sampling_rate):
-    n_samples = window * sampling_rate
-    # hrv_signal = hrv_signal_array[0]
-    return [np.std(hrv_signal[i*n_samples:(i*n_samples) + n_samples]) for i in xrange(len(hrv_signal)/n_samples)]
+
+# def compute_pNN50(n_samples, hrv_signal, sampling_rate):
+#     return [_compute_pNN50(hrv_signal[i*n_samples:(i*n_samples) + n_samples]) for i in xrange(len(hrv_signal)/n_samples)]
 
 
-def compute_pNN50(window, hrv_signal, sampling_rate):
-    n_samples = window * sampling_rate
-    return [_compute_pNN50(hrv_signal[i*n_samples:(i*n_samples) + n_samples]) for i in xrange(len(hrv_signal)/n_samples)]
-
-
-def _compute_pNN50(segment):
-    print 'segment'
-    print segment
-    p_NN50 = len(np.where(segment == 1/(60*0.05)))
+def compute_pNN50(hrv_signal):
+    # print 'hrv_signal'
+    # print hrv_signal
+    p_NN50 = len(np.where(hrv_signal > 1/(60 * 0.05))[0])
     return p_NN50
 
 

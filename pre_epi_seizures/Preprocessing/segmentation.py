@@ -40,39 +40,48 @@ def rpeak_detection(signal_arguments, sampling_rate, win_params, add_params, win
     return rpeaks, mdata_list, window_list
 
 
-def QRS_fixed_segmentation(signal_arguments, sampling_rate, params):
-    signal_list = signal_arguments['feature_group_to_process']
-    rpeaks_list = signal_arguments['rpeak_group_to_process']
+def QRS_fixed_segmentation(signal_arguments,
+                           win_params, add_params,
+                           win_param_to_process, param_to_process):
+    #CHANGE URGENTLY*************************************************************
+    signal_list = signal_arguments['rpeak_group_to_process']
+    rpeaks_list = signal_arguments['feature_group_to_process']
     # print rpeaks_list
 
+    # stop
     # print signal_list
     # print rpeaks_list
+    sampling_rate = win_params['samplerate']
 
     beats = [compute_QRS(signal, rpeaks, sampling_rate) 
         for signal, rpeaks in zip(signal_list, rpeaks_list)]
 
-    print 'done'
-    mdata = [''] * len(rpeaks)
-    return beats, mdata
+    domains = [rpeaks[0][1:-1] for rpeaks in rpeaks_list]
+    mdata = [''] * len(rpeaks_list)
+    return beats, mdata, domains
 
 
-def beat_phase_segmentation(signal_arguments, sampling_rate):
+def beat_phase_segmentation(signal_arguments,
+                           win_params, add_params,
+                           win_param_to_process, param_to_process):
     print 'fdkfjsadkfjla'
     signal_list = signal_arguments['feature_group_to_process']
     rpeaks_list = signal_arguments['rpeak_group_to_process']
+    sampling_rate = win_params['samplerate']
+
 
     beats = [compute_beat_phase(signal, rpeaks, sampling_rate) for signal, rpeaks in zip(signal_list, rpeaks_list)]
-
-    mdata = ['']*len(beats)
-
-
+    domains = rpeaks_list
+    mdata = [''] * len(rpeaks_list)
     # the signals are saved in reverse order since 
     # it isn't possible to save them in h5py datasets
-    return beats, mdata
+    return beats, mdata, domains
 
 
 def compute_beat_phase(signal, rpeaks, sampling_rate):
-
+    signal = signal[0]
+    rpeaks = rpeaks[0]
+    # stop
     phase = get_phase(signal, rpeaks)
     idx_up = np.where(abs(np.diff(phase)) > 6)[0]
 
@@ -82,7 +91,7 @@ def compute_beat_phase(signal, rpeaks, sampling_rate):
     new_domain = np.linspace(-np.pi, np.pi, 1000, endpoint=True)
     new_beats = [interpolate(beat, new_domain, domain) for beat, domain in zip(beats, domains)]
 
-    return new_beats
+    return np.array(new_beats).T
 
 
 def compute_hrv(rpeaks):

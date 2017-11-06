@@ -61,7 +61,7 @@ def extract_feature(feature, arg_list):
 
 
 def get_names(group_name_list):
-    # print group_name_list
+    print group_name_list
     return [group_name[1] for group_name in group_name_list
             if 'window' not in group_name[1]]
 
@@ -252,6 +252,10 @@ def load_feature(path_to_load, path_to_map, feature_to_load,
 
     # stop
 
+    print feature_group_to_save
+
+    # stop
+
     if feature_group_to_save[0] not in feature_groups_saved_list:
         print 'Saving to txt'
         group_name = feature_group_to_save[0]
@@ -281,6 +285,7 @@ def load_feature(path_to_load, path_to_map, feature_to_load,
 
     # print feature_groups_to_process
     if files=='all_new':
+        print feature_groups_to_process
         names_to_save = get_names(list_group_signals(path_to_load, feature_group_to_process)['signals'])
         for k in feature_groups_to_process.keys():
             feature_groups_to_process[k] = list_group_signals(path_to_load, feature_groups_to_process[k])['signals']
@@ -322,7 +327,6 @@ def load_feature(path_to_load, path_to_map, feature_to_load,
 
         # print dict_to_process
         return_object = globals()[feature_to_load](dict_to_process,
-                                                      sampling_rate,
                                                       win_final, param_final,
                                                       win_param_to_process,
                                                       param_to_process)
@@ -366,6 +370,7 @@ def main():
     # 1. Raw -----------------------------------------------------------------------------------
     raw_groups = get_feature_group_name_list(path_to_map,
                                              'raw#')
+    files = 'all_new'
     # print raw_groups
     # stop
 
@@ -419,47 +424,120 @@ def main():
     #                      feature_group_to_process=groups[1],
     #                      win_samplerate=win_samplerate)
 
-    # stop
+    # # stop
+    # groups_to_process = get_feature_group_name_list(path_to_map,
+    #                                           'hrv_computation#')
+    # feature_name = 'hrv_time_features'
+    # # 3.1.1 HRV features
+    # files = 'all_new'
+    # for group in groups_to_process:
+    #     win_win_variation = [2 * 60]
+    #     for win_win in win_win_variation:
+    #         load_feature(path_to_load, path_to_map,
+    #                      feature_name,
+    #                      files=files,
+    #                      feature_group_to_process=group)
+
+    # # print 'STOP!!!!!!'
+    # # stop
+
+    # rpeaks_groups_to_process = get_feature_group_name_list(path_to_map,
+    #                                          'rpeak_detection#')
+    # feature_name = 'QRS_fixed_segmentation'
+    # files = 'all_new'
+    # groups_to_process = get_feature_group_name_list(path_to_map,
+    #                                          'baseline_removal#')
+    # rpeaks_groups_to_process = [feature_group_name
+    #                             for feature_group_name in rpeaks_groups_to_process
+    #                             if 'baseline_removal' in feature_group_name]
+
+    # for groups in zip(groups_to_process, rpeaks_groups_to_process):
+    #     win_samplerate_variation = [sampling_rate]
+    #     for win_samplerate in win_samplerate_variation:
+    #         # stop
+    #         load_feature(path_to_load, path_to_map, feature_name,
+    #                      files=files,
+    #                      feature_group_to_process=groups[1],
+    #                      rpeak_group_to_process=groups[0],
+    #                      win_samplerate=win_samplerate)
+
+
+    # # # STOP
+
+    rpeaks_groups_to_process = get_feature_group_name_list(path_to_map,
+                                             'rpeak_detection#')
+    # feature_name = 'beat_phase_segmentation'
+    # files = 'all_new'
+    # groups_to_process = get_feature_group_name_list(path_to_map,
+    #                                          'baseline_removal#')
+    # rpeaks_groups_to_process = [feature_group_name
+    #                             for feature_group_name in rpeaks_groups_to_process
+    #                             if 'baseline_removal' in feature_group_name]
+
+    # for groups in zip(groups_to_process, rpeaks_groups_to_process):
+    #     win_samplerate_variation = [sampling_rate]
+    #     for win_samplerate in win_samplerate_variation:
+    #         # stop
+    #         load_feature(path_to_load, path_to_map, feature_name,
+    #                      files=files,
+    #                      rpeak_group_to_process=groups[1],
+    #                      feature_group_to_process=groups[0],
+    #                      win_samplerate=win_samplerate)
+
+
+    # STOP
+
+    # groups_to_process = get_feature_group_name_list(path_to_map,
+    #                                          'QRS_fixed_segmentation#')
+    # print groups_to_process
+    # feature_name = 'pca_beat_amp_computation'
+    # for groups in zip(groups_to_process, rpeaks_groups_to_process):
+    #     nr_comp_variation = [5]
+    #     for nr_comp in nr_comp_variation:
+    #         # stop
+    #         load_feature(path_to_load, path_to_map, feature_name,
+    #                      files=files,
+    #                      feature_group_to_process=groups[1],
+    #                      rpeak_group_to_process=groups[0],
+    #                      nr_comp = nr_comp_variation)
+
+
     groups_to_process = get_feature_group_name_list(path_to_map,
-                                              'hrv_computation#')
-    feature_name = 'hrv_time_features'
-    # 3.1.1 HRV features
-    files = 'all_new'
-    for group in groups_to_process:
-        win_win_variation = [2 * 60]
-        for win_win in win_win_variation:
-            load_feature(path_to_load, path_to_map,
-                         feature_name,
+                                             'QRS_fixed_segmentation#')
+    print groups_to_process
+    feature_name = 'rqa_computation'
+    for groups in zip(groups_to_process, rpeaks_groups_to_process):
+        nr_comp_variation = [5]
+        for nr_comp in nr_comp_variation:
+            # stop
+            load_feature(path_to_load, path_to_map, feature_name,
                          files=files,
-                         feature_group_to_process=group)
+                         feature_group_to_process=groups[1],
+                         rpeak_group_to_process=groups[0],
+                         nr_comp = nr_comp_variation)
 
-    print 'STOP!!!!!!'
-    stop
-
-
-
-    # 3.2.1 Fixed_window beat extraction
-    files = 'all_new'
-    for baseline_removal_group in baseline_removal_groups:
-        param_filt_variation = ['hamilton']
-        for param_filt in param_filt_variation:
-            load_feature(path_to_load, baseline_removal_name,
-                         files=files,
-                         feature_group_to_process=raw_dataset_name,
-                         param_filt = 'hamilton')
+    # # 3.2.1 F beat extraction
+    # files = 'all_new'
+    # for baseline_removal_group in baseline_removal_groups:
+    #     param_filt_variation = ['hamilton']
+    #     for param_filt in param_filt_variation:
+    #         load_feature(path_to_load, baseline_removal_name,
+    #                      files=files,
+    #                      feature_group_to_process=raw_dataset_name,
+    #                      param_filt = 'hamilton')
 
 
-    # 3.2.2 phasemapped-window segmentation
-    files = 'all_new'
-    for baseline_removal_group in baseline_removal_groups:
-        param_filt_variation = ['hamilton']
-        for param_filt in param_filt_variation:
-            load_feature(path_to_load, baseline_removal_name,
-                         files=files,
-                         feature_group_to_process=raw_dataset_name,
-                         param_filt = 'hamilton')
+    # # 3.2.2 phasemapped-window segmentation
+    # files = 'all_new'
+    # for baseline_removal_group in baseline_removal_groups:
+    #     param_filt_variation = ['hamilton']
+    #     for param_filt in param_filt_variation:
+    #         load_feature(path_to_load, baseline_removal_name,
+    #                      files=files,
+    #                      feature_group_to_process=raw_dataset_name,
+    #                      param_filt = 'hamilton')
 
-    # 3.2.1 pha
+    # # 3.2.1 pha
 
 
 
