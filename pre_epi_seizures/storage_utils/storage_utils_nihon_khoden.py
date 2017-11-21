@@ -117,6 +117,14 @@ def find_crysis(annotations):
     return annotations[0][crysis_index]
 
 
+
+def find_baseline(annotations):
+    name_annotations = annotations[2]
+    print annotations
+    crysis_index =  [i for i,item in enumerate(name_annotations) if ('CRISE' or 'Remote' or 'MARK ON') in item]
+    return annotations[0][crysis_index]
+
+
 def get_annotations(edf_file):
     annotations = edf_file.readAnnotations()
     return annotations

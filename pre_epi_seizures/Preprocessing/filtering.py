@@ -20,7 +20,7 @@ import time
 
 
 
-def baseline_removal(signal_arguments, sampling_rate, window_params, add_params, win_param_to_process, param_to_process):
+def baseline_removal(signal_arguments, window_params, add_params, win_param_to_process, param_to_process):
     signal_list = signal_arguments['feature_group_to_process']
     _logger.info('Removing the baseline ...')
     feature = 'medianFIR'
@@ -51,7 +51,9 @@ def baseline_removal(signal_arguments, sampling_rate, window_params, add_params,
     # default_add_params = input_default_params(win_params,
     #                         filt='medianFIR')
 
+    print signal_list
 
+    # stop
     # ------------------------------
     # Compute feature_array_list
     sampling_rate = window_params['samplerate']
@@ -60,7 +62,7 @@ def baseline_removal(signal_arguments, sampling_rate, window_params, add_params,
     finish = window_params['finish']
 
     # No resampling is made --- Change needed if resampling different(check HRV code - template for resampling signals, very good)
-    feature_signal_list = [np.asarray([create_filtered_dataset(signal, filtmethod='medianFIR',
+    feature_signal_list = [np.asarray([create_filtered_dataset(signal[0], filtmethod='medianFIR',
             sampling_rate=sampling_rate)]) for signal in signal_list]
 
     feature_window_list = [np.asarray([np.linspace(init, finish, (finish - init) * sampling_rate)])] * len(feature_signal_list)
@@ -111,8 +113,15 @@ def create_filtered_dataset(signal, filtmethod,
         print np.shape(signal)
         print type(signal)
         print signal
+        # signal = signal[0:1000]
+        # print signal
+
+        # stop
+        # stop
         ti = time.time()
         X_filt = globals()[filtmethod](signal, fs=1000)
+
+
         tf = time.time() - ti
         print tf, 
         print 'seconds'

@@ -1,7 +1,7 @@
 import numpy as np
 from numba import jit, njit
 
-from scipy_numba.spatial.distance import squareform
+# from scipy_numba.spatial.distance import squareform
 
 from scipy.spatial.distance import squareform
 # from MyML.utils.sparse import EAC_CSR

@@ -48,7 +48,7 @@ def get_input_and_default_params(win_params, add_params, feature_name):
     if feature_name == 'hrv_time_features':
         print 'hrv_features'
         final_win_params = input_default_params(win_params,
-                            win=3*60,
+                            win=2*60,
                             init=0,
                             finish=4200,
                             samplerate=1000)
@@ -85,6 +85,7 @@ def get_input_and_default_params(win_params, add_params, feature_name):
 
         final_add_params = input_default_params(add_params,
                             nr_comp=5)
+
 
     if feature_name == 'rqa_computation':
         final_win_params = input_default_params(win_params,

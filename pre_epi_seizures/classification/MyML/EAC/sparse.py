@@ -4,7 +4,7 @@ from numba import jit, njit
 from scipy.sparse import csr_matrix
 
 # from MyML.helper.scan import exprefixsumNumbaSingle as ex_prefix_sum
-from MyML.helper.scan import exprefixsumNumbaSingle as ex_prefix_sum
+from pre_epi_seizures.MyML.helper.scan import exprefixsumNumbaSingle as ex_prefix_sum
 
 #from MyML.cluster.linkage import binary_search, binary_search_interval
 

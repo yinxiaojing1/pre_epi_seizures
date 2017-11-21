@@ -1,6 +1,68 @@
 import numpy as np
 
 
+# Custom labels structure ----------------------------------------------------------
+
+
+
+# BASE ------------------------------------------------------------------------------
+
+def change_label_record(feature_record_window,
+                        label_record, time_intreval,
+                        label_number, sampling_rate):
+    begin = time_intreval[0] * sampling_rate
+    end = time_intreval[1] * sampling_rate
+    samples =  np.where(
+                np.logical_and(
+                    feature_record_window >= begin,
+                    feature_record_window <= end ))[0]
+    label_record[samples] = label_number
+    return label_record
+
+
+def _create_label_from_feature_record(feature_record_window,
+                                      label_record,
+                                      time_intreval_list,
+                                      label_number,
+                                      sampling_rate):
+
+    for time_intreval in time_intreval_list:
+        label_record = change_label_record(feature_record_window,
+                                           label_record,
+                                           time_intreval,
+                                           label_number,
+                                           sampling_rate)
+
+    return label_record
+
+
+
+def create_label_from_feature_record(feature_record,
+                                     feature_record_window,
+                                     class_structure,
+                                     sampling_rate):
+
+    # Initialize labels to -1
+    label_record = -1 * np.ones(len(feature_record[0]))
+
+
+    # Loop to reach final label array
+    for k in class_structure.keys():
+        class_item = class_structure[k]
+        label_number = class_item[0]
+        time_intreval_list = class_item[1]
+        label_record = _create_label_from_feature_record(
+                                      feature_record_window,
+                                      label_record,
+                                      time_intreval_list,
+                                      label_number,
+                                      sampling_rate)
+
+    return label_record
+
+
+
+# ****************************** DUMP********************************************
 def _compute_intreval(sampling_rate, windows, label_intreval):
     # print label_intreval
     intreval = np.where(np.logical_and(label_intreval[0]*sampling_rate*60<=windows, windows<=label_intreval[1]*sampling_rate*60))[0]
@@ -14,6 +76,8 @@ def create_labels(sampling_rate, windows_list, **args):
         args[k] = (intreval, args[k][1])
 
     return args 
+
+
 # def create_labels(sampling_rate, t_inter_ictal, t_ictal, time_before_seizure, time_after_seizure):
 
 #     sampling_rate = 1000

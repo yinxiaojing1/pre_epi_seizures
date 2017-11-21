@@ -23,14 +23,20 @@ import functools
 
 
 
-def rpeak_detection(signal_arguments, sampling_rate, win_params, add_params, win_param_to_process, param_to_process):
+def rpeak_detection(signal_arguments, win_params, add_params, win_param_to_process, param_to_process):
     signal_list = signal_arguments['feature_group_to_process']
     # signal_list = [np.asarray([signal]) for signal in signal_list]
 
-    #---------------------------------------
+    # print signal_list
+
+    # stop
+    # #---------------------------------------
     # Compute feature
     method = add_params['method']
     sampling_rate = win_param_to_process['samplerate']
+
+    # print sampling_rate
+
     rpeaks = map(functools.partial(detect_rpeaks,
                  method=method,
                  sampling_rate=sampling_rate), signal_list)
@@ -48,6 +54,9 @@ def QRS_fixed_segmentation(signal_arguments,
     rpeaks_list = signal_arguments['feature_group_to_process']
     # print rpeaks_list
 
+    # print signal_list
+
+    # stop
     # stop
     # print signal_list
     # print rpeaks_list
@@ -108,6 +117,8 @@ def detect_rpeaks(feature_array, method, sampling_rate=1000):
 
 
 def find_rpeaks(rpeaks, start, end): 
+    print rpeaks
+    stop
     samples = np.arange(start, end, 1)
     goodvalues = samples
     ix = np.in1d(rpeaks.ravel(), goodvalues).reshape(rpeaks.shape)

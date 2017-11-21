@@ -25,6 +25,7 @@ def __plot_full_time(feature, feature_window):
     f1 = plt.figure()
     ax1 = f1.add_subplot(1,1,1)
     l1 = ax1.plot(feature_window, feature)
+    l1 = ax1.axvline(50*60*1000, color='k', linestyle='--')
     return f1
 
 
@@ -40,6 +41,7 @@ def _save_fig(figure_array, directory, feature_names, seizure_name):
     for figure, feature_name in zip(figure_array, feature_names)]
 
     print 'DOOOOOOOOOOOONNNNNNNNNNNNNEEEEEEEEEEEEEEEEE'
+
 
 def plot_full_time(path_to_save, feature_group,
                    feature_names, feature_array_list,
@@ -70,6 +72,7 @@ def plot_all_seizures(path_to_load, path_to_save, feature_group):
     set_feature_group_name = create_set_from_disk(path_to_load, feature_group)
     feature_names = feature_mdata[0]['feature_legend']
 
+
     plot_full_time(path_to_save, feature_group,
                    feature_names, feature_array_list,
                    feature_window_list, set_feature_group_name)
@@ -81,15 +84,16 @@ sns.set()
 
 path_to_load = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new.h5'
 path_to_map= '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new_map.txt'
-path_to_save = '/Volumes/ASSD/pre_epi_seizures/plotting_utils/teste/'
+path_to_save = '/Volumes/ASSD/pre_epi_seizures/plotting_utils/hrv_features/'
 
-feature_group_name = 'hrv_time_features'
+feature_group = 'hrv_time_features'
+
 
 
 feature_groups = get_feature_group_name_list(path_to_map,
-                                             feature_group_name + '#')
+                                             feature_group+ '#')
 
-
+print feature_groups
 # stop
 for feature_group in feature_groups:
     plot_all_seizures(path_to_load, path_to_save, feature_group)
