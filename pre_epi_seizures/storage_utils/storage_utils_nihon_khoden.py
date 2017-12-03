@@ -171,4 +171,4 @@ def fetch_path_list(*args):
     return ['/Volumes/ASSD/pre_epi_seizures/' + 'PATIENT' + str(arg) + '/' for arg in args]
 
 
-converter(12)
+converter(4)

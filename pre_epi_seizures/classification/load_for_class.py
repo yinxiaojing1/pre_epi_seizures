@@ -108,6 +108,8 @@ def load_feature_window_from_input_list(path_to_load, feature_group_name_record_
         _logger.debug(e)
 
 
+
+
 def get_patient_feature_records(path_to_load,
                                 feature_name,
                                 patient_nr):
@@ -120,6 +122,27 @@ def get_patient_feature_records(path_to_load,
     list_patient = [group_name
                     for group_name in list_all
                     if group_name[1][0] == str(patient_nr)]
+
+# 
+    return list_patient
+
+
+def get_patient_feature_lead_records(path_to_load,
+                                feature_name,
+                                patient_nr, 
+                                lead_name):
+
+    # Select the baseline records from the input patient number
+    list_all = list_group_signals(path_to_load,
+                                  feature_name)['signals']
+
+
+
+    list_patient = [group_name
+                    for group_name in list_all
+                    if group_name[1][0] == str(patient_nr)
+                    and lead_name in group_name[1]]
+
 
 # 
     return list_patient

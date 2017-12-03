@@ -70,25 +70,6 @@ def analyze_leave_one_out_performance(performance):
     return dict(zip(parameters, best))
 
 
-def create_dataframe_baseline_seizure(baseline_struct, seizure_struct):
-
-    seizure_dataframe = create_training(seizure_struct[0],
-                                              seizure_struct[1],
-                                              seizure_struct[2],
-                                              seizure_struct[3])
-
-    seizure_dataframe = seizure_dataframe\
-                            .loc[seizure_dataframe['labels'] != -1]
-
-    baseline_dataframe = create_training(baseline_struct[0],
-                                          baseline_struct[1],
-                                          baseline_struct[2],
-                                          baseline_struct[3])
-
-    dataframe = pd.concat((seizure_dataframe, baseline_dataframe))
-
-    return dataframe
-
 
 def create_baseline_seizure_labels(pre_seizure_window_intrevals,
                                     baseline_data_struct,

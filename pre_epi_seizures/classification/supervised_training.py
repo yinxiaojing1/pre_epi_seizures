@@ -4,7 +4,7 @@ import pandas as pd
 
 
 # *********** NAIVE ++ CAREFUL: no particularites of data ******************************
-def _create_trainig(data_record, feature_name, data_record_window,
+def _create_training(i, data_record, feature_name, data_record_window,
                     label_record):
 
     # print ''
@@ -19,11 +19,15 @@ def _create_trainig(data_record, feature_name, data_record_window,
     # print data_record_window
     # print label_record
     # stop
-    training_data = pd.DataFrame(data_record.T, columns=feature_name['feature_legend'])
-
+    # print data_record
+    print i
+    training_data = pd.DataFrame(data_record.T,  columns=feature_name['feature_legend'])
+    # print training_data
+    # stop
     training_data['sample_domain'] = data_record_window
 
     training_data['labels'] = label_record
+    training_data['group'] = i
 
     # stop
 
@@ -39,10 +43,11 @@ def create_training(data_record_list, feature_names, data_record_window_list,
 
     # stop
 
-    training_data = pd.concat([_create_trainig(data_record, feature_name,
+    training_data = pd.concat([_create_training(i, data_record, feature_name,
                                                data_record_window, label_record)
-                              for data_record, feature_name, data_record_window, label_record,\
-                              in zip(data_record_list, feature_names, data_record_window_list,
+                              for i, data_record, feature_name, data_record_window, label_record,\
+                              in zip(range(0, len(data_record_list)),
+                                     data_record_list, feature_names, data_record_window_list,
                                      label_record_list)])
 
     return training_data

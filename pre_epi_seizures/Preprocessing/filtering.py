@@ -62,7 +62,7 @@ def baseline_removal(signal_arguments, window_params, add_params, win_param_to_p
     finish = window_params['finish']
 
     # No resampling is made --- Change needed if resampling different(check HRV code - template for resampling signals, very good)
-    feature_signal_list = [np.asarray([create_filtered_dataset(signal[0], filtmethod='medianFIR',
+    feature_signal_list = [np.asarray([create_filtered_dataset(signal, filtmethod='medianFIR',
             sampling_rate=sampling_rate)]) for signal in signal_list]
 
     feature_window_list = [np.asarray([np.linspace(init, finish, (finish - init) * sampling_rate)])] * len(feature_signal_list)
@@ -132,8 +132,6 @@ def create_filtered_dataset(signal, filtmethod,
                   order=10, frequency=40,
                   sampling_rate=sampling_rate)
         _logger.debug(X_filt)
-
-
 
 
     print X_filt

@@ -370,60 +370,60 @@ def main():
     # path_to_map= '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/baseline_datasets_new_map.txt'
 
 
-    # # # 1. Raw -----------------------------------------------------------------------------------
-    # raw_groups = get_feature_group_name_list(path_to_map,
-    #                                          'raw#')
-    # files = 'all_new'
-    # # print raw_groups
-    # # stop
+    # # 1. Raw -----------------------------------------------------------------------------------
+    raw_groups = get_feature_group_name_list(path_to_map,
+                                             'raw#')
+    files = 'all_new'
+    # print raw_groups
+    # stop
 
-    # # 2. Baseline removal and denoisings------------------------------------------------------
-    # files = 'all_new'
-    # feature_name = 'baseline_removal'
-    # for raw_group in raw_groups:
-    #     param_filt_variation = ['MedianFIR']
-    #     for param_filt in param_filt_variation:
-    #         load_feature(path_to_load, path_to_map, feature_name,
-    #                      files=files,
-    #                      feature_group_to_process=raw_group,
-    #                      param_filt = param_filt)
+    # 2. Baseline removal and denoisings------------------------------------------------------
+    files = 'just_new'
+    feature_name = 'baseline_removal'
+    for raw_group in raw_groups:
+        param_filt_variation = ['MedianFIR']
+        for param_filt in param_filt_variation:
+            load_feature(path_to_load, path_to_map, feature_name,
+                         files=files,
+                         feature_group_to_process=raw_group,
+                         param_filt = param_filt)
 
     # # print 'stopppp'
     # stop
 
-    # # 3. Segmentation---------------------------------------------------------------------------
-    # files = 'all_new'
-    # feature_name = 'rpeak_detection'
-    # group_to_process = get_feature_group_name_list(path_to_map,
-    #                                          'baseline_removal#')
-    # for group in group_to_process:
-    #     param_method_variation = ['hamilton']
-    #     for param_method in param_method_variation:
-    #         load_feature(path_to_load, path_to_map, feature_name,
-    #                      files=files,
-    #                      feature_group_to_process=group,
-    #                      param_method = param_method)
+    # 3. Segmentation---------------------------------------------------------------------------
+    files = 'just_new'
+    feature_name = 'rpeak_detection'
+    group_to_process = get_feature_group_name_list(path_to_map,
+                                             'baseline_removal#')
+    for group in group_to_process:
+        param_method_variation = ['hamilton']
+        for param_method in param_method_variation:
+            load_feature(path_to_load, path_to_map, feature_name,
+                         files=files,
+                         feature_group_to_process=group,
+                         param_method = param_method)
 
-    # # 3.1 HRV computation-----------------------------------------------------------------------
-    # rpeaks_groups_to_process = get_feature_group_name_list(path_to_map,
-    #                                          'rpeak_detection#')
-    # feature_name = 'hrv_computation'
-    # files = 'all_new'
-    # groups_to_process = get_feature_group_name_list(path_to_map,
-    #                                          'baseline_removal#')
-    # rpeaks_groups_to_process = [feature_group_name
-    #                             for feature_group_name in rpeaks_groups_to_process
-    #                             if 'baseline_removal' in feature_group_name]
+    # 3.1 HRV computation-----------------------------------------------------------------------
+    rpeaks_groups_to_process = get_feature_group_name_list(path_to_map,
+                                             'rpeak_detection#')
+    feature_name = 'hrv_computation'
+    files = 'all_new'
+    groups_to_process = get_feature_group_name_list(path_to_map,
+                                             'baseline_removal#')
+    rpeaks_groups_to_process = [feature_group_name
+                                for feature_group_name in rpeaks_groups_to_process
+                                if 'baseline_removal' in feature_group_name]
 
-    # for groups in zip(groups_to_process, rpeaks_groups_to_process):
-    #     win_samplerate_variation = [sampling_rate]
-    #     for win_samplerate in win_samplerate_variation:
-    #         print groups[1]
-    #         # stop
-    #         load_feature(path_to_load, path_to_map, feature_name,
-    #                      files=files,
-    #                      feature_group_to_process=groups[1],
-    #                      win_samplerate=win_samplerate)
+    for groups in zip(groups_to_process, rpeaks_groups_to_process):
+        win_samplerate_variation = [sampling_rate]
+        for win_samplerate in win_samplerate_variation:
+            print groups[1]
+            # stop
+            load_feature(path_to_load, path_to_map, feature_name,
+                         files=files,
+                         feature_group_to_process=groups[1],
+                         win_samplerate=win_samplerate)
 
     # stop
     groups_to_process = get_feature_group_name_list(path_to_map,

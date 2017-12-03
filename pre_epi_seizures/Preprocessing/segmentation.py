@@ -27,6 +27,8 @@ def rpeak_detection(signal_arguments, win_params, add_params, win_param_to_proce
     signal_list = signal_arguments['feature_group_to_process']
     # signal_list = [np.asarray([signal]) for signal in signal_list]
 
+    print signal_list
+
     # print signal_list
 
     # stop
@@ -109,7 +111,7 @@ def compute_hrv(rpeaks):
 
 
 def detect_rpeaks(feature_array, method, sampling_rate=1000):
-    record = feature_array[0]
+    record = feature_array[0][0]
     if method == 'hamilton':
         rpeaks = ecg.hamilton_segmenter(signal=record,
                                         sampling_rate=sampling_rate)
@@ -126,8 +128,8 @@ def find_rpeaks(rpeaks, start, end):
 
 
 def compute_QRS(signal, rpeaks, sampling_rate):
-    signal = signal[0]
-    rpeaks = rpeaks[0]
+    signal = signal[0][0]
+    rpeaks = rpeaks[0][0]
     beats = np.asarray([signal[rpeak - int(0.04*sampling_rate):rpeak + int(0.06*sampling_rate)] for rpeak in rpeaks[1:-1]])
     return beats.T
 

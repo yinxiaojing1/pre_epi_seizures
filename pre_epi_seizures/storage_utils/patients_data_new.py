@@ -39,15 +39,15 @@ patients = {
              'age': 55, 
              'ictal_clinical_on_time': [time(15, 48, 16),
                                        time(18, 34, 13),
-                                       # time(10, 22, 26)
+                                       time(10, 22, 26)
                                       ],
              'post_ictal_time': [time(15, 49, 10),
                                  time(18, 36, 1),
-                                 # time(10, 24, 14)
+                                 time(10, 24, 14)
                                 ],
              'ictal_on_time': [time(15, 48, 13),
                                time(18, 34, 14),
-                               # time(10, 22, 27)
+                               time(10, 22, 27)
                               ],
              'types_of_seizure': ['FC',
                                   'FC',
@@ -61,7 +61,7 @@ patients = {
 
              'dates_of_seizure': [date(2017, 1, 10),
                                   date(2017, 1, 10),
-                                  # date(2017, 1, 12),
+                                  date(2017, 1, 12),
                                  ]
             },
 

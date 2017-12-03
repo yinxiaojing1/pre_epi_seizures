@@ -14,7 +14,7 @@ from datetime import datetime
 
 import os
 
-# from __future__ import print_function
+# from __future__ importS print_function
 
 
 def get_feature_group_name_list(path_to_map, feature_name):
@@ -386,12 +386,13 @@ def create_seizure_dataset(path_to_load, path_to_save,
 # #     singal = save_signal
 
 
-# _logger.setLevel(10)
+# # _logger.setLevel(10)
+
 path_to_load = '/Volumes/ASSD/pre_epi_seizures/h5_files/raw_fulldata/HSM_data.h5'
 path_to_save = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new.h5'
 path_to_map = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new_map.txt'
 
-# patient_number = 1
+# # patient_number = 1
 
 time_before_seizure = 50 * 60
 time_after_seizure = 20 * 60
@@ -401,14 +402,14 @@ time_after_seizure = 20 * 60
 dataset = create_seizure_dataset(path_to_load, path_to_save,
                                  path_to_map,
                                  time_before_seizure,
-                                 time_after_seizure, 3)
+                                 time_after_seizure, 4)
 
-# _logger.debug('the dataset is the following: %s', dataset)
-# _logger.debug(np.shape(dataset))
-# a = list_all_blocks(path_to_load, patient_number)
-# # b = sorted(a)
-# _logger.debug('Existent_Signals: %s', a)
+    # # _logger.debug('the dataset is the following: %s', dataset)
+    # # _logger.debug(np.shape(dataset))
+    # # a = list_all_blocks(path_to_load, patient_number)
+    # # # b = sorted(a)
+    # # _logger.debug('Existent_Signals: %s', a)
 
-# # raw = load_signal(path_to_load, a)
+    # # raw = load_signal(path_to_load, a)
 
-# _logger.debug(raw)
+    # _logger.debug(raw)
