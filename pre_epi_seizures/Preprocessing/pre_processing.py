@@ -366,8 +366,8 @@ def main():
     time_before_seizure) + '_' + str(time_after_seizure)
     path_to_map = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new_map.txt'
 
-    # path_to_load = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/baseline_datasets_new.h5'
-    # path_to_map= '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/baseline_datasets_new_map.txt'
+    #path_to_load = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/baseline_datasets_new.h5'
+    #path_to_map= '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/baseline_datasets_new_map.txt'
 
 
     # # 1. Raw -----------------------------------------------------------------------------------
@@ -388,8 +388,8 @@ def main():
                          feature_group_to_process=raw_group,
                          param_filt = param_filt)
 
-    # # print 'stopppp'
-    # stop
+    #print 'stopppp'
+    #stop
 
     # 3. Segmentation---------------------------------------------------------------------------
     files = 'just_new'
@@ -408,7 +408,7 @@ def main():
     rpeaks_groups_to_process = get_feature_group_name_list(path_to_map,
                                              'rpeak_detection#')
     feature_name = 'hrv_computation'
-    files = 'all_new'
+    files = 'just_new'
     groups_to_process = get_feature_group_name_list(path_to_map,
                                              'baseline_removal#')
     rpeaks_groups_to_process = [feature_group_name
@@ -442,9 +442,10 @@ def main():
                          feature_group_to_process=group[0], 
                          rpeak_group_to_process=group[1])
 
+    #print 'HRV features'
+    #stop
+    print 'STOP!!!!!!'
     stop
-    # print 'STOP!!!!!!'
-    # stop
 
     rpeaks_groups_to_process = get_feature_group_name_list(path_to_map,
                                              'rpeak_detection#')

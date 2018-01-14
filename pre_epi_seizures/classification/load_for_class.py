@@ -129,7 +129,7 @@ def get_patient_feature_records(path_to_load,
 
 def get_patient_feature_lead_records(path_to_load,
                                 feature_name,
-                                patient_nr, 
+                                patient_list, 
                                 lead_name):
 
     # Select the baseline records from the input patient number
@@ -140,11 +140,12 @@ def get_patient_feature_lead_records(path_to_load,
 
     list_patient = [group_name
                     for group_name in list_all
+                    for patient_nr in patient_list
                     if group_name[1][0] == str(patient_nr)
                     and lead_name in group_name[1]]
 
 
-# 
+
     return list_patient
 
 

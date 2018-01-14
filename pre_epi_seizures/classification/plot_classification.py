@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 from matplotlib import colors as mcolors
 import seaborn as sns
 import numpy as np
+import scipy as sp
 import os
 # sns.set()
 
@@ -62,14 +63,54 @@ def get_roc_curves(data_struct):
 
     return
 
+def extend_roc_curve(mean_curve_fpr, roc_curve_list):
+    # For each mean FPR point
+    mean_tpr_curve = []
+    for roc_curve in roc_curve_list:
+        roc_curve_fpr = np.asarray(roc_curve['FPR'])
+        roc_curve_tpr = np.asarray(roc_curve['TPR'])
+            
+        f = sp.interpolate.interp1d(roc_curve_fpr, roc_curve_tpr, kind='zero')
+        mean_curve_tpr_aux = f(mean_curve_fpr)
+        mean_tpr_curve.append(mean_curve_tpr_aux)
+    
+    mean_tpr_curve = np.asarray(mean_tpr_curve)
+    mean_tpr_curve = np.mean(mean_tpr_curve, axis=0)
+    mean_fpr_curve = mean_curve_fpr
+    plt.plot(mean_fpr_curve, mean_tpr_curve, 'k')
+        
+        
+            
+def compute_mean_roc(roc_curve_list):
+    
+    length = [len(roc_curve)
+              for roc_curve in roc_curve_list]
+    
+    mean_curve_fpr = np.linspace(0, 1, 100)
+    
+    extend_roc_curve(mean_curve_fpr, roc_curve_list)
 
-def plot_roc(path_to_save, intreval, points_per_label, nested_cross_struct):
+    
+def plot_roc_new(path_to_save, intreval, points_per_label, nested_cross_struct, trial):
+    
+    # Get color list
+    colors = get_color_list()
+
+    print nested_cross_struct[0]
+    stop
+    for model in nested_cross_struct:
+        print model
+        
+
+
+def plot_roc(path_to_save, intreval, points_per_label, nested_cross_struct, trial):
     # path_to_save = path_to_save + 'ROC/'
     plt.figure(figsize=(15, 7.5))
-    plt.title('ROC - ' + str(intreval) + '_' + str(points_per_label))
+    plt.title('ROC - ' + str(intreval) + '_' + str(points_per_label) + str(trial))
     plt.xlabel('False Positive Rate')
     plt.ylabel('True Positive Rate')
 
+    
     # Get color list
     colors = get_color_list()
 
@@ -77,7 +118,17 @@ def plot_roc(path_to_save, intreval, points_per_label, nested_cross_struct):
     data = nested_cross_struct.groupby(['model'])
 
     legend = []
-
+    
+    # Mean 
+    curve = [sz[1][['FPR', 'TPR']]
+             for dt in data
+             for sz in dt[1].groupby(['nr_seizure'])
+             ]
+    
+    
+    compute_mean_roc(curve)
+    legend.append('mean')
+    
     # For each model
     for dt, color in zip(data, colors):
 
@@ -94,18 +145,18 @@ def plot_roc(path_to_save, intreval, points_per_label, nested_cross_struct):
         # sns.set_palette(sns.color_palette('Blues'))
 
         # compute mean ROC
-        # mean_fpr = [sz[1]['FPR'] for sz in dt_sz]
-        # mean_fpr = sum(mean_fpr)/len(mean_fpr)
+        #mean_fpr = [sz[1]['FPR'] for sz in dt_sz]
+        #mean_fpr = sum(mean_fpr)/len(mean_fpr)
 
-        # mean_tpr = [sz[1]['TPR'] for sz in dt_sz]
-        # mean_tpr = sum(mean_tpr)/len(mean_tpr)
+        #mean_tpr = [sz[1]['TPR'] for sz in dt_sz]
+        #mean_tpr = sum(mean_tpr)/len(mean_tpr)
 
 
         # plot each test seizure
         # sns.set_palette(sns.dark_palette('k', n_colors=20))
-        # plt.plot(mean_fpr, mean_tpr)
+        #plt.plot(mean_fpr, mean_tpr, 'k')
 
-        # legend.append(model_name)
+        #legend.append('mean --Best chance')
         for sz in dt_sz:
             fpr = sz[1]['FPR']
             tpr = sz[1]['TPR']
@@ -131,7 +182,9 @@ def plot_roc(path_to_save, intreval, points_per_label, nested_cross_struct):
     legend.append('chance')
     plt.plot([0, 1], [0, 1], 'k--')
     plt.legend(legend)
-    plt.savefig(path_to_save + str(intreval) + '_' + str(points_per_label))
+    plt.show()
+    #stop
+    #plt.savefig(path_to_save + str(intreval) + '_' + str(points_per_label) + str(trial))
 
 
 def plot_scatter(path_to_save, data_struct, class_metadata):
@@ -177,9 +230,10 @@ def plot_hist(file_to_save, intreval, points_per_label, data_struct, class_metad
         labels = data_struct['labels']
         color = ['r', 'g']
 
-        for label, color in zip(labels.unique(), color):
+        for i, (label, color) in enumerate(zip(labels.unique(), color)):
             print label
-            plt.subplot(len(labels.unique()), 1, label)
+            print i
+            plt.subplot(len(labels.unique()), 1, i+1)
             data = data_struct.loc[data_struct['labels']==label]
             data = data.drop(class_metadata, axis=1)
             sns.distplot(data[feature], bins=np.linspace(-4, 4, 100), hist=True, kde=False, color=color)
@@ -187,4 +241,5 @@ def plot_hist(file_to_save, intreval, points_per_label, data_struct, class_metad
 
         # plt.legend(labels.unique())
         # plt.legend(['2', '1'])
+        plt.show()
         plt.savefig(file_to_save + '_' + feature + '_' + str(intreval) + '_' + str(points_per_label))

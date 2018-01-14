@@ -137,7 +137,7 @@ path_to_map = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/basel
 time_before_seizure = 50 * 60
 time_after_seizure = 20 * 60
 
-create_free_datasets(path_to_map, path_to_save, path_to_load, 4)
+create_free_datasets(path_to_map, path_to_save, path_to_load, 5)
 
 
 stop

@@ -388,21 +388,22 @@ def create_seizure_dataset(path_to_load, path_to_save,
 
 # # _logger.setLevel(10)
 
-path_to_load = '/Volumes/ASSD/pre_epi_seizures/h5_files/raw_fulldata/HSM_data.h5'
-path_to_save = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new.h5'
-path_to_map = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new_map.txt'
+if __name__=='main':
+    path_to_load = '/Volumes/ASSD/pre_epi_seizures/h5_files/raw_fulldata/HSM_data.h5'
+    path_to_save = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new.h5'
+    path_to_map = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new_map.txt'
 
-# # patient_number = 1
+    # # patient_number = 1
 
-time_before_seizure = 50 * 60
-time_after_seizure = 20 * 60
+    time_before_seizure = 50 * 60
+    time_after_seizure = 20 * 60
 
 
 
-dataset = create_seizure_dataset(path_to_load, path_to_save,
-                                 path_to_map,
-                                 time_before_seizure,
-                                 time_after_seizure, 4)
+    dataset = create_seizure_dataset(path_to_load, path_to_save,
+                                     path_to_map,
+                                     time_before_seizure,
+                                     time_after_seizure, 5)
 
     # # _logger.debug('the dataset is the following: %s', dataset)
     # # _logger.debug(np.shape(dataset))

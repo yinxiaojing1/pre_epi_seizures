@@ -19,17 +19,19 @@ path_to_load_seizure_map = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_d
 path_to_load_baseline = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/baseline_datasets_new.h5'
 path_to_load_baseline_map = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/baseline_datasets_new_map.txt'
 
-
-
-def load_feature_groups_baseline_seizure_per_patient(patient_nr):
+    
+def load_feature_groups_baseline_seizure_per_patient(patient_list, feature_slot):
 
     # # Patient to analyse
     # patient_nr = 3
+    
+    print patient_list
+    
+
 
     # Feature group to analyse -- point of entry
-
     feature_name = get_feature_group_name_list(path_to_load_baseline_map,
-                                               'hrv_time_features#')[0]
+                                               feature_slot)[0]
 
 
     # Load baseline data headers based on patient < --- Different Feature Groups
@@ -39,12 +41,14 @@ def load_feature_groups_baseline_seizure_per_patient(patient_nr):
 
     baseline_feature_name_list = get_patient_feature_lead_records(path_to_load_baseline,
                                                    feature_name,
-                                                   patient_nr,
-                                                   'Ecg')
-
+                                                   patient_list,
+                                                   'ECG')
+    
+   
     # Feature group to analyse -- point of entry < --- Different Feature Groups
     feature_name = get_feature_group_name_list(path_to_load_seizure_map,
-                                               'hrv_time_features#')[0]
+                                               feature_slot)[0]
+
 
     # stop
 
@@ -55,8 +59,10 @@ def load_feature_groups_baseline_seizure_per_patient(patient_nr):
 
     seizure_feature_name_list = get_patient_feature_lead_records(path_to_load_seizure,
                                                   feature_name,
-                                                  patient_nr,
-                                                  'Ecg')
+                                                  patient_list,
+                                                  'ECG')
+    
+
 
 
     baseline_data_struct = load_feature_from_input_list(path_to_load_baseline,
@@ -80,7 +86,8 @@ def load_feature_groups_baseline_seizure_per_patient(patient_nr):
     seizure_data_struct = data_struct[2][0]
     seizure_feature_names = data_struct[2][1]
     seizure_data_window_struct = data_struct[3][0]
-
+    
+    
 
     # print seizure_data_struct[0]
     # print len(seizure_data_struct[0])
@@ -301,18 +308,24 @@ def random_balanced_pair_seizure_baseline(df):
 
     return dataframe
 
+
+
+
+
 def prep_input_supervised_baseline_seizure(data_struct, pre_seizure_window_intrevals):
 
     # Baseline records selection
     # one-for-all
     # baseline_struct = select_one_for_all_baseline(0, data_struct)
-    # baseline_struct = select_equal_baseline_data(data_struct)
+    baseline_struct = select_equal_baseline_data(data_struct)
     # baseline_struct = select_equal_baseline_data_random(data_struct)
     # get baseline
-    baseline_struct = select_all_baseline(data_struct)
-
+    #baseline_struct = select_all_baseline(data_struct)
     # get seizures
     seizure_struct = select_all_seizure(data_struct)
+
+    # print pre_seizure_window_intrevals
+
 
     baseline_struct, seizure_struct = create_baseline_seizure_labels(pre_seizure_window_intrevals,
                                       baseline_struct[0],
@@ -323,8 +336,9 @@ def prep_input_supervised_baseline_seizure(data_struct, pre_seizure_window_intre
                                       seizure_struct[2])
 
     dataframe = create_dataframe_baseline_seizure(baseline_struct, seizure_struct)
+    
 
-    dataframe = random_balanced_pair_seizure_baseline(dataframe)
+    #dataframe = random_balanced_pair_seizure_baseline(dataframe)
 
     return dataframe
 

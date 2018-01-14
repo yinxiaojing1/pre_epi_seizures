@@ -35,6 +35,38 @@ patients = {
 #                                   date(2016, 9, 15),
 #                                  ]
 
+'5': {'sex': 'f',
+             'age': 55, 
+             'ictal_clinical_on_time': [time(9, 1, 41),
+                                       time(14, 38, 6),
+                                       time(3, 41, 57)
+                                      ],
+             'post_ictal_time': [time(9, 3, 8),
+                                 None,
+                                 None,
+                                ],
+             'ictal_on_time': [time(9, 1, 42),
+                               time(14, 38, 6),
+                               time(3, 41, 52)
+                              ],
+             'types_of_seizure': ['FS',
+                                  'FS',
+                                  'FS'
+                                 ],
+
+              'location_of_seizure': ['FTLR',
+                                      'FTLR',
+                                      'FTLR'
+                                      ], 
+
+             'dates_of_seizure': [date(2016, 8, 23),
+                                  date(2016, 8, 24),
+                                  date(2016, 8, 25),
+                                 ]
+             },
+                               
+    
+    
 '4': {'sex': 'f',
              'age': 55, 
              'ictal_clinical_on_time': [time(15, 48, 16),
