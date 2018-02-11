@@ -58,49 +58,120 @@ def jointplot(data, x, y, labels, colors):
 
     print 'done'
     f1.savefig('joint')
+    
 
 def get_roc_curves(data_struct):
 
     return
 
+
 def extend_roc_curve(mean_curve_fpr, roc_curve_list):
-    # For each mean FPR point
+    ''' Recieves a list with FPR and corresponding TPR'''
+    
+    # loop for each computed FPR and Correspondig TPR
     mean_tpr_curve = []
     for roc_curve in roc_curve_list:
-        roc_curve_fpr = np.asarray(roc_curve['FPR'])
-        roc_curve_tpr = np.asarray(roc_curve['TPR'])
-            
+        
+        # get fpr Curve
+        roc_curve_fpr = np.asarray(roc_curve[0])
+       
+        # get tpr curve
+        roc_curve_tpr = np.asarray(roc_curve[1])
+        
+        print roc_curve_fpr
+        print roc_curve_tpr
+         
+        # interpolate with zero kind curve the Tpr points, based on
+        # the computed fpr curve
         f = sp.interpolate.interp1d(roc_curve_fpr, roc_curve_tpr, kind='zero')
+        
+        # Compute interpolated tpr curve
         mean_curve_tpr_aux = f(mean_curve_fpr)
         mean_tpr_curve.append(mean_curve_tpr_aux)
     
+    # Compute mean TPR curve
     mean_tpr_curve = np.asarray(mean_tpr_curve)
     mean_tpr_curve = np.mean(mean_tpr_curve, axis=0)
     mean_fpr_curve = mean_curve_fpr
-    plt.plot(mean_fpr_curve, mean_tpr_curve, 'k')
+    
+    return mean_fpr_curve, mean_tpr_curve
         
         
             
 def compute_mean_roc(roc_curve_list):
+    ''' Recieves a list with FPR and corresponding TPR'''
     
-    length = [len(roc_curve)
-              for roc_curve in roc_curve_list]
-    
+    # Default Main FPR Curve
     mean_curve_fpr = np.linspace(0, 1, 100)
     
-    extend_roc_curve(mean_curve_fpr, roc_curve_list)
+    # Extends The Main FPR Curve 
+    mean_fpr_curve, mean_tpr_curve = extend_roc_curve(
+                                        mean_curve_fpr,
+                                        roc_curve_list)
+    
+    return mean_fpr_curve, mean_tpr_curve
+
+def configure_figure(intreval, points_per_label, trial):        
+    
+    # employ default configuration
+    plt.figure(figsize=(20,20))
+    plt.title('ROC - ' + str(intreval) + '_' + str(points_per_label) + str(trial))
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
 
     
 def plot_roc_new(path_to_save, intreval, points_per_label, nested_cross_struct, trial):
     
+    # Employ default configuration
+    configure_figure(intreval, points_per_label, trial)
+    
     # Get color list
     colors = get_color_list()
-
-    print nested_cross_struct[0]
-    stop
-    for model in nested_cross_struct:
-        print model
+    
+    # allocate legend
+    legend = []
+    
+    # allocate mean_curves
+    mean_fpr = []
+    mean_tpr = []
+    
+    for i, model in enumerate(nested_cross_struct):
+        # get hyper_parameter optimization results
+        cv_results = model['cv_results'][0]
+                
+        # get best model from optimization
+        best_model = model['cv_results'][1]
         
+        # get ROC
+        ROC = model['ROC']
+        
+        # plot ROC curve
+        fpr = ROC[0]['FPR']
+        tpr = ROC[0]['TPR']
+        plt.plot(fpr, tpr)
+        
+        # Build mean model
+        mean_fpr.append(fpr)
+        mean_tpr.append(tpr)
+        
+        # build legend
+        legend.append(str(best_model) + '__' + str(i))
+        
+    # Plot chance boundary
+    legend.append('chance')
+    plt.plot([0, 1], [0, 1], 'k--')
+    
+    # Compute & Plot mean curve
+    mean_roc_curve = compute_mean_roc(zip(mean_fpr, mean_tpr))
+    plt.plot(mean_roc_curve[0], mean_roc_curve[1], 'k')
+    
+    # Finnish the figure configuration
+    plt.legend(legend)
+    plt.savefig(path_to_save + str(intreval) + '_' + str(points_per_label) + str(trial))
+    plt.show()  
+        
+    # Close figure
+    plt.close()
 
 
 def plot_roc(path_to_save, intreval, points_per_label, nested_cross_struct, trial):

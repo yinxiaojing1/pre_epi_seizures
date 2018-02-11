@@ -92,6 +92,7 @@ def beat_phase_segmentation(signal_arguments,
 def compute_beat_phase(signal, rpeaks, sampling_rate):
     signal = signal[0]
     rpeaks = rpeaks[0]
+    
     # stop
     phase = get_phase(signal, rpeaks)
     idx_up = np.where(abs(np.diff(phase)) > 6)[0]
@@ -129,7 +130,7 @@ def find_rpeaks(rpeaks, start, end):
 
 def compute_QRS(signal, rpeaks, sampling_rate):
     signal = signal[0][0]
-    rpeaks = rpeaks[0][0]
+    rpeaks = rpeaks[0]
     beats = np.asarray([signal[rpeak - int(0.04*sampling_rate):rpeak + int(0.06*sampling_rate)] for rpeak in rpeaks[1:-1]])
     return beats.T
 

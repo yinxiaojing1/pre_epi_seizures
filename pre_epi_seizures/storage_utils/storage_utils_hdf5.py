@@ -92,7 +92,11 @@ def _delete_signal(opened_file, name, group):
 
 def list_group_signals(path, group):
     opened_file = st_hdf5.HDF(path, 'r')
-    list_signals = opened_file.list_signals(group=group, recursive=False)
+    try:
+        list_signals = opened_file.list_signals(group=group, recursive=False)
+    except Exception as e:
+        print e
+        list_signals = {'signals': []}
     opened_file.close()
     return list_signals
 

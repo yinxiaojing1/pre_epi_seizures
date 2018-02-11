@@ -315,6 +315,7 @@ def create_seizure_dataset_patient(path_to_load, path_to_save,
     return dataset_list
 
 def save_dataset(path_to_save, path_to_map, time_before_seizure, time_after_seizure, patient_number, dataset_list_files):
+    
     group_list = ['/' + str(time_before_seizure) + '_' + str(time_after_seizure) + '/raw'
                    + '_$beginwin_samplerate:1000' 
                    + '_win:0.001'
@@ -328,11 +329,8 @@ def save_dataset(path_to_save, path_to_map, time_before_seizure, time_after_seiz
     write_feature_to_map(path_to_map, group_list[0])
     for dataset_list_file in dataset_list_files:
         name_list = [str(patient_number) + '_' + seizure_record[0] for seizure_record in dataset_list_file]
-        signal_list = [seizure_record[1] for seizure_record in dataset_list_file]
-        print name_list
-        print signal_list
+        signal_list = [np.array([seizure_record[1]]) for seizure_record in dataset_list_file]
         mdata_list=[{'fs':1000}]*len(dataset_list_file)
-        print mdata_list
         # stop
         save_signal(path_to_save, signal_list, mdata_list, name_list, group_list)
 
@@ -351,21 +349,8 @@ def create_seizure_dataset(path_to_load, path_to_save,
                                         arg)
          for arg in args]
     _logger.debug('Befor_saving')
-    stop
+    
 
-    # seizure_dataset = [val for sublist in seizure_dataset for val in sublist]
-    # group_list = ['raw']
-    # name_list = [str(time_before_seizure) + '_' + str(time_after_seizure)]
-    # mdata_list = ['']
-    # signal_list = [seizure_dataset]
-    # save_signal(path_to_save, signal_list, mdata_list, name_list, group_list)
-    # _logger.debug(seizure_dataset)
-
-    # mdata = create_seizure_mdata(path_to_load, *args)
-
-    # _logger.debug(mdata)
-
-    return np.asmatrix(seizure_dataset)
 
 
 # def create_seizure_mdata(path_to_load, *args):
@@ -388,29 +373,16 @@ def create_seizure_dataset(path_to_load, path_to_save,
 
 # # _logger.setLevel(10)
 
-if __name__=='main':
+def create_datasets_nk(patient_nr):
     path_to_load = '/Volumes/ASSD/pre_epi_seizures/h5_files/raw_fulldata/HSM_data.h5'
     path_to_save = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new.h5'
     path_to_map = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new_map.txt'
 
-    # # patient_number = 1
-
     time_before_seizure = 50 * 60
     time_after_seizure = 20 * 60
-
-
 
     dataset = create_seizure_dataset(path_to_load, path_to_save,
                                      path_to_map,
                                      time_before_seizure,
-                                     time_after_seizure, 5)
-
-    # # _logger.debug('the dataset is the following: %s', dataset)
-    # # _logger.debug(np.shape(dataset))
-    # # a = list_all_blocks(path_to_load, patient_number)
-    # # # b = sorted(a)
-    # # _logger.debug('Existent_Signals: %s', a)
-
-    # # raw = load_signal(path_to_load, a)
-
-    # _logger.debug(raw)
+                                     time_after_seizure,
+                                     patient_nr)

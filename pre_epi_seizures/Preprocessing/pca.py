@@ -9,10 +9,6 @@ def pca_beat_amp_computation(signal_arguments,
     rpeaks_list = signal_arguments['feature_group_to_process']
     nr_comp = add_params['nr_comp']
     
-    print rpeaks_list
-
-    print signal_list[0]
-
     # stop
 
     parameters_list = [trace_evol_PC(beats_list.T, nr_comp) for beats_list in signal_list]

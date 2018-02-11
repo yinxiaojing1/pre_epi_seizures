@@ -34,34 +34,130 @@ patients = {
 #                                   date(2016, 9, 15),
 #                                   date(2016, 9, 15),
 #                                  ]
+    
+'7': {'sex': 'm',
+             'age': 55, 
+             'ictal_clinical_on_time': [
+                                        time(4, 20, 47),
+                                        time(14, 38, 6),
+                                        time(3, 41, 57),
+                                        time(5, 59, 16),
+                                        time(7, 57, 13),
+                                        time(9, 3, 10),
+                                        time(10, 47, 24),
+                                        time(12, 16, 26),
+                                      ],
+             'post_ictal_time': [
+                                 None,
+                                 None,
+                                 None,
+                                 None,
+                                 None,
+                                 None,
+                                 None,
+                                 None
+                                ],
+             'ictal_on_time': [
+                               time(4, 20, 52),
+                               time(14, 38, 6),
+                               time(3, 41, 52),
+                               time(5, 58, 29),
+                               time(7, 57, 13),
+                               time(9, 3, 10),
+                               time(10, 47, 24)
+                               time(12, 16, 26)
+                              ],
+             'types_of_seizure': [
+                                  'FS',
+                                  'FS',
+                                  'FS',
+                                  'FS',
+                                  'GS',
+                                  'FS',
+                                  'FS',
+                                  'FS',
+                                  'FS'
+                                 ],
+
+              'location_of_seizure': [
+                                      'FTR',
+                                      'FTLR',
+                                      'FTLR',
+                                      'FTLR',
+                                      'FTLR',
+                                      'FTLR',
+                                      'FTLR',
+                                      'FTLR',
+                                     ], 
+
+             'dates_of_seizure': [date(2016, 8, 23),
+                                  date(2016, 8, 24),
+                                  date(2016, 8, 25),
+                                  date(2016, 8, 25),
+                                  date(2016, 8, 25),
+                                  date(2016, 8, 25),
+                                  date(2016, 8, 25),
+                                  date(2016, 8, 28),
+                                 ]
+             },
 
 '5': {'sex': 'f',
              'age': 55, 
              'ictal_clinical_on_time': [time(9, 1, 41),
-                                       time(14, 38, 6),
-                                       time(3, 41, 57)
+                                        time(14, 38, 6),
+                                        time(3, 41, 57),
+                                        time(5, 59, 16),
+                                        time(7, 57, 13),
+                                        time(9, 3, 10),
+                                        time(10, 47, 24),
+                                        time(12, 16, 26),
                                       ],
              'post_ictal_time': [time(9, 3, 8),
                                  None,
                                  None,
+                                 None,
+                                 None,
+                                 None,
+                                 None,
+                                 None
                                 ],
              'ictal_on_time': [time(9, 1, 42),
                                time(14, 38, 6),
-                               time(3, 41, 52)
+                               time(3, 41, 52),
+                               time(5, 58, 29),
+                               time(7, 57, 13),
+                               time(9, 3, 10),
+                               time(10, 47, 24)
+                               time(12, 16, 26)
                               ],
              'types_of_seizure': ['FS',
+                                  'FS',
+                                  'FS',
+                                  'GS',
+                                  'FS',
+                                  'FS',
                                   'FS',
                                   'FS'
                                  ],
 
               'location_of_seizure': ['FTLR',
                                       'FTLR',
-                                      'FTLR'
-                                      ], 
+                                      'FTLR',
+                                      'FTLR',
+                                      'FTLR',
+                                      'FTLR',
+                                      'FTLR',
+                                      'FTLR',
+                                     ], 
 
              'dates_of_seizure': [date(2016, 8, 23),
                                   date(2016, 8, 24),
                                   date(2016, 8, 25),
+                                  date(2016, 8, 25),
+                                  date(2016, 8, 25),
+                                  date(2016, 8, 25),
+                                  date(2016, 8, 25),
+                                  date(2016, 8, 28),
                                  ]
              },
                                

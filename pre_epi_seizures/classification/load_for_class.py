@@ -17,7 +17,6 @@ def load_all_features_from_disk(path_to_load, feature_group_name):
     feature_group_name_extracted= [group_name for group_name in feature_group_name_extracted if 'window_' not in group_name[1]]
 
     try:
-        print feature_group_extracted
         signal_structure = load_signal(path_to_load, feature_group_name_extracted)
         extracted_features = [get_multiple_records(get_one_signal_structure(signal_structure, group_name))
                               for group_name in feature_group_name_extracted
@@ -39,7 +38,6 @@ def load_all_feature_windows_from_disk(path_to_load, feature_group_name):
     feature_group_name_extracted= [group_name for group_name in feature_group_name_extracted if 'window_' in group_name[1]]
 
     try:
-        print feature_group_extracted
         signal_structure = load_signal(path_to_load, feature_group_name_extracted)
         extracted_features = [get_multiple_records(get_one_signal_structure(signal_structure, group_name))
                               for group_name in feature_group_name_extracted]
@@ -70,7 +68,6 @@ def load_single_feature_from_disk(path_to_load, feature_group_name_record):
 
 def load_feature_from_input_list(path_to_load, feature_group_name_record_list):
     feature_group_name_extracted = feature_group_name_record_list
-    print feature_group_name_extracted
 
     # stop
     signal_structure = load_signal(path_to_load, feature_group_name_extracted)
@@ -123,7 +120,6 @@ def get_patient_feature_records(path_to_load,
                     for group_name in list_all
                     if group_name[1][0] == str(patient_nr)]
 
-# 
     return list_patient
 
 
@@ -136,17 +132,22 @@ def get_patient_feature_lead_records(path_to_load,
     list_all = list_group_signals(path_to_load,
                                   feature_name)['signals']
 
-
-
     list_patient = [group_name
                     for group_name in list_all
                     for patient_nr in patient_list
                     if group_name[1][0] == str(patient_nr)
                     and lead_name in group_name[1]]
 
-
-
     return list_patient
+
+
+
+
+
+
+
+        
+    
 
 
 

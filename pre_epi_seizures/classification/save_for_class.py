@@ -8,10 +8,8 @@ def get_name_to_save(path_to_save, seizure_nr, trial):
 
 def parse_pipeline_str(pipeline):
     steps = pipeline.steps
-    final_str = ''
-    for item in steps:
-        final_str = final_str + str(item) + '/'
-    return final_str[:-1]
+    return str([step[0]
+                for step in pipeline.steps])
 
 
 def save_model(clf):
@@ -24,7 +22,6 @@ def save_model(clf):
         clf = pickle.load(fid)
 
     print 'Load!!!'
-
 
 
 def get_full_pipeline_name(path_to_save,
@@ -77,8 +74,25 @@ def insert_corresp_unique_file(path, filename):
     
     
 def h5store(filename, df, **kwargs):
+    try :
+        
+        print 'SAVINGGGGGGGGGGGGGGGGGGG'
+        store = pd.HDFStore(filename)
+        store.put('mydata', df)
+        store.get_storer('mydata').attrs.metadata = kwargs
+    except Exception as e:
+        print 'WHHYYYYYYYYYYYYYYYYYY?'
+        print filename
+        print e
+        try :
+            store.close()
+        except Exception as e:
+            pass
+    print 'SAVEEEEEEEEEEEEEEEEEDDDDDDDDDDDDDDDDDDDDDDDDD'
+    
+    
+def h5storemodel(filename, **kwargs):
     store = pd.HDFStore(filename)
-    store.put('mydata', df)
     store.get_storer('mydata').attrs.metadata = kwargs
     store.close()
 
@@ -89,9 +103,23 @@ def h5load(filename):
         metadata = store.get_storer('mydata').attrs.metadata
         return data, metadata
 
-
+    
 def h5loadmodel(filename):
     with pd.HDFStore(filename) as store:
         metadata = store.get_storer('mydata').attrs.metadata
         return metadata
+    
+    
+def load_pandas_file_h5(full_path):
+    path = full_path
+    try:
+        file, mdata = h5load(path)
+
+    except Exception as e:
+
+            file = pd.DataFrame([])
+            mdata = {}
+        
+    return file, mdata
+    
                        

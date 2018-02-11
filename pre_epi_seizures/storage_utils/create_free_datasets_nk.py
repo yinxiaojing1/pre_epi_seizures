@@ -25,6 +25,8 @@ def get_file_datetime(parsed_string):
 
 
 def fetch_group_raw_to_map():
+    time_before_seizure = 50 * 60
+    time_after_seizure = 20 * 60
     group_list = ['/raw'
                    + '_$beginwin_samplerate:1000' 
                    + '_win:0.001'
@@ -60,6 +62,8 @@ def get_baseline_filenames(list_free_filenames_disk, list_seizure_filenames_disk
 
 def save_records_raw(path_to_save, baseline_filenames, baseline_data, patient_number):
     # allocate raw group of features
+    time_before_seizure = 50 * 60
+    time_after_seizure = 20 * 60
     group_list = ['/raw'
                    + '_$beginwin_samplerate:1000' 
                    + '_win:0.001'
@@ -71,7 +75,7 @@ def save_records_raw(path_to_save, baseline_filenames, baseline_data, patient_nu
 
     name_list = [str(patient_number) + '_' + filename[1] for filename in baseline_filenames]
     baseline_data = [record[1]['signal'][0:1000*60*120].T for record in baseline_data.items()]
-
+    
     mdata_list = [''] * len(baseline_data)
     save_signal(path_to_save, baseline_data, mdata_list, name_list, group_list)
 
@@ -119,34 +123,14 @@ def create_free_datasets(path_to_map, path_to_save, path_to_load, *patients):
     write_feature_to_map(path_to_map, feature_group)
 
 
+def create_free_datasets_nk(patient_nr):
+    path_to_load = '/Volumes/ASSD/pre_epi_seizures/h5_files/raw_fulldata/HSM_data.h5'
+    path_to_save = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/baseline_datasets_new.h5'
+    path_to_map = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/baseline_datasets_new_map.txt'
+    # patient_number = 1
 
+    time_before_seizure = 50 * 60
+    time_after_seizure = 20 * 60
 
-
-
-
-
-
-
-
-
-path_to_load = '/Volumes/ASSD/pre_epi_seizures/h5_files/raw_fulldata/HSM_data.h5'
-path_to_save = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/baseline_datasets_new.h5'
-path_to_map = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/baseline_datasets_new_map.txt'
-# patient_number = 1
-
-time_before_seizure = 50 * 60
-time_after_seizure = 20 * 60
-
-create_free_datasets(path_to_map, path_to_save, path_to_load, 5)
-
-
-stop
-
-dataset = create_seizure_dataset(path_to_load, path_to_save,
-                                 time_before_seizure,
-                                 time_after_seizure, 4)
-
-_logger.debug('the dataset is the following: %s', dataset)
-_logger.debug(np.shape(dataset))
-
+    create_free_datasets(path_to_map, path_to_save, path_to_load, patient_nr)
 
