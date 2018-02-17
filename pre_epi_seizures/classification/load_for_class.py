@@ -10,7 +10,7 @@ import seaborn as sns
 
 import os
 
-
+# Code needs improving
 def load_all_features_from_disk(path_to_load, feature_group_name):
     feature_group_extracted = feature_group_name
     feature_group_name_extracted = list_group_signals(path_to_load, feature_group_extracted)['signals']
@@ -69,13 +69,22 @@ def load_single_feature_from_disk(path_to_load, feature_group_name_record):
 def load_feature_from_input_list(path_to_load, feature_group_name_record_list):
     feature_group_name_extracted = feature_group_name_record_list
 
-    # stop
     signal_structure = load_signal(path_to_load, feature_group_name_extracted)
     try:
+        print 'starting to load signals...'
         signal_structure = load_signal(path_to_load, feature_group_name_extracted)
-
+        
+        print 'here are the signals?....'
+        print signal_structure
+        
+        
         extracted_features = [get_multiple_records(get_one_signal_structure(signal_structure, group_name))
                               for group_name in feature_group_name_extracted]
+           
+        print 'here are the signals?....'
+        print extracted_features
+       
+        
         mdata = [get_mdata_dict(get_one_signal_structure(signal_structure, group_name))
                  for group_name in feature_group_name_extracted]
 
@@ -84,6 +93,7 @@ def load_feature_from_input_list(path_to_load, feature_group_name_record_list):
     except Exception as e:
         print signal_structure
         print e
+        stop
 
 
 
@@ -129,14 +139,17 @@ def get_patient_feature_lead_records(path_to_load,
                                 lead_name):
 
     # Select the baseline records from the input patient number
+    
     list_all = list_group_signals(path_to_load,
                                   feature_name)['signals']
+
 
     list_patient = [group_name
                     for group_name in list_all
                     for patient_nr in patient_list
                     if group_name[1][0] == str(patient_nr)
                     and lead_name in group_name[1]]
+    
 
     return list_patient
 

@@ -10,7 +10,6 @@ import pandas as pd
 import numpy as np
 
 
-
 # Baseline records path
 path_to_load_seizure = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new.h5'
 path_to_load_seizure_map = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new_map.txt'
@@ -21,21 +20,27 @@ path_to_load_baseline_map = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_
 
     
 def load_feature_groups_baseline_seizure_per_patient(patient_list, feature_slot):
+    """ Designed to load the data 
+    Line 2 of comment...
+    And so on... 
+    """
 
     # Feature group to analyse -- point of entry
     feature_name = get_feature_group_name_list(path_to_load_baseline_map,
                                                feature_slot)[0]
-
+    
     # Load baseline data headers based on patient < --- Different Feature Groups
     # baseline_feature_name_list = get_patient_feature_records(path_to_load_baseline,
     #                                                feature_name,
     #                                                patient_nr)
+    
 
     baseline_feature_name_list = get_patient_feature_lead_records(path_to_load_baseline,
                                                    feature_name,
                                                    patient_list,
-                                                   'ECG')
-       
+                                                   'ECG-')
+    
+
     # Feature group to analyse -- point of entry < --- Different Feature Groups
     feature_name = get_feature_group_name_list(path_to_load_seizure_map,
                                                feature_slot)[0]
@@ -69,14 +74,37 @@ def load_feature_groups_baseline_seizure_per_patient(patient_list, feature_slot)
     baseline_data_struct = data_struct[0][0]
     baseline_feature_names = data_struct[0][1]
     baseline_data_window_struct = data_struct[1][0]
+    
+
 
     # Get seizure dataset
     seizure_data_struct = data_struct[2][0]
     seizure_feature_names = data_struct[2][1]
     seizure_data_window_struct = data_struct[3][0]
+
+    baseline_files = {
+                      'data': baseline_data_struct,
+                      'mdata': baseline_feature_names,
+                      'sample': baseline_data_window_struct
+                 }
+
     
-    return baseline_data_struct, baseline_feature_names, baseline_data_window_struct,\
-           seizure_data_struct, seizure_feature_names, seizure_data_window_struct
+    seizure_files = {
+                          'data': seizure_data_struct,
+                          'mdata': seizure_feature_names,
+                          'sample': seizure_data_window_struct
+                     }
+
+    # return dictionary with data
+    data_lists = dict()
+    data_lists['baseline_files'] = baseline_files
+    data_lists['seizure_files'] = seizure_files
+
+    return data_lists
+
+# Optional return (uncomment)
+#    return baseline_data_struct, baseline_feature_names, baseline_data_window_struct,\
+ #          seizure_data_struct, seizure_feature_names, seizure_data_window_struct
 
 
 def get_labels_list(data_struct,

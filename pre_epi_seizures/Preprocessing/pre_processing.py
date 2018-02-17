@@ -285,7 +285,6 @@ def load_feature(path_to_load, path_to_map, feature_to_load,
 
     # print feature_groups_to_process
     if files=='all_new':
-        print feature_groups_to_process
         names_to_save = get_names(list_group_signals(path_to_load, feature_group_to_process)['signals'])
         for k in feature_groups_to_process.keys():
             feature_groups_to_process[k] = list_group_signals(path_to_load, feature_groups_to_process[k])['signals']
@@ -365,7 +364,8 @@ def main():
     
     order = [sz, baseline]
     
-    for path_to_load, path_to_map in order:
+    for path_to_load, path_to_map in [order[-1]]:
+        print '********PATH: ' + str(path_to_load) + '******************'
         _main(path_to_load, path_to_map)
     
 def _main(path_to_load, path_to_map):
@@ -444,7 +444,7 @@ def _main(path_to_load, path_to_map):
                                              'rpeak_detection#')
     feature_name = 'hrv_time_features'
     # # 3.1.1 HRV features
-    #files = 'just_new'
+    files = 'all_new'
     for group in zip(groups_to_process, rpeaks_groups_to_process):
         win_win_variation = [2 * 60]
         for win_win in win_win_variation:
