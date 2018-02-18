@@ -77,7 +77,6 @@ def load_feature_from_input_list(path_to_load, feature_group_name_record_list):
         print 'here are the signals?....'
         print signal_structure
         
-        
         extracted_features = [get_multiple_records(get_one_signal_structure(signal_structure, group_name))
                               for group_name in feature_group_name_extracted]
            
@@ -95,6 +94,11 @@ def load_feature_from_input_list(path_to_load, feature_group_name_record_list):
         print e
         stop
 
+        
+def get_patient_seizure_from_input_list(path_to_load, feature_group_name_record_list):
+    patient_seizure_list = [{'patient_nr': group_name[0], 'seizure': group_name[-1]}
+                            for group_name in feature_group_name_record_list]
+    return patient_seizure_list
 
 
 def load_feature_window_from_input_list(path_to_load, feature_group_name_record_list):
@@ -136,7 +140,7 @@ def get_patient_feature_records(path_to_load,
 def get_patient_feature_lead_records(path_to_load,
                                 feature_name,
                                 patient_list, 
-                                lead_name):
+                                lead_list):
 
     # Select the baseline records from the input patient number
     
@@ -147,8 +151,9 @@ def get_patient_feature_lead_records(path_to_load,
     list_patient = [group_name
                     for group_name in list_all
                     for patient_nr in patient_list
+                    for lead in lead_list
                     if group_name[1][0] == str(patient_nr)
-                    and lead_name in group_name[1]]
+                    and lead in group_name[1]]
     
 
     return list_patient
