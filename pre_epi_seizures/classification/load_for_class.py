@@ -71,18 +71,14 @@ def load_feature_from_input_list(path_to_load, feature_group_name_record_list):
 
     signal_structure = load_signal(path_to_load, feature_group_name_extracted)
     try:
-        print 'starting to load signals...'
+ 
         signal_structure = load_signal(path_to_load, feature_group_name_extracted)
-        
-        print 'here are the signals?....'
-        print signal_structure
+
         
         extracted_features = [get_multiple_records(get_one_signal_structure(signal_structure, group_name))
                               for group_name in feature_group_name_extracted]
            
-        print 'here are the signals?....'
-        print extracted_features
-       
+
         
         mdata = [get_mdata_dict(get_one_signal_structure(signal_structure, group_name))
                  for group_name in feature_group_name_extracted]
