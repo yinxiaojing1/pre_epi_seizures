@@ -364,7 +364,7 @@ def main():
     
     order = [sz, baseline]
     
-    for path_to_load, path_to_map in [order[-1]]:
+    for path_to_load, path_to_map in order:
         print '********PATH: ' + str(path_to_load) + '******************'
         _main(path_to_load, path_to_map)
     
@@ -404,7 +404,7 @@ def _main(path_to_load, path_to_map):
     #stop
 
     # 3. Segmentation---------------------------------------------------------------------------
-    files = 'just_new'
+    files = 'all_new'
     feature_name = 'rpeak_detection'
     group_to_process = get_feature_group_name_list(path_to_map,
                                              'baseline_removal#')
@@ -420,7 +420,7 @@ def _main(path_to_load, path_to_map):
     rpeaks_groups_to_process = get_feature_group_name_list(path_to_map,
                                              'rpeak_detection#')
     feature_name = 'hrv_computation'
-    files = 'just_new'
+    files = 'all_new'
     groups_to_process = get_feature_group_name_list(path_to_map,
                                              'baseline_removal#')
     rpeaks_groups_to_process = [feature_group_name
@@ -463,7 +463,7 @@ def _main(path_to_load, path_to_map):
                                              'rpeak_detection#')
     # stop
     feature_name = 'QRS_fixed_segmentation'
-    files = 'just_new'
+    files = 'all_new'
     groups_to_process = get_feature_group_name_list(path_to_map,
                                              'baseline_removal#')
     rpeaks_groups_to_process = [feature_group_name
@@ -507,7 +507,7 @@ def _main(path_to_load, path_to_map):
 
     # STOP
 
-    files = 'just_new'
+    files = 'all_new'
     groups_to_process = get_feature_group_name_list(path_to_map,
                                              'QRS_fixed_segmentation#')
     print groups_to_process

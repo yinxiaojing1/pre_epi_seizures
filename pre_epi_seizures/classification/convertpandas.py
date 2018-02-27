@@ -49,6 +49,10 @@ def convert_records_to_pd_dataframe(records_data, records_sample, records_mdata,
                                           
 
 def _convert_record_to_pd_dataframe(data, sample, mdata, patient, seizure):
+    
+    print 'New record'
+    print patient
+    print seizure
     # First, convert data
     record = pd.DataFrame(data.T, columns=mdata['feature_legend'])
     

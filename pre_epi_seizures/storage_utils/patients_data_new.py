@@ -64,7 +64,7 @@ patients = {
                                time(5, 58, 29),
                                time(7, 57, 13),
                                time(9, 3, 10),
-                               time(10, 47, 24)
+                               time(10, 47, 24),
                                time(12, 16, 26)
                               ],
              'types_of_seizure': [
@@ -127,7 +127,7 @@ patients = {
                                time(5, 58, 29),
                                time(7, 57, 13),
                                time(9, 3, 10),
-                               time(10, 47, 24)
+                               time(10, 47, 24),
                                time(12, 16, 26)
                               ],
              'types_of_seizure': ['FS',
