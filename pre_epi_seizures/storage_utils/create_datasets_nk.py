@@ -295,8 +295,6 @@ def create_seizure_dataset_patient(path_to_load, path_to_save,
     # retrieve the names of all available files
     group_name_all_list = list_all_files_patient(path_to_load=path_to_load,
                                                  patient_number=patient_number)
-    print group_name_all_list
-    stop
 
     _logger.debug(group_name_all_list)
 

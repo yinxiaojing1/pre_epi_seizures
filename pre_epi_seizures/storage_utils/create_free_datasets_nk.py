@@ -84,9 +84,6 @@ def save_records_raw(path_to_save,
                  for filename in baseline_filenames]
     baseline_data = [record[1]['signal'][0:1000 * 60 * 120].T
                      for record in baseline_data.items()]
-    baseline_data = [baseline_record[0]
-                     for baseline_record
-                     in baseline_data]
     mdata_list = [''] * len(baseline_data)
 
     save_signal(path_to_save, baseline_data, mdata_list, name_list, group_list)

@@ -387,21 +387,23 @@ def _main(disk,
     # stop
 
     # 2. Baseline removal and denoisings------------------------------------------------------
-    files = 'all_new'
-    feature_name = 'baseline_removal'
-    for raw_group in raw_groups:
-        param_filt_variation = ['MedianFIR']
-        for param_filt in param_filt_variation:
-            load_feature(path_to_load, path_to_map, feature_name,
-                         files=files,
-                         feature_group_to_process=raw_group,
-                         param_filt = param_filt)
-
+    try:
+        files = 'just_new'
+        feature_name = 'baseline_removal'
+        for raw_group in raw_groups:
+            param_filt_variation = ['MedianFIR']
+            for param_filt in param_filt_variation:
+                load_feature(path_to_load, path_to_map, feature_name,
+                             files=files,
+                             feature_group_to_process=raw_group,
+                             param_filt = param_filt)
+    except Exception as e:
+        print e
     #print 'stopppp'
     #stop
 
     # 3. Segmentation---------------------------------------------------------------------------
-    files = 'all_new'
+    files = 'just_new'
     feature_name = 'rpeak_detection'
     group_to_process = get_feature_group_name_list(path_to_map,
                                              'baseline_removal#')
@@ -424,6 +426,7 @@ def _main(disk,
                                 for feature_group_name in rpeaks_groups_to_process
                                 if 'baseline_removal' in feature_group_name]
 
+    sampling_rate = 1000
     for groups in zip(groups_to_process, rpeaks_groups_to_process):
         win_samplerate_variation = [sampling_rate]
         for win_samplerate in win_samplerate_variation:
