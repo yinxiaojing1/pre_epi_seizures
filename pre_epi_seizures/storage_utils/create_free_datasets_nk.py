@@ -30,7 +30,7 @@ def fetch_group_raw_to_map():
     group_list = ['/raw'
                    + '_$beginwin_samplerate:1000' 
                    + '_win:0.001'
-                   + '_init:0_finish:' + str(time_after_seizure + time_before_seizure)
+                   + '_init:0_finish:' + str(2 * 60 * 60)
                    + '_endwin$_'
                    + '_$beginparams_param:None'
                    + '_endparam$_'
@@ -60,77 +60,104 @@ def get_baseline_filenames(list_free_filenames_disk, list_seizure_filenames_disk
     return init_files
 
 
-def save_records_raw(path_to_save, baseline_filenames, baseline_data, patient_number):
+def save_records_raw(path_to_save,
+                     baseline_filenames,
+                     baseline_data,
+                     patient_number):
     # allocate raw group of features
-    time_before_seizure = 50 * 60
-    time_after_seizure = 20 * 60
-    group_list = ['/raw'
-                   + '_$beginwin_samplerate:1000' 
-                   + '_win:0.001'
-                   + '_init:0_finish:' + str(time_after_seizure + time_before_seizure)
-                   + '_endwin$_'
-                   + '_$beginparams_param:None'
-                   + '_endparam$_'
-                   ]
+    # time_before_seizure = 50 * 60
+    # time_after_seizure = 20 * 60
 
-    name_list = [str(patient_number) + '_' + filename[1] for filename in baseline_filenames]
-    baseline_data = [record[1]['signal'][0:1000*60*120].T for record in baseline_data.items()]
-    
+    # create group list
+    group_list = ['/raw' +
+                  '_$beginwin_samplerate:1000' +
+                  '_win:0.001' +
+                  '_init:0_finish:' +
+                  str(2 * 60 * 60) +
+                  '_endwin$_' +
+                  '_$beginparams_param:None' +
+                  '_endparam$_'
+                  ]
+
+    # Save dataset
+    name_list = [str(patient_number) + '_' + filename[1]
+                 for filename in baseline_filenames]
+    baseline_data = [record[1]['signal'][0:1000 * 60 * 120].T
+                     for record in baseline_data.items()]
+    baseline_data = [baseline_record[0]
+                     for baseline_record
+                     in baseline_data]
     mdata_list = [''] * len(baseline_data)
+
     save_signal(path_to_save, baseline_data, mdata_list, name_list, group_list)
 
 
-def _create_free_datasets(path_to_save, path_to_load, patient_number):
+def _create_free_datasets(path_to_load,
+                          path_to_save,
+                          patient_number):
 
+    # Input Stage********************************
     # import data from selected patient
     from patients_data_new import patients
-    patients = patients[str(patient_number)]
+    patient_dict = patients[str(patient_number)]
 
     # get all filenames from disk
     list_all_filenames_disk = list_all_files_patient(path_to_load,
-                                              patient_number)['signals']
-
-    print list_all_filenames_disk 
+                                                     patient_number)['signals']
     # get seizure filenames from disk
     list_seizure_filenames_disk = list_seizures_files_patient(path_to_load,
-                                             patients, patient_number)
-    # stop
+                                                              patient_dict,
+                                                              patient_number)
     list_seizure_filenames_disk = [seizure[0]
-                              for seizure in list_seizure_filenames_disk]
+                                   for seizure in list_seizure_filenames_disk]
 
     # get free from seizures filenames from disk
     list_free_filenames_disk = [filename
-                           for filename in list_all_filenames_disk
-                           if filename not in list_seizure_filenames_disk]
+                                for filename in list_all_filenames_disk
+                                if filename not in list_seizure_filenames_disk]
+    # *********************************************
 
+    # Run logic ***********************************
     baseline_filenames = get_baseline_filenames(list_free_filenames_disk,
-                                             list_seizure_filenames_disk)
-    # return baseline_filenames
-
-
+                                                list_seizure_filenames_disk)
     baseline_data = load_signal(path_to_load, baseline_filenames)
+    # ---------------- enact conformability with datastructures
 
-    print baseline_data
+    # --------------------------------------------------------
+    # *********************************************
+
+    # Output Stage ********************************
+    # Save records to disk
+    save_records_raw(path_to_save,
+                     baseline_filenames,
+                     baseline_data,
+                     patient_number)
 
 
-    save_records_raw(path_to_save, baseline_filenames, baseline_data, patient_number)
-
-
-def create_free_datasets(path_to_map, path_to_save, path_to_load, *patients):
-    [_create_free_datasets(path_to_save, path_to_load, patient)
-            for patient in patients]
+def create_free_datasets(path_to_load,
+                         path_to_map,
+                         path_to_save,
+                         patient_list,
+                         time_baseline):
+    # Run logic for each record
+    [_create_free_datasets(path_to_load, path_to_save, patient)
+     for patient in patient_list]
     feature_group = fetch_group_raw_to_map()
     write_feature_to_map(path_to_map, feature_group)
 
 
-def create_free_datasets_nk(patient_nr):
-    path_to_load = '/Volumes/ASSD/pre_epi_seizures/h5_files/raw_fulldata/HSM_data.h5'
-    path_to_save = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/baseline_datasets_new.h5'
-    path_to_map = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/baseline_datasets_new_map.txt'
-    # patient_number = 1
+def create_free_datasets_nk(disk, time_baseline, patient_list,):
 
-    time_before_seizure = 50 * 60
-    time_after_seizure = 20 * 60
+    # input files
+    path_to_load = disk + 'h5_files/raw_fulldata/HSM_data.h5'
+    path_to_map = disk  + 'h5_files/processing_datasets/baseline_datasets_new_map.txt'
 
-    create_free_datasets(path_to_map, path_to_save, path_to_load, patient_nr)
+    # Output files
+    path_to_save = disk + 'h5_files/processing_datasets/baseline_datasets_new.h5'
 
+    # Logic
+    create_free_datasets(path_to_load,
+                         path_to_map,
+                         path_to_save,
+                         patient_list,
+                         time_baseline)

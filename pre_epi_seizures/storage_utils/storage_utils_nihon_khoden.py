@@ -11,7 +11,6 @@ from pre_epi_seizures.logging_utils.formatter_logging import logger
 from pre_epi_seizures.storage_utils.storage_utils_hdf5 import  load_signal, save_signal
 
 
-
 # @profile
 def converter(patient_list, disk):
     path_list = get_file_list(patient_list, disk)

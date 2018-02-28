@@ -273,6 +273,9 @@ def load_feature(path_to_load, path_to_map, feature_to_load,
     print param_final
     print win_final
 
+    print 'FIles!!'
+    print files
+
 
     if files=='just_new':
         print 'here'
@@ -290,7 +293,6 @@ def load_feature(path_to_load, path_to_map, feature_to_load,
             feature_groups_to_process[k] = list_group_signals(path_to_load, feature_groups_to_process[k])['signals']
         names_to_save = get_names(list_group_signals(path_to_load, feature_group_to_process)['signals'])
         # print feature_groups_to_process
-
         #*****************IMPORTANT CHANGE***************************
         # names_to_save = get_names(list_group_signals(path_to_load, feature_group_to_process)['signals'])
 
@@ -353,34 +355,29 @@ def load_feature(path_to_load, path_to_map, feature_to_load,
 
 # @profile
 
-def main():
-    path_to_load = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new.h5'
-    path_to_map = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new_map.txt'
+def main(disk, dataset_files_path):
+    path_to_load = disk + 'h5_files/processing_datasets/seizure_datasets_new.h5'
+    path_to_map = disk + 'h5_files/processing_datasets/seizure_datasets_new_map.txt'
     sz = (path_to_load, path_to_map)
-    
-    path_to_load = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/baseline_datasets_new.h5'
-    path_to_map= '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/baseline_datasets_new_map.txt'
+
+    path_to_load = disk + 'h5_files/processing_datasets/baseline_datasets_new.h5'
+    path_to_map= disk + 'h5_files/processing_datasets/baseline_datasets_new_map.txt'
     baseline = (path_to_load, path_to_map)
-    
+
     order = [sz, baseline]
-    
+
     for path_to_load, path_to_map in order:
         print '********PATH: ' + str(path_to_load) + '******************'
         _main(path_to_load, path_to_map)
     
-def _main(path_to_load, path_to_map):
+def _main(disk,
+          dataset_files_path):
 
- # General Feature Extraction pipeline
+    # Input Stage
+    path_to_load = disk + dataset_files_path + '.h5'
+    path_to_map = disk + dataset_files_path + '_map.txt'
 
-    #signal
-    sampling_rate = 1000
-    time_before_seizure = 50 * 60
-    time_after_seizure = 20 * 60
-    dataset_name = str(
-    time_before_seizure) + '_' + str(time_after_seizure)
-    
-    
-
+    # General Feature Extraction pipeline
     # # 1. Raw -----------------------------------------------------------------------------------
     raw_groups = get_feature_group_name_list(path_to_map,
                                              'raw#')
@@ -390,7 +387,7 @@ def _main(path_to_load, path_to_map):
     # stop
 
     # 2. Baseline removal and denoisings------------------------------------------------------
-    files = 'just_new'
+    files = 'all_new'
     feature_name = 'baseline_removal'
     for raw_group in raw_groups:
         param_filt_variation = ['MedianFIR']
