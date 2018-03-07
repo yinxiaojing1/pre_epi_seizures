@@ -419,7 +419,7 @@ def _main(disk,
     rpeaks_groups_to_process = get_feature_group_name_list(path_to_map,
                                              'rpeak_detection#')
     feature_name = 'hrv_computation'
-    files = 'all_new'
+    files = 'just_new'
     groups_to_process = get_feature_group_name_list(path_to_map,
                                              'baseline_removal#')
     rpeaks_groups_to_process = [feature_group_name
@@ -444,7 +444,7 @@ def _main(disk,
                                              'rpeak_detection#')
     feature_name = 'hrv_time_features'
     # # 3.1.1 HRV features
-    files = 'all_new'
+    files = 'just_new'
     for group in zip(groups_to_process, rpeaks_groups_to_process):
         win_win_variation = [2 * 60]
         for win_win in win_win_variation:
@@ -458,12 +458,13 @@ def _main(disk,
     #stop
     print 'STOP!!!!!!'
     print 'Just hrv_time_features'
+    
 
     rpeaks_groups_to_process = get_feature_group_name_list(path_to_map,
                                              'rpeak_detection#')
     # stop
     feature_name = 'QRS_fixed_segmentation'
-    files = 'all_new'
+    files = 'just_new'
     groups_to_process = get_feature_group_name_list(path_to_map,
                                              'baseline_removal#')
     rpeaks_groups_to_process = [feature_group_name
@@ -507,7 +508,7 @@ def _main(disk,
 
     # STOP
 
-    files = 'all_new'
+    files = 'just_new'
     groups_to_process = get_feature_group_name_list(path_to_map,
                                              'QRS_fixed_segmentation#')
     print groups_to_process
@@ -524,10 +525,11 @@ def _main(disk,
 
             
     print 'PCA DONE!'
-    return
+
 
     groups_to_process = get_feature_group_name_list(path_to_map,
                                              'QRS_fixed_segmentation#')
+    files = 'all_new'
     print groups_to_process
     feature_name = 'rqa_computation'
     for groups in zip(groups_to_process, rpeaks_groups_to_process):
@@ -539,6 +541,9 @@ def _main(disk,
                          rpeak_group_to_process=groups[1],
                          feature_group_to_process=groups[0],
                          nr_comp = nr_comp_variation)
+            
+    print 'RQA DONE!'
+    return
 
     # # 3.2.1 F beat extraction
     # files = 'all_new'
