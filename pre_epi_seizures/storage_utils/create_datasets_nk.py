@@ -179,45 +179,47 @@ def get_record_dataset_seizure(path_to_load,
 
 
 def get_record_dataset_seizure_file(path_to_load,
+                                    path_to_save,
+                                    path_to_map,
                                     time_before_seizure,
                                     time_after_seizure,
                                     group_name_all_list,
                                     group_name_file_seizure,
                                     patient_dict,
+                                    patient_nr,
                                     nr_leads):
+    ''' Creates a record from a seizure file, based on the criteria
+        explicited by time_before_seizure and time_after_seizure,
+        '''
 
+    # Input requirements
+    # Get seizure number and corresponding file name
     seizure = group_name_file_seizure[1]
     group_name_file_seizure = group_name_file_seizure[0]
-    # load and allocate the seizure file
+
+    # load and allocate to memory the seizure file
     signals_structure = load_signal(path_to_load, [group_name_file_seizure])
     one_signal_structure = get_one_signal_structure(signals_structure,
                                                     group_name_file_seizure) 
     total_record = get_record(one_signal_structure)
 
-    print one_signal_structure
-    print total_record
-    print seizure
-    print patient_dict
 
+    # get seizure datetime
     seizure_time = datetime.combine(
                     patient_dict['dates_of_seizure'][seizure],
                     patient_dict['ictal_on_time'][seizure]
                     )
 
-    print seizure_time
+    # generate output file name
     name = group_name_file_seizure[1]
     date_time_file = datetime.strptime(
-                                 name[len(name)-26:len(name)-1],
+                                 name[len(name) - 26:len(name) - 1],
                                 '%Y-%m-%d %H:%M:%S.%f')
-    print date_time_file
-    print seizure_time
 
+    # create seizure record (Logic)
     Fs = 1000
-
     time_seconds_seizure = (seizure_time - date_time_file).total_seconds()
-    print time_seconds_seizure
     sample_seizure = int(Fs*time_seconds_seizure)
-    print sample_seizure
     samples_before_seizure = int(time_before_seizure * Fs)
     samples_after_seizure = int(time_after_seizure * Fs)
 
@@ -231,91 +233,35 @@ def get_record_dataset_seizure_file(path_to_load,
                 total_record=total_record,
                 nr_leads=nr_leads)]
 
-    # dataset_seizures_file = [
-    #     get_record_dataset_seizure(
-    #         path_to_load=path_to_load,
-    #         samples_before_seizure=samples_before_seizure,
-    #         samples_after_seizure=samples_after_seizure,
-    #         sample_seizure=sample_seizure,
-    #         group_name_all_list=group_name_all_list,
-    #         group_name_seizure=group_name_file_seizure,
-    #         total_record=total_record)
-    #     for sample_seizure in sample_seizures]
-
-    _logger.debug(np.shape(np.asarray(dataset_seizures_file)))
-    print seizure
-
-    dataset_seizures_file = [(group_name_file_seizure[1] + '_' + str(seizure), signal)
+    # Output peocedures
+    # Prep record for saving
+    dataset_seizures_file = [(group_name_file_seizure[1] +
+                              '_' + str(seizure), signal)
                              for signal in dataset_seizures_file]
+    save_dataset(path_to_save,
+                 path_to_map,
+                 time_before_seizure,
+                 time_after_seizure,
+                 patient_nr,
+                 [dataset_seizures_file])
+    # *** ATENTION. take notice [dataset_seizure_file].
+    # This list construct is required, since save_dataset is 
+    # prepared to save list of records (dataset), not a single
+    # record
+
+
     # stop
     # print dataset_seizures_file
     return dataset_seizures_file
 
 
-def create_seizure_dataset_patient(path_to_load, path_to_save, 
-                                   path_to_map,
-                                   time_before_seizure,
-                                   time_after_seizure, patient_number):
-    _logger.debug('searching all files')
+def save_dataset(path_to_save,
+                 path_to_map,
+                 time_before_seizure,
+                 time_after_seizure,
+                 patient_number,
+                 dataset_list_files):
 
-    # import data from selected patient
-    from patients_data_new import patients
-    patients = patients[str(patient_number)]
-
-    # retrieve the names of all available files
-    group_name_all_list = list_all_files_patient(path_to_load=path_to_load,
-                                                 patient_number=patient_number)
-    _logger.debug(group_name_all_list)
-
-    nr_leads = get_nr_leads(group_name_all_list)
-    # print nr_leads
-    # stops
-    # retrieve the names of all the seizure files
-    group_name_seizure_list = list_seizures_files_patient(
-        path_to_load=path_to_load,
-        patient_dict=patients,
-        patient_number = patient_number)
-
-    print group_name_seizure_list
-    # stop
-    _logger.debug(group_name_seizure_list)
-
-    # set up the intial h5 group file for processing: 'raw'
-    group_list = ['/' + str(time_before_seizure) + '_' + str(time_after_seizure) + '/raw']
-
-    # # check alreasy creted datasets
-    # try:
-    #     group_name_already_saved = list_group_signals(path_to_save, group_list[0])
-    
-    # except Exception as e:
-    #     _logger.info('No files have been processed in ' + path_to_save)
-    #     group_name_already_saved = None
-
-    dataset_list =\
-        [get_record_dataset_seizure_file(
-            path_to_load,
-            time_before_seizure=time_before_seizure,
-            time_after_seizure=time_after_seizure,
-            group_name_all_list=group_name_all_list,
-            group_name_file_seizure=group_name,
-            patient_dict=patients,
-            nr_leads=nr_leads)
-            for group_name in group_name_seizure_list]
-
-    # dataset_list = [val for sublist in dataset_list for val in sublist]
-
-    print dataset_list
-
-    # stop
-    save_dataset(path_to_save, path_to_map, time_before_seizure, time_after_seizure, patient_number, dataset_list)
-
-    # mdata = group_name_seizure_list
-
-    _logger.error('the dataset_list is the following: %s', dataset_list)
-    return dataset_list
-
-def save_dataset(path_to_save, path_to_map, time_before_seizure, time_after_seizure, patient_number, dataset_list_files):
-    
     group_list = ['/' + str(time_before_seizure) + '_' + str(time_after_seizure) + '/raw'
                    + '_$beginwin_samplerate:1000' 
                    + '_win:0.001'
@@ -328,6 +274,7 @@ def save_dataset(path_to_save, path_to_map, time_before_seizure, time_after_seiz
 
     write_feature_to_map(path_to_map, group_list[0])
     for dataset_list_file in dataset_list_files:
+        print dataset_list_file
         name_list = [str(patient_number) + '_' + seizure_record[0] for seizure_record in dataset_list_file]
         signal_list = [np.array([seizure_record[1]]) for seizure_record in dataset_list_file]
         mdata_list=[{'fs':1000}]*len(dataset_list_file)
@@ -335,54 +282,85 @@ def save_dataset(path_to_save, path_to_map, time_before_seizure, time_after_seiz
         save_signal(path_to_save, signal_list, mdata_list, name_list, group_list)
 
 
+def create_seizure_dataset_patient(path_to_load, path_to_save,
+                                   path_to_map,
+                                   time_before_seizure,
+                                   time_after_seizure, patient_number):
+    _logger.debug('searching all files')
+
+    # import datetime of seizure from selected patient
+    from patients_data_new import patients
+    patient_dict = patients[str(patient_number)]
+
+    # retrieve the names of all available files
+    group_name_all_list = list_all_files_patient(path_to_load=path_to_load,
+                                                 patient_number=patient_number)
+
+    _logger.debug(group_name_all_list)
+
+    # get number of leads
+    nr_leads = get_nr_leads(group_name_all_list)
+
+    # retrieve the names of all the seizure files
+    group_name_seizure_list = list_seizures_files_patient(
+        path_to_load=path_to_load,
+        patient_dict=patient_dict,
+        patient_number=patient_number)
+    _logger.debug(group_name_seizure_list)
+
+    # Get all the seizure records into memory
+    seizure_list = [get_record_dataset_seizure_file(
+                    path_to_load=path_to_load,
+                    path_to_save=path_to_save,
+                    path_to_map=path_to_map,
+                    time_before_seizure=time_before_seizure,
+                    time_after_seizure=time_after_seizure,
+                    group_name_all_list=group_name_all_list,
+                    group_name_file_seizure=group_name,
+                    patient_dict=patient_dict,
+                    patient_nr=patient_number,
+                    nr_leads=nr_leads)
+                    for group_name in group_name_seizure_list]
+
+
+    # Save seizure records to disk
+    #save_dataset(path_to_save, path_to_map, time_before_seizure, time_after_seizure, patient_number, dataset_list)
+    #_logger.error('the dataset_list is the following: %s', dataset_list)
+    #return dataset_list
+
+
 def create_seizure_dataset(path_to_load, path_to_save,
                            path_to_map,
                            time_before_seizure,
-                           time_after_seizure, *args):
+                           time_after_seizure, patient_list):
 
-    seizure_dataset =\
-        [create_seizure_dataset_patient(path_to_load,
-                                        path_to_save,
-                                        path_to_map,
-                                        time_before_seizure,
-                                        time_after_seizure,
-                                        arg)
-         for arg in args]
-    _logger.debug('Befor_saving')
-    
+    # Run logic for each patient
+    [create_seizure_dataset_patient(path_to_load,
+                                    path_to_save,
+                                    path_to_map,
+                                    time_before_seizure,
+                                    time_after_seizure,
+                                    patient)
+     for patient in patient_list]
 
 
+def create_datasets_nk(disk,
+                       time_before_seizure,
+                       time_after_seizure,
+                       patient_list):
 
-# def create_seizure_mdata(path_to_load, *args):
+    # required input files
+    path_to_load = disk + ('h5_files/raw_fulldata/HSM_data.h5')
+    path_to_map = disk + ('h5_files/processing_datasets/' +
+                          'seizure_datasets_new_map.txt')
 
-#     mdata = [list_seizures_files_patient(
-#         path_to_load=path_to_load,
-#         patient_number=patient_number)
-#         for patient_number in args]
+    # Output files
+    path_to_save = disk + ('h5_files/processing_datasets' +
+                           '/seizure_datasets_new.h5')
 
-#     mdata = [val for sublist in mdata for val in sublist]
-
-#     return mdata
-
-
-# def save_seizure_dataset(seizure_dataset, group_name_list)
-#     []
-#     mdata = group_name_list
-# #     singal = save_signal
-
-
-# # _logger.setLevel(10)
-
-def create_datasets_nk(patient_nr):
-    path_to_load = '/Volumes/ASSD/pre_epi_seizures/h5_files/raw_fulldata/HSM_data.h5'
-    path_to_save = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new.h5'
-    path_to_map = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new_map.txt'
-
-    time_before_seizure = 50 * 60
-    time_after_seizure = 20 * 60
-
-    dataset = create_seizure_dataset(path_to_load, path_to_save,
-                                     path_to_map,
-                                     time_before_seizure,
-                                     time_after_seizure,
-                                     patient_nr)
+    # Run logic
+    create_seizure_dataset(path_to_load, path_to_save,
+                           path_to_map,
+                           time_before_seizure,
+                           time_after_seizure,
+                           patient_list)

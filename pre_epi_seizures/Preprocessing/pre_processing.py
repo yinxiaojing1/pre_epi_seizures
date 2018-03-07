@@ -273,6 +273,9 @@ def load_feature(path_to_load, path_to_map, feature_to_load,
     print param_final
     print win_final
 
+    print 'FIles!!'
+    print files
+
 
     if files=='just_new':
         print 'here'
@@ -290,7 +293,6 @@ def load_feature(path_to_load, path_to_map, feature_to_load,
             feature_groups_to_process[k] = list_group_signals(path_to_load, feature_groups_to_process[k])['signals']
         names_to_save = get_names(list_group_signals(path_to_load, feature_group_to_process)['signals'])
         # print feature_groups_to_process
-
         #*****************IMPORTANT CHANGE***************************
         # names_to_save = get_names(list_group_signals(path_to_load, feature_group_to_process)['signals'])
 
@@ -353,34 +355,29 @@ def load_feature(path_to_load, path_to_map, feature_to_load,
 
 # @profile
 
-def main():
-    path_to_load = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new.h5'
-    path_to_map = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/seizure_datasets_new_map.txt'
+def main(disk, dataset_files_path):
+    path_to_load = disk + 'h5_files/processing_datasets/seizure_datasets_new.h5'
+    path_to_map = disk + 'h5_files/processing_datasets/seizure_datasets_new_map.txt'
     sz = (path_to_load, path_to_map)
-    
-    path_to_load = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/baseline_datasets_new.h5'
-    path_to_map= '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/baseline_datasets_new_map.txt'
+
+    path_to_load = disk + 'h5_files/processing_datasets/baseline_datasets_new.h5'
+    path_to_map= disk + 'h5_files/processing_datasets/baseline_datasets_new_map.txt'
     baseline = (path_to_load, path_to_map)
-    
+
     order = [sz, baseline]
-    
-    for path_to_load, path_to_map in [order[-1]]:
+
+    for path_to_load, path_to_map in order:
         print '********PATH: ' + str(path_to_load) + '******************'
         _main(path_to_load, path_to_map)
     
-def _main(path_to_load, path_to_map):
+def _main(disk,
+          dataset_files_path):
 
- # General Feature Extraction pipeline
+    # Input Stage
+    path_to_load = disk + dataset_files_path + '.h5'
+    path_to_map = disk + dataset_files_path + '_map.txt'
 
-    #signal
-    sampling_rate = 1000
-    time_before_seizure = 50 * 60
-    time_after_seizure = 20 * 60
-    dataset_name = str(
-    time_before_seizure) + '_' + str(time_after_seizure)
-    
-    
-
+    # General Feature Extraction pipeline
     # # 1. Raw -----------------------------------------------------------------------------------
     raw_groups = get_feature_group_name_list(path_to_map,
                                              'raw#')
@@ -390,16 +387,18 @@ def _main(path_to_load, path_to_map):
     # stop
 
     # 2. Baseline removal and denoisings------------------------------------------------------
-    files = 'just_new'
-    feature_name = 'baseline_removal'
-    for raw_group in raw_groups:
-        param_filt_variation = ['MedianFIR']
-        for param_filt in param_filt_variation:
-            load_feature(path_to_load, path_to_map, feature_name,
-                         files=files,
-                         feature_group_to_process=raw_group,
-                         param_filt = param_filt)
-
+    try:
+        files = 'just_new'
+        feature_name = 'baseline_removal'
+        for raw_group in raw_groups:
+            param_filt_variation = ['MedianFIR']
+            for param_filt in param_filt_variation:
+                load_feature(path_to_load, path_to_map, feature_name,
+                             files=files,
+                             feature_group_to_process=raw_group,
+                             param_filt = param_filt)
+    except Exception as e:
+        print e
     #print 'stopppp'
     #stop
 
@@ -427,6 +426,7 @@ def _main(path_to_load, path_to_map):
                                 for feature_group_name in rpeaks_groups_to_process
                                 if 'baseline_removal' in feature_group_name]
 
+    sampling_rate = 1000
     for groups in zip(groups_to_process, rpeaks_groups_to_process):
         win_samplerate_variation = [sampling_rate]
         for win_samplerate in win_samplerate_variation:
@@ -444,7 +444,7 @@ def _main(path_to_load, path_to_map):
                                              'rpeak_detection#')
     feature_name = 'hrv_time_features'
     # # 3.1.1 HRV features
-    files = 'all_new'
+    files = 'just_new'
     for group in zip(groups_to_process, rpeaks_groups_to_process):
         win_win_variation = [2 * 60]
         for win_win in win_win_variation:
@@ -458,6 +458,7 @@ def _main(path_to_load, path_to_map):
     #stop
     print 'STOP!!!!!!'
     print 'Just hrv_time_features'
+    
 
     rpeaks_groups_to_process = get_feature_group_name_list(path_to_map,
                                              'rpeak_detection#')
@@ -524,10 +525,11 @@ def _main(path_to_load, path_to_map):
 
             
     print 'PCA DONE!'
-    return
+
 
     groups_to_process = get_feature_group_name_list(path_to_map,
                                              'QRS_fixed_segmentation#')
+    files = 'all_new'
     print groups_to_process
     feature_name = 'rqa_computation'
     for groups in zip(groups_to_process, rpeaks_groups_to_process):
@@ -539,6 +541,9 @@ def _main(path_to_load, path_to_map):
                          rpeak_group_to_process=groups[1],
                          feature_group_to_process=groups[0],
                          nr_comp = nr_comp_variation)
+            
+    print 'RQA DONE!'
+    return
 
     # # 3.2.1 F beat extraction
     # files = 'all_new'

@@ -18,6 +18,53 @@ path_to_load_seizure_map = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_d
 path_to_load_baseline = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/baseline_datasets_new.h5'
 path_to_load_baseline_map = '/Volumes/ASSD/pre_epi_seizures/h5_files/processing_datasets/baseline_datasets_new_map.txt'
 
+
+def load_records(path_to_load, path_to_map, patient_list, feature_slot, lead_list):
+    # Feature group to analyse -- point of entry
+    feature_name = get_feature_group_name_list(path_to_map,
+                                               feature_slot)[0]
+    
+    # Load records as lists, numpy storage method
+    records_list = get_patient_feature_lead_records(path_to_load,
+                                                    feature_name,
+                                                    patient_list,
+                                                    lead_list)
+    data_struct = load_feature_from_input_list(path_to_load,
+                                               records_list)
+    window_data_struct = load_feature_window_from_input_list(path_to_load,
+                                                         records_list)
+    
+    # convert to pandas
+    records_data = data_struct[0]
+    records_sample = window_data_struct[0]    
+    records_mdata = data_struct[1]
+    records_patient =[record_name[1][0] for record_name in records_list]
+    records_seizure =[record_name[1][-1] for record_name in records_list]
+    records_pd_list = [convert_record_to_pd_dataframe(data, sample, mdata,
+                                                      patient, seizure)
+                       for data, sample, mdata, patient, seizure in zip(
+                                              records_data, records_sample, records_mdata,
+                                              records_patient, records_seizure)]
+    
+    final_data_struct_pd = pd.concat(records_pd_list)
+    return final_data_struct_pd
+    
+def convert_record_to_pd_dataframe(data, sample, mdata, patient, seizure):
+    # First, convert data
+    record = pd.DataFrame(data.T, columns=mdata['feature_legend'])
+    
+    # Add time sample
+    record['time_sample'] = sample
+    
+    # Add patient number
+    record['patient_nr'] = patient
+    
+    # Add seizure number
+    record['seizure_nr'] = seizure
+    
+    return record   
+    
+
     
 def load_feature_groups_baseline_seizure_per_patient(patient_list, feature_slot):
     """ Designed to load the data 

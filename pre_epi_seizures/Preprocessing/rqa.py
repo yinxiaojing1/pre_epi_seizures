@@ -12,7 +12,7 @@ def rqa_computation(signal_arguments,
                     win_param_to_process, param_to_process):
     signal_list = signal_arguments['feature_group_to_process']
     rpeaks_list = signal_arguments['rpeak_group_to_process']    
-    rqa_list = [compute_rqa(beats_seizure) for beats_seizure in signal_list]
+    rqa_list = [np.array(compute_rqa(beats_seizure)) for beats_seizure in signal_list]
     mdata = [
              {'feature_legend': ['entropy_white_vertical_lines', 'number_of_vertical_lines'
                                 'number_of_white_vertical_lines', 'entropy_diagonal_lines',

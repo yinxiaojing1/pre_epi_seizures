@@ -11,10 +11,9 @@ from pre_epi_seizures.logging_utils.formatter_logging import logger
 from pre_epi_seizures.storage_utils.storage_utils_hdf5 import  load_signal, save_signal
 
 
-
 # @profile
-def converter(*args):
-    path_list = get_file_list(*args)
+def converter(patient_list, disk):
+    path_list = get_file_list(patient_list, disk)
     # print path_list
     for path in path_list:
 
@@ -41,7 +40,7 @@ def converter(*args):
         print names_files
 
         # stop
-        path = '/Volumes/ASSD/pre_epi_seizures/h5_files/raw_fulldata/HSM_data.h5'
+        path = '/Volumes/Seagate Bac/pre_epi_seizures/h5_files/raw_fulldata/HSM_data.h5'
         # stop
         save_signal(path=path, signal_list= signals, mdata_list=['']*len(signals), name_list=names_files, group_list=[name_patient])
 
@@ -152,8 +151,8 @@ def read_edf_file(file_name):
     return edf_file, signal_labels
 
 
-def get_file_list(*args):
-    path_list = fetch_path_list(*args)
+def get_file_list(patient_list, disk):
+    path_list = fetch_path_list(patient_list, disk)
     files_list = fetch_files_list(path_list)
     print files_list
     # print files_list
@@ -167,7 +166,7 @@ def fetch_files_list(path_list):
          '.edf' in i]
 
 
-def fetch_path_list(*args):
-    return ['/Volumes/ASSD/pre_epi_seizures/' + 'PATIENT' + str(arg) + '/' for arg in args]
+def fetch_path_list(patient_list, disk):
+    return [disk + 'PATIENT' + str(arg) + '/' for arg in patient_list]
 
 
