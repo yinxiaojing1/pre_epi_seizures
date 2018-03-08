@@ -1,7 +1,7 @@
 from pre_epi_seizures.storage_utils.storage_utils_hdf5 import \
     load_signal, save_signal, delete_signal, list_group_signals
 
-from pre_epi_seizures.Preprocessing.pre_processing import *
+from ..pre_processing import *
 
 # from pre_epi_seizures.stats_utils.statistics import create_set_from_disk
 

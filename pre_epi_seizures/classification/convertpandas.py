@@ -1,5 +1,5 @@
 from load_for_class import *
-from labels import *
+#from labels import *
 from supervised_training import *
 
 

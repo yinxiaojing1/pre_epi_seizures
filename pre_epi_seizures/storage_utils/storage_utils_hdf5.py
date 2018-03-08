@@ -1,5 +1,5 @@
 
-from pre_epi_seizures.logging_utils.formatter_logging\
+from formatter_logging\
     import logger as _logger
 
 from biosppy import storage as st_hdf5
