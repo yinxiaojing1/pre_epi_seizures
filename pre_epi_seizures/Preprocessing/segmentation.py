@@ -25,27 +25,56 @@ import functools
 
 def rpeak_detection(signal_arguments, win_params, add_params, win_param_to_process, param_to_process):
     signal_list = signal_arguments['feature_group_to_process']
-    # signal_list = [np.asarray([signal]) for signal in signal_list]
+    
 
-    print signal_list
-
-    # print signal_list
-
-    # stop
-    # #---------------------------------------
     # Compute feature
     method = add_params['method']
     sampling_rate = win_param_to_process['samplerate']
-
-    # print sampling_rate
-
-    rpeaks = map(functools.partial(detect_rpeaks,
-                 method=method,
-                 sampling_rate=sampling_rate), signal_list)
+    rpeaks = map(functools.partial(run_univariate_rpeaks_detection,
+                                   method=method,
+                                   sampling_rate=sampling_rate),
+                 signal_list)
 
     window_list = rpeaks
     mdata_list = [{'feature_legend':['rpeaks']}] * len(rpeaks)
     return rpeaks, mdata_list, window_list
+
+
+def run_univariate_rpeaks_detection(feature_array, method, sampling_rate=1000):
+    # Select function of rpeak detection
+    if method == 'hamilton':
+        detector = ecg.hamilton_segmenter
+    
+    # Compute Rpeaks for each feature_signal (ECG)
+    rpeaks_feature_array = np.array([detect_rpeaks(feature_signal,
+                                                   detector,
+                                                   sampling_rate)
+                                     for feature_signal in feature_array])
+    
+    return rpeaks_feature_array
+
+
+def detect_rpeaks(feature_signal, detector, sampling_rate):
+    # detect rpeaks
+    rpeaks = detector(signal=feature_signal,
+                      sampling_rate=sampling_rate)['rpeaks']
+    return rpeaks
+
+
+def visual_inspection(signal_list,
+                      rpeaks,
+                      begin_second,
+                      end_second):
+    signal = signal_list[0][0]
+    l = len(signal)
+  
+    import matplotlib.pyplot as plt
+    plt.figure()
+    plt.plot(np.linspace(0, l-1, l), signal)
+    rpeaks = rpeaks[0][0]
+    plt.plot(rpeaks, signal[rpeaks], 'o')
+    plt.xlim(begin_second * 1000, end_second * 1000)
+    plt.show()
 
 
 def QRS_fixed_segmentation(signal_arguments,
@@ -109,14 +138,6 @@ def compute_beat_phase(signal, rpeaks, sampling_rate):
 def compute_hrv(rpeaks):
     print rpeaks
     return 1.0/np.diff(rpeaks)
-
-
-def detect_rpeaks(feature_array, method, sampling_rate=1000):
-    record = feature_array[0][0]
-    if method == 'hamilton':
-        rpeaks = ecg.hamilton_segmenter(signal=record,
-                                        sampling_rate=sampling_rate)
-    return np.asarray([rpeaks['rpeaks']])
 
 
 def find_rpeaks(rpeaks, start, end): 

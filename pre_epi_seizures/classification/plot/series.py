@@ -14,6 +14,7 @@ def time_series_plot(path_to_save, df,
                      seizure_id,
                      label_id,
                      color_id):
+    
 
     # Loop for patients
     patients = df[patient_id].unique()
@@ -51,15 +52,12 @@ def time_series_plot(path_to_save, df,
                     plt.ylabel(feature)
                     plt.legend([label])
                     
-                    # Title
-                    if i == 0:
-                        plt.title(save_str)
                 
                 # Save figure
                 
                 plt.title(save_str)
                 plt.show()
-                plt.savefig(path_to_save + save_str)
+                #plt.savefig(path_to_save + save_str)
 
 
 

@@ -18,36 +18,19 @@ def load_signal(path, group_name_list):
     return return_dict
 
 
-# def save_signal_group_name(path, signal_list, mdata_list, group_name_list):
-#     opened_file = st_hdf5.HDF(path, 'a')
-#     for group_name, signal, mdata in zip(group_name_list, signal_list, mdata_list):
-#         add_signal(opened_file, signal, mdata, group_name[1], group_name[0])
-
-
 def save_signal(path, signal_list, mdata_list, name_list, group_list):
-    print path
 
-
-    # try:
-    #     opened_file = st_hdf5.HDF(path, 'r+')
-    # except Exception as e:
-    #     print e
-    #     opened_file = st_hdf5.HDF(path, 'r')
-    #     # stop
-    #     opened_file.close()
-    #     print 'done'
-
+    # Open file
     opened_file = st_hdf5.HDF(path, 'a')
 
-    # stop
     for group in group_list:
         for signal, mdata, name in zip(signal_list,
                                        mdata_list, name_list):
             add_signal(opened_file=opened_file, signal=signal,
                        mdata=mdata, name=name, group=group)
-    print 'closinnngg'
+
     opened_file.close()
-    print 'CLOSEDDDDD'
+    
 
 def get_signal(opened_file, group_name):
     group = group_name[0]
@@ -64,7 +47,6 @@ def get_signal(opened_file, group_name):
 
 def add_signal(opened_file, signal, mdata, name, group):
     _logger.info('Saving [signal: %s][group: %s]', name, group)
-    print 'addd'
     try:
         signal = opened_file.add_signal(signal=signal, mdata=mdata,
                                         name=name, group=group)

@@ -37,7 +37,7 @@ def histogram(path_to_save,
                 # plot histogram
                 try:
                     sns.distplot(univariate_data_label, color=color,
-                                 kde=False)
+                                 kde=False, bins=100)
                 
                 except Exception as e:
                     print e

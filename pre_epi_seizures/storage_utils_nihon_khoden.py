@@ -40,7 +40,7 @@ def converter(patient_list, disk):
         print names_files
 
         # stop
-        path = '/Volumes/Seagate Bac/pre_epi_seizures/h5_files/raw_fulldata/HSM_data.h5'
+        path = disk + 'h5_files/raw_fulldata/HSM_data.h5'
         # stop
         save_signal(path=path, signal_list= signals, mdata_list=['']*len(signals), name_list=names_files, group_list=[name_patient])
 

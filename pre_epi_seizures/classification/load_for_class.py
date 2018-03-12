@@ -1,7 +1,9 @@
 from pre_epi_seizures.storage_utils.storage_utils_hdf5 import \
     load_signal, save_signal, delete_signal, list_group_signals
 
-from ..pre_processing import *
+from pre_epi_seizures.storage_utils.data_handlers import *
+
+#from pre_epi_seizures.Preprocessing.pre_processing import *
 
 # from pre_epi_seizures.stats_utils.statistics import create_set_from_disk
 
@@ -9,6 +11,19 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 import os
+
+def get_feature_group_name_list(path_to_map, feature_name):
+    with open(path_to_map, 'r') as inF:
+        feature_group_name_list = [ feature_group_name[:feature_group_name.index('#')]
+                                     + feature_group_name[feature_group_name.index('#') + 1:
+                                        feature_group_name.index('!')]
+                                    for feature_group_name in inF
+                                    if '#' and feature_name in feature_group_name
+                                   ]
+
+    inF.close()
+            # print feature_name
+    return feature_group_name_list
 
 # Code needs improving
 def load_all_features_from_disk(path_to_load, feature_group_name):
@@ -88,7 +103,7 @@ def load_feature_from_input_list(path_to_load, feature_group_name_record_list):
     except Exception as e:
         print signal_structure
         print e
-        stop
+
 
         
 def get_patient_seizure_from_input_list(path_to_load, feature_group_name_record_list):
@@ -112,8 +127,7 @@ def load_feature_window_from_input_list(path_to_load, feature_group_name_record_
         return extracted_features, mdata
 
     except Exception as e:
-        _logger.debug(e)
-
+        print e
 
 
 

@@ -9,82 +9,62 @@ from decimal import *
 def hrv_computation(signal_arguments, window_params, add_params, win_param_to_process, param_to_process):
     signal_list = signal_arguments['feature_group_to_process']
     rpeaks_list = signal_arguments['feature_group_to_process']
-
-    print rpeaks_list
-
-
-    hrv_list = map(compute_hrv, rpeaks_list[0])
-    print hrv_list
- 
-    # resampling 
-    domains = [rpeak[1:] for rpeak in rpeaks_list[0]]
-    new_domains_i = [np.arange(rpeak[1], rpeak[-1] + 1, 1)] * len(rpeaks_list)
-    # new_domains = [np.linspace(rpeak[1], rpeak[-1], len(signal[rpeak[1]:rpeak[-1]+1])) for signal in signal_list[0]]
     
-    # print 'here'
-    # print new_domains_i[0]
-    # # print new_domains[0]
+    try:
+        
+        # Compute Unequal sampled hrv
+        hrv_list = map(compute_hrv, rpeaks_list[0])
 
-    # stop
-    
-    # stop
+        # resampling 
+        domains = [rpeak[1:] for rpeak in rpeaks_list[0]]
 
-    hrv_list = [np.asarray([interpolate(hrv, new_domain, domain)]) for hrv, new_domain, domain in zip(hrv_list, new_domains_i, domains)]
+        new_domains_i = [np.arange(rpeak[0][1], rpeak[0][-1] + 1, 1)
+                         for rpeak in rpeaks_list] 
 
-    # hrv_mean_list = [compute_mean_NN(10, hrv_signal, sampling_rate) for hrv_signal in hrv_list]
+        hrv_list = [np.asarray([interpolate(hrv, new_domain, domain)])
+                    for hrv, new_domain, domain in zip(hrv_list,
+                                                       new_domains_i,
+                                                       domains)]
+    except Exception as e:
+        print e
+        hrv_list = [[]]
+        new_domains_i =[[]]
 
-    # hrv_sd_list = [compute_SD_NN(10, hrv_signal, sampling_rate) for hrv_signal in hrv_list]
-
-
+    # Load feature names
     mdata = [{'feature_legend': ['hrv']}] * len(hrv_list)
 
     return hrv_list, mdata, new_domains_i
 
 
 def hrv_time_features(signal_arguments, window_params, add_params, win_param_to_process, param_to_process):
+    
+    # Get hrv signal parameters
     rpeaks_list = signal_arguments['rpeak_group_to_process']
     hrv_signal_list = signal_arguments['feature_group_to_process']
     window = window_params['win']
-
-
     init = window_params['init']
-
     sampling_rate = window_params['samplerate']
-
-    overlap = 0.75
-
-
-    # stop
-    n_samples = (window * sampling_rate)
-
-    # stop
-
     finish = window_params['finish']
+    try :
+        # Set hrv_time_features parameters
+        overlap = 0.75
+        n_samples = (window * sampling_rate)
 
+        # Get window of hrv signal
+        window_tuple_list = create_window_tuple(rpeaks_list, window, overlap, sampling_rate)
+        windows_list = create_window_time_domain(window_tuple_list)
+        split_list = get_hrv_window(hrv_signal_list, window_tuple_list)
 
+        # Compute features on these windows
+        hrv_features = [compute_hrv_features(hrv_window, sampling_rate)
+                        for hrv_window in split_list]
+    except Exception as e:
+        hrv_features = [[]]
+        windows_list = [[]]
 
-    window_tuple_list = create_window_tuple(rpeaks_list, window, overlap, sampling_rate)
-
-
-    windows_list = create_window_time_domain(window_tuple_list)
-    # split_list = 
-
-    split_list = get_hrv_window(hrv_signal_list, window_tuple_list)
-
-
-    hrv_features = [compute_hrv_features(hrv_window, sampling_rate)
-                    for hrv_window in split_list]
-
-    # windows_list = [window] * len(hrv_signal_list)
-
-    # split_list = fixed_window_split(hrv_signal_list, windows_list)
-    # print split
-    # print hrv_time_features
-
-
+    # Load features names
     mdata = [{'feature_legend': ['mean_NN', 'SD_NN', 'p_NN50', 'var_NN',
                                  'LF', 'HF', 'LF_HF']}] * len(hrv_features)
-    # stop
 
     return hrv_features, mdata, windows_list
 

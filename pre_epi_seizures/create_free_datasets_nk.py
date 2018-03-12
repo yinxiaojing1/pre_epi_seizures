@@ -45,6 +45,7 @@ def get_baseline_filenames(list_free_filenames_disk, list_seizure_filenames_disk
                             list_free_filenames_disk)
     list_seizure_filenames = map(parse_string_from_name,
                                  list_seizure_filenames_disk)
+   
     # convert to datetime
     list_free_filenames_datetime = map(get_file_datetime,
                                          list_free_filenames)
@@ -52,10 +53,12 @@ def get_baseline_filenames(list_free_filenames_disk, list_seizure_filenames_disk
                                          list_seizure_filenames)
 
     # get filenames from files at least 2 hours before any seizure --Assumption baseline
-    datetime_1st_seizure = list_seizure_filenames_datetime[0]    #1st seizure date time
+    datetime_1st_seizure = sorted(list_seizure_filenames_datetime)[0]    #1st seizure date time
+   
+
     init_files = [list_free_filenames_disk[i]
                   for i, file in enumerate(list_free_filenames_datetime)
-                  if datetime_1st_seizure - file > timedelta(hours=4)]
+                  if datetime_1st_seizure - file > timedelta(hours=2)]
 
     return init_files
 
@@ -95,12 +98,13 @@ def _create_free_datasets(path_to_load,
 
     # Input Stage********************************
     # import data from selected patient
-    from patients_data_new import patients
+    from storage_utils.patients_data_new import patients
     patient_dict = patients[str(patient_number)]
 
     # get all filenames from disk
     list_all_filenames_disk = list_all_files_patient(path_to_load,
                                                      patient_number)['signals']
+
     # get seizure filenames from disk
     list_seizure_filenames_disk = list_seizures_files_patient(path_to_load,
                                                               patient_dict,
@@ -117,6 +121,7 @@ def _create_free_datasets(path_to_load,
     # Run logic ***********************************
     baseline_filenames = get_baseline_filenames(list_free_filenames_disk,
                                                 list_seizure_filenames_disk)
+    
     baseline_data = load_signal(path_to_load, baseline_filenames)
     # ---------------- enact conformability with datastructures
 

@@ -4,36 +4,37 @@ from datetime import date
 
 
 patients = {
-# patient10 = {'sex': 'm',
-#              'age': 55,
-#              'ictal_clinical_on_time' [time(06, 44, 07),
-#                                        time(10, 02, 46),
-#                                        time(12, 04, 06),
-#                                        time(17, 24, 58),
-#                                       ],
-#              'post_ictal_time': [time(06, 46, 29),
-#                                  time(10, 04, 01),
-#                                  time(12, 07, 38),
-#                                  time(17, 25, 12),
-#                                 ],
-#              'ictal_on_time': [time(06, 44, 00),
-#                                time(10, 02, 45),
-#                                time(12, 04, 16),
-#                                time(17, 24, 57),
-#                               ],
-#              'types_of_seizure': ['F',
-#                                   'F',
-#                                   'F',
-#                                   'F'
-#                                  ],
+ '10': {'sex': 'm',
+              'age': 55,
+              'ictal_clinical_on_time': [time(6, 44, 7),
+                                        time(10, 2, 46),
+                                        time(12, 4, 6),
+                                        time(17, 24, 58),
+                                       ],
+              'post_ictal_time': [time(6, 46, 29),
+                                  time(10, 4, 1),
+                                  time(12, 7, 38),
+                                  time(17, 25, 12),
+                                 ],
+              'ictal_on_time': [time(6, 44, 0),
+                                time(10, 2, 45),
+                                time(12, 4, 16),
+                                time(17, 24, 57),
+                               ],
+              'types_of_seizure': ['F',
+                                   'F',
+                                   'F',
+                                   'F'
+                                  ],
 
-#              'location': ['']
-#              'propagation': [], 
-#              'dates_of_seizure': [date(2016, 9, 15),
-#                                   date(2016, 9, 15),
-#                                   date(2016, 9, 15),
-#                                   date(2016, 9, 15),
-#                                  ]
+              'location': [''],
+              'propagation': [], 
+              'dates_of_seizure': [date(2016, 9, 15),
+                                   date(2016, 9, 15),
+                                   date(2016, 9, 15),
+                                   date(2016, 9, 15),
+                                  ]
+       },
     
 '7': {'sex': 'm',
              'age': 55, 
@@ -59,45 +60,22 @@ patients = {
                                 ],
              'ictal_on_time': [
                                time(4, 20, 52),
-                               time(14, 38, 6),
-                               time(3, 41, 52),
-                               time(5, 58, 29),
-                               time(7, 57, 13),
-                               time(9, 3, 10),
-                               time(10, 47, 24),
-                               time(12, 16, 26)
-                              ],
+                               time(1, 41, 5),
+                               time(2, 19, 28)
+                               ],
              'types_of_seizure': [
-                                  'FS',
-                                  'FS',
-                                  'FS',
-                                  'FS',
-                                  'GS',
-                                  'FS',
                                   'FS',
                                   'FS',
                                   'FS'
                                  ],
-
-              'location_of_seizure': [
+             'location_of_seizure': [
                                       'FTR',
                                       'FTLR',
-                                      'FTLR',
-                                      'FTLR',
-                                      'FTLR',
-                                      'FTLR',
-                                      'FTLR',
-                                      'FTLR',
+                                      'FTLR'
                                      ], 
-
-             'dates_of_seizure': [date(2016, 8, 23),
-                                  date(2016, 8, 24),
-                                  date(2016, 8, 25),
-                                  date(2016, 8, 25),
-                                  date(2016, 8, 25),
-                                  date(2016, 8, 25),
-                                  date(2016, 8, 25),
-                                  date(2016, 8, 28),
+             'dates_of_seizure': [date(2016, 7, 6),
+                                  date(2016, 7, 6),
+                                  date(2016, 7, 8),
                                  ]
              },
 

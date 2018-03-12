@@ -51,23 +51,35 @@ def baseline_removal(signal_arguments, window_params, add_params, win_param_to_p
     # default_add_params = input_default_params(win_params,
     #                         filt='medianFIR')
 
-    print signal_list
 
-    # stop
-    # ------------------------------
-    # Compute feature_array_list
-    sampling_rate = window_params['samplerate']
-    filtmethod = add_params['filt']
-    init = window_params['init']
-    finish = window_params['finish']
+    # ------------------------------ # TEMPORARY
+    try:
+        # Compute feature_array_list
+        sampling_rate = window_params['samplerate']
+        filtmethod = add_params['filt']
+        init = window_params['init']
+        finish = window_params['finish']
+        feature_signal_list = [np.asarray(create_filtered_dataset(signal, filtmethod='medianFIR',
+                               sampling_rate=sampling_rate)) for signal in signal_list]
+        # No resampling is made --- Change needed if resampling different
+        #(check HRV code - template for resampling signals, very good)
 
-    # No resampling is made --- Change needed if resampling different(check HRV code - template for resampling signals, very good)
-    feature_signal_list = [np.asarray([create_filtered_dataset(signal, filtmethod='medianFIR',
-            sampling_rate=sampling_rate)]) for signal in signal_list]
+        # Compute time domain
+        feature_window_list = [np.linspace(init,
+                                           finish,
+                                           (finish - init) * sampling_rate)]
+        feature_window_list = feature_window_list * len(feature_signal_list)
 
-    feature_window_list = [np.asarray([np.linspace(init, finish, (finish - init) * sampling_rate)])] * len(feature_signal_list)
-
-    mdata_list = [{'feature_legend': ['baseline_removal']}] * len(feature_signal_list)
+        # Get feature names
+        mdata_list = [{'feature_legend': ['baseline_removal']}] * len(feature_signal_list)
+    
+    except Exception as e:
+        print e
+        feature_signal_list = [[]]
+        feature_window_list = [[]]
+        mdata_list = [{'feature_legend': ['baseline_removal']}] * len(feature_signal_list)
+        
+        
 
     # Return the objects
     return feature_signal_list, mdata_list, feature_window_list
@@ -110,24 +122,28 @@ def create_filtered_dataset(signal, filtmethod,
         Additional arguments to filtmethod function (e.g. fs).
     """
     if filtmethod == 'medianFIR':
-        print np.shape(signal)
-        print type(signal)
-        print signal
-        ti = time.time()
         X_filt = globals()[filtmethod](signal, fs=1000)
-
-
-        tf = time.time() - ti
-        print tf, 
-        print 'seconds'
-        _logger.debug(X_filt)
-
+        
     elif filtmethod == 'FIR_lowpass_40hz':
         X_filt = globals()['filter_signal'](signal, ftype='FIR', band='lowpass',
                   order=10, frequency=40,
                   sampling_rate=sampling_rate)
         _logger.debug(X_filt)
 
-
-    print X_filt
     return X_filt
+
+
+def visual_inspection(raw_signal_list,
+                      filtered_signal_list,
+                      begin_sec, end_sec):
+    import matplotlib.pylot as plt
+    
+    for raw_signal, filtered_signal in zip(raw_signal_list,
+                                           filtered_signal_list):
+        plt.figure(figsize=(20, 20))
+        plt.plot(raw_signal.T)
+        plt.plot(filterd_signal.T)
+        plt.xlim(begin_sec * 1000, end_sec * 1000)
+        plt.legend(['raw', 'filtered'])
+        plt.show()
+        
