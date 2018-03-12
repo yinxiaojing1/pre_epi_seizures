@@ -24,14 +24,15 @@ def load_records(path_to_load, path_to_map, patient_list, feature_slot, lead_lis
 
     # convert to pandas
     records_data = data_struct[0]
-    records_sample = window_data_struct[0]    
+    records_sample = window_data_struct[0]
     records_mdata = data_struct[1]
     records_patient =[record_name[1][0] for record_name in records_list]
     records_seizure =[record_name[1][-1] for record_name in records_list]
-    
+
     return convert_records_to_pd_dataframe(records_data, records_sample, records_mdata,
                                           records_patient, records_seizure)
-                                           
+
+
 
 def convert_records_to_pd_dataframe(records_data, records_sample, records_mdata,
                                     records_patient, records_seizure):
@@ -46,10 +47,13 @@ def convert_records_to_pd_dataframe(records_data, records_sample, records_mdata,
                      for record_pd in records_pd_list
                      if record_pd is not None]
 
-    # Concatenate the records dataframe into a single matrixof data
-    final_data_struct_pd = pd.concat(records_pd_list)
+    print records_pd_list
 
-    return final_data_struct_pd
+    if records_pd_list:
+        # Concatenate the records dataframe into a single matrixof data
+        final_data_struct_pd = pd.concat(records_pd_list)
+
+        return final_data_struct_pd
 
 
 def _convert_record_to_pd_dataframe(data, sample, mdata, patient, seizure):
@@ -69,7 +73,7 @@ def _convert_record_to_pd_dataframe(data, sample, mdata, patient, seizure):
 
         # Add seizure number
         record['seizure_nr'] = seizure
-    
+
     except Exception as e:
         record = None
 
@@ -121,7 +125,10 @@ def convert_to_pandas(path_to_load, path_to_map,
                         patient_list, feature_slot,
                         lead_list)
 
-    # Apply labeling strategy
-    apply_label_structure(data, label_struct)
+    print data 
+    if data is not None:
 
-    return data
+        # Apply labeling strategy
+        apply_label_structure(data, label_struct)
+
+        return data
