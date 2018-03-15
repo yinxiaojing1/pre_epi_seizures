@@ -436,7 +436,7 @@ def _main(disk,
     print 'STOP!!!!!!'
     print 'Just hrv_time_features'
 
-    return 
+    files = 'just_new'
 
     rpeaks_groups_to_process = get_feature_group_name_list(path_to_map,
                                              'rpeak_detection#')

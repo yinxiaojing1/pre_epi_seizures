@@ -1,7 +1,6 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-import eda.estimationfit as es
 
 ''' Module containing the various plot functions required to perform
 exploratory statistical analysis, the level of abstraction is minimal,
@@ -32,17 +31,16 @@ def histogram(path_to_save,
                 label = label_color[0]
                 color = label_color[1]
 
+                
                 #plt.subplot(len(labels), 1, i + 1)
                 # get data from a certain label
                 univariate_data_label = grouped_df[feature].loc[grouped_df[label_id]==label]
-                dist = 'norm'
 
                 # plot histogram
                 try:
                     sns.distplot(univariate_data_label, color=color,
                                  kde=False, bins=bins)
-                    pdfitted = es.dist_estimation(univariate_data_label, dist)
-                    plt.plot(pdfitted, color=color)
+                
                 except Exception as e:
                     print e
                     print color

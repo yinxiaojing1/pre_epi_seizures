@@ -83,20 +83,20 @@ def QRS_fixed_segmentation(signal_arguments,
     #CHANGE URGENTLY*************************************************************
     signal_list = signal_arguments['rpeak_group_to_process']
     rpeaks_list = signal_arguments['feature_group_to_process']
-    # print rpeaks_list
-
-    # print signal_list
-
-    # stop
-    # stop
-    # print signal_list
-    # print rpeaks_list
     sampling_rate = win_params['samplerate']
+    
+    try:
 
-    beats = [compute_QRS(signal, rpeaks, sampling_rate) 
-        for signal, rpeaks in zip(signal_list, rpeaks_list)]
+        beats = [compute_QRS(signal, rpeaks, sampling_rate) 
+                 for signal, rpeaks in zip(signal_list, rpeaks_list)]
 
-    domains = [rpeaks[0][1:-1] for rpeaks in rpeaks_list]
+        domains = [rpeaks[0][1:-1] for rpeaks in rpeaks_list]
+        
+    except Exception as e:
+        beats = [[]]
+        domains = [[]]
+    
+    
     mdata = [''] * len(rpeaks_list)
     return beats, mdata, domains
 
@@ -150,7 +150,7 @@ def find_rpeaks(rpeaks, start, end):
 
 
 def compute_QRS(signal, rpeaks, sampling_rate):
-    signal = signal[0][0]
+    signal = signal[0]
     rpeaks = rpeaks[0]
     beats = np.asarray([signal[rpeak - int(0.04*sampling_rate):rpeak + int(0.06*sampling_rate)] for rpeak in rpeaks[1:-1]])
     return beats.T

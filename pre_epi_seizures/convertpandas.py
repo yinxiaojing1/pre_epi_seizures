@@ -47,8 +47,6 @@ def convert_records_to_pd_dataframe(records_data, records_sample, records_mdata,
                      for record_pd in records_pd_list
                      if record_pd is not None]
 
-    print records_pd_list
-
     if records_pd_list:
         # Concatenate the records dataframe into a single matrixof data
         final_data_struct_pd = pd.concat(records_pd_list)
@@ -57,9 +55,7 @@ def convert_records_to_pd_dataframe(records_data, records_sample, records_mdata,
 
 
 def _convert_record_to_pd_dataframe(data, sample, mdata, patient, seizure):
-    print 'New record'
-    print patient
-    print seizure
+
 
     try:
         # First, convert data

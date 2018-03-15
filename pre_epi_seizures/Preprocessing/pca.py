@@ -18,13 +18,16 @@ def pca_beat_amp_computation(signal_arguments,
     rpeaks_list = signal_arguments['feature_group_to_process']
     nr_comp = add_params['nr_comp']
     
-    parameters_list = [trace_evol_PC(beats_list.T, nr_comp) for beats_list in signal_list]
-    # print parameters_list
-    mdata = [{'feature_legend': ['eig_value_' + str(i) for i in xrange(1, nr_comp + 1)]}] * len(parameters_list)
-    # print parameters_list
-    window_list = [rpeaks[0][nr_comp:-1] for rpeaks in rpeaks_list]
+    try:
+        parameters_list = [trace_evol_PC(beats_list.T, nr_comp) for beats_list in signal_list]
+        window_list = [rpeaks[0][nr_comp:-1] for rpeaks in rpeaks_list]
+    except Exception as e:
+        print e
+        parameters_list = [[]]
+        window_list = [[]]
     
 
+    mdata = [{'feature_legend': ['eig_value_' + str(i) for i in xrange(1, nr_comp + 1)]}] * len(parameters_list)
 
 
     return parameters_list, mdata, window_list
