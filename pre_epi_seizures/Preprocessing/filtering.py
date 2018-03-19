@@ -60,26 +60,25 @@ def baseline_removal(signal_arguments, window_params, add_params, win_param_to_p
         init = window_params['init']
         finish = window_params['finish']
         feature_signal_list = [np.asarray(create_filtered_dataset(signal, filtmethod='medianFIR',
-                               sampling_rate=sampling_rate)) for signal in signal_list]
+                                                                  sampling_rate=sampling_rate)) for signal in signal_list]
         # No resampling is made --- Change needed if resampling different
         #(check HRV code - template for resampling signals, very good)
 
         # Compute time domain
-        feature_window_list = [np.linspace(init,
-                                           finish,
-                                           (finish - init) * sampling_rate)]
+        feature_window_list = [np.linspace(0,
+                                           len(feature_signal.T) - 1,
+                                            len(feature_signal.T))
+                               for feature_signal in feature_signal_list]
         feature_window_list = feature_window_list * len(feature_signal_list)
 
         # Get feature names
         mdata_list = [{'feature_legend': ['baseline_removal']}] * len(feature_signal_list)
-    
+
     except Exception as e:
         print e
         feature_signal_list = [[]]
         feature_window_list = [[]]
-        mdata_list = [{'feature_legend': ['baseline_removal']}] * len(feature_signal_list)
-        
-        
+        mdata_list = [{'feature_legend': ['baseline_removal']}] * len(feature_signal_list)        
 
     # Return the objects
     return feature_signal_list, mdata_list, feature_window_list
@@ -123,6 +122,7 @@ def create_filtered_dataset(signal, filtmethod,
     """
     if filtmethod == 'medianFIR':
         X_filt = globals()[filtmethod](signal, fs=1000)
+        
         
     elif filtmethod == 'FIR_lowpass_40hz':
         X_filt = globals()['filter_signal'](signal, ftype='FIR', band='lowpass',

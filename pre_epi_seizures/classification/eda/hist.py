@@ -1,6 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
+import utils.estimationfit as es
 
 ''' Module containing the various plot functions required to perform
 exploratory statistical analysis, the level of abstraction is minimal,
@@ -15,32 +16,46 @@ def histogram(path_to_save,
               seizure_id,
               label_id,
               color_id,
+              dist=None,
               bins=None):
 
 
 
     for i, feature in enumerate(features_id):
+        if i == 0:
+            plt.title(dist)
 
         plt.subplot(len(features_id), 1, i+1)
+        
         #iterate for each label
         labels = grouped_df[label_id].unique()
         colors = grouped_df[color_id].unique()
         colormap = zip(labels, colors)
         for i, label_color in enumerate(colormap):
-            
+                
+                # get labels
                 label = label_color[0]
                 color = label_color[1]
 
-                
-                #plt.subplot(len(labels), 1, i + 1)
                 # get data from a certain label
                 univariate_data_label = grouped_df[feature].loc[grouped_df[label_id]==label]
 
                 # plot histogram
                 try:
-                    sns.distplot(univariate_data_label, color=color,
-                                 kde=False, bins=bins)
-                
+                    if dist=='kde':
+                        sns.distplot(univariate_data_label, color=color,
+                                     kde=True, bins=bins, norm_hist=True)
+                        
+                    if dist==None:
+                        sns.distplot(univariate_data_label, color=color,
+                                     kde=False, bins=bins, norm_hist=True)
+                        
+                    else:
+                        sns.distplot(univariate_data_label, color=color,
+                                     kde=False, bins=bins, norm_hist=True)
+                        x, pdfitted = es.dist_estimation(univariate_data_label, dist)
+                        plt.plot(x, pdfitted, color=color)
+
                 except Exception as e:
                     print e
                     print color
