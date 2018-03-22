@@ -22,11 +22,11 @@ import numpy as np
 import os
 
 # classification packages-------------
-from supervised_new import *
-from prep_input_supervised import *
-from plot_classification import *
-from supervised_new import *
-from cross_validation import *
+#from supervised_new import *
+#from prep_input_supervised import *
+#from plot_classification import *
+#from supervised_new import *
+#from cross_validation import *
 from save_for_class import *
 
 
@@ -87,22 +87,23 @@ def _nested_cross_validation(full_path,
                                          compute_all_new,
                                          clf)
     return_struct['cv_results'] = hp_opt_results
+    return_struct['clf'] = clf
     #-------------------------------------------------
     
     print 'TESSSSSSSSSSSST'
     # Model Test-------------------------------------- 
     # ROC (Reciever-Operator-Characteristic)
-    name_ROC = 'ROC__%s.h5' %i
-    full_path_ROC = full_path + name_ROC
-    ROC = _compute_ROC(full_path_ROC,
-                       compute_all_new,
-                       X, y,
-                       test,
-                       clf)
-    return_struct['ROC'] = ROC
+    #name_ROC = 'ROC__%s.h5' %i
+    #full_path_ROC = full_path + name_ROC
+    #ROC = _compute_ROC(full_path_ROC,
+    #                   compute_all_new,
+    #                   X, y,
+    #                   test,
+    #                   clf)
+    #return_struct['ROC'] = ROC
     # -------------------------------------------------
 
-    return return_struct
+    return (clf, test)
 
 
 # Design Pattern
@@ -151,7 +152,8 @@ def hyper_parameter_optimization(full_path,
                        n_jobs=1, verbose=1,
                        cv=cv_inner,
                        return_train_score=True,
-                       refit=scoring[0])
+                       refit=scoring[0],
+                       error_score=0)
     
     clf.fit(X_inner, y_innner) # retrain
     mdata = {}

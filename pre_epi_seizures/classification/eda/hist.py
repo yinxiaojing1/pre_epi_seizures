@@ -17,7 +17,8 @@ def histogram(path_to_save,
               label_id,
               color_id,
               dist=None,
-              bins=None):
+              bins=None,
+              ):
 
 
 

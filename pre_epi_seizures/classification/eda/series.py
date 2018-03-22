@@ -35,6 +35,9 @@ def time_series_plot(path_to_save, df,
                 save_str = ('Patient: ' + patient +
                             ' Seizure: ' + seizure)
                 
+                feature_series = df_seizure[feature]
+                ylim = [feature_series.min(), feature_series.max()]
+                
                 # Loop for labels
                 labels = df_seizure[label_id].unique()
                 colors = df_seizure[color_id].unique()
@@ -45,11 +48,13 @@ def time_series_plot(path_to_save, df,
                     df_label = df_seizure.loc[df_seizure[label_id] == label]
                     time_domain = df_label[time_domain_id]
                     time_series = df_label[feature]
+                    
 
                     # Plot data
                     plt.subplot(len(colormap), 1, i+1)
                     plt.plot(time_domain, time_series, color)
                     plt.ylabel(feature)
+                    plt.ylim(ylim)
                     plt.legend([label])
                     
                     if i == 0:
