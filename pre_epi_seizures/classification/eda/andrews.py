@@ -30,7 +30,8 @@ def andrews_curves(path_to_save,
     X = grouped_df[features_id]
     X[label_id] = grouped_df[label_id]
     pd.plotting.andrews_curves(X, label_id, color=colors)
-
+    
     # Save
     plt.title(title)
+    plt.savefig(path_to_save + str(title))
     plt.show()

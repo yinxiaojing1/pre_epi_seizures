@@ -62,7 +62,7 @@ def time_series_plot(path_to_save, df,
 
                 # Save figure
                 plt.show()
-                #plt.savefig(path_to_save + save_str)
+                plt.savefig(path_to_save + feature)
 
 
 

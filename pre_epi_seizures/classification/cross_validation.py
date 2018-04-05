@@ -34,7 +34,8 @@ def nested_cross_validation(full_path,
                            X,y, groups,
                            pipe,
                            param_grid, scoring,
-                           compute_all_new, cv_out, cv_in):
+                           compute_all_new, cv_out, cv_in,
+                           search_function):
     
     # Outer-loop cross-validation
     cv_out = cv_out.split(X, y, groups=groups)
@@ -48,7 +49,8 @@ def nested_cross_validation(full_path,
                              test,
                              i,
                              param_grid, scoring,
-                             compute_all_new, cv_in)
+                             compute_all_new, cv_in,
+                             search_function)
               for i, (train, test) in enumerate(cv_out)]
  
     return struct
@@ -61,13 +63,13 @@ def _nested_cross_validation(full_path,
                              test,
                              i,
                              param_grid, scoring,
-                             compute_all_new, cv_in):
+                             compute_all_new, cv_in,
+                             search_function):
     
     return_struct = {}
     
     # Hyper Parameter optimization---------------------
     # 1. Hyper parameter grid-search optimization
-    print 'CLFFFFFFFF'
     name_clf = 'clf__%s.h5' %i
     full_path_clf = full_path + name_clf
     clf, mdata = hyper_parameter_optimization(full_path_clf,
@@ -77,7 +79,8 @@ def _nested_cross_validation(full_path,
                                               train,
                                               param_grid,
                                               scoring,
-                                              cv_in)
+                                              cv_in,
+                                              search_function)
 
     print 'HANDDLLLLEEEEEEEEE'
     # 2. Handle optimization results 
@@ -137,17 +140,18 @@ def hyper_parameter_optimization(full_path,
                                  optimization_pipe,
                                  train,
                                  param_grid, scoring,
-                                 cv_in):
+                                 cv_in,
+                                 search_function):
     
     # get inner data
     groups_inner = groups.iloc[train] # get data seizures
     X_inner = X.iloc[train] # get data features
     y_innner = y.iloc[train] # data labels
 
-    # Grid search for Hyperparameters
+    # search for Hyperparameters
     cv_inner = cv_in.split(X_inner, y_innner, groups=groups_inner) # get iterator for cv
     
-    clf = GridSearchCV(optimization_pipe,
+    clf = search_function(optimization_pipe,
                        param_grid, scoring=scoring,
                        n_jobs=1, verbose=1,
                        cv=cv_inner,
@@ -161,7 +165,6 @@ def hyper_parameter_optimization(full_path,
     return clf, mdata
 
 
-@get_cv_result        
 def handle_optimization(full_path,
                         compute_all_new,
                         clf):

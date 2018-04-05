@@ -7,10 +7,7 @@ import pandas as pd
 import numpy as np
 
 
-def load_records(path_to_load, path_to_map, patient_list, feature_slot, lead_list):
-    # Feature group to analyse -- point of entry
-    feature_name = get_feature_group_name_list(path_to_map,
-                                               feature_slot)[0]
+def load_records(path_to_load, path_to_map, patient_list, feature_name, lead_list):
 
     # Load records as lists, numpy storage method
     records_list = get_patient_feature_lead_records(path_to_load,
@@ -36,6 +33,7 @@ def load_records(path_to_load, path_to_map, patient_list, feature_slot, lead_lis
 
 def convert_records_to_pd_dataframe(records_data, records_sample, records_mdata,
                                     records_patient, records_seizure):
+    
     # Get a list of dataframes for each record
     records_pd_list = [_convert_record_to_pd_dataframe(data, sample, mdata,
                                                       patient, seizure)
@@ -55,8 +53,11 @@ def convert_records_to_pd_dataframe(records_data, records_sample, records_mdata,
 
 
 def _convert_record_to_pd_dataframe(data, sample, mdata, patient, seizure):
-
-
+    print 'data'
+    print len(data.T)
+    print len(sample)
+    print mdata['feature_legend']
+    
     try:
         # First, convert data
         record = pd.DataFrame(data.T, columns=mdata['feature_legend'])
@@ -71,6 +72,7 @@ def _convert_record_to_pd_dataframe(data, sample, mdata, patient, seizure):
         record['seizure_nr'] = seizure
 
     except Exception as e:
+        print e
         record = None
 
     return record
@@ -120,8 +122,7 @@ def convert_to_pandas(path_to_load, path_to_map,
     data = load_records(path_to_load, path_to_map,
                         patient_list, feature_slot,
                         lead_list)
-
-    print data 
+    
     if data is not None:
 
         # Apply labeling strategy

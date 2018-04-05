@@ -4,6 +4,89 @@ from datetime import date
 
 
 patients = {
+    
+   
+    
+   '8': {'sex': 'm',
+              'age': 55,
+              'ictal_clinical_on_time': [time(19, 53, 57),
+                                        time(5, 29, 13),
+                                        time(18, 59, 42),
+                                        time(3, 15, 59),
+                                        time(12, 1, 48),
+                                        time(12, 1, 48),
+                                        time(12, 4, 46),
+                                        time(12, 9, 13),
+                                        time(12, 12, 30),
+                                        time(18, 25, 9), 
+                                        time(20, 59, 16),
+                                        time(10, 50, 23),
+                                        time(10, 51, 56),
+                                        time(11, 7, 16),
+                                        time(11, 9, 16)
+                                        
+                                       ],
+              'post_ictal_time': [time(19, 54, 22),
+                                  time(5, 29, 52),
+                                  time(19, 0, 23),
+                                  time(3, 15, 59),
+                                  time(12, 2, 26),
+                                  time(12, 5, 52),
+                                  time(12, 9, 13),
+                                  time(12, 13, 10),
+                                  time(18, 27, 40),
+                                  time(21, 0, 5),
+                                  time(10, 50, 44),
+                                  time(10, 52, 42),
+                                  time(11, 7, 16),
+                                  time(11, 10, 35)
+                                  
+                                 ],
+              'ictal_on_time': [time(19, 53, 56),
+                                time(5, 29, 13),
+                                time(18, 59, 42),
+                                time(3, 15, 57),
+                                time(12, 1, 48),
+                                time(12, 4, 39),
+                                time(12, 9, 13),
+                                time(12, 12, 37),
+                                time(18, 25, 9),
+                                time(20, 59, 16),
+                                time(10, 50, 24),
+                                time(10, 51, 56),
+                                time(11, 7, 16),
+                                time(11, 9, 15)
+                                
+                                
+                               ],
+              'types_of_seizure': ['F',
+                                   'F',
+                                   'F',
+                                   'F',
+                                   'F'
+                                  ],
+
+              'location': [''],
+              'propagation': [], 
+              'dates_of_seizure': [date(2016, 5, 9),
+                                   date(2016, 5, 10),
+                                   date(2016, 5, 12),
+                                   date(2016, 5, 13),
+                                   date(2016, 5, 13),
+                                   date(2016, 5, 13),
+                                   date(2016, 5, 13),
+                                   date(2016, 5, 13),
+                                   date(2016, 5, 13),
+                                   date(2016, 5, 13),
+                                   date(2016, 5, 14),
+                                   date(2016, 5, 17),
+                                   date(2016, 5, 17),
+                                   date(2016, 5, 17),
+                                  ]
+       },  
+    
+    
+    
  '10': {'sex': 'm',
               'age': 55,
               'ictal_clinical_on_time': [time(6, 44, 7),
@@ -24,7 +107,7 @@ patients = {
               'types_of_seizure': ['F',
                                    'F',
                                    'F',
-                                   'F'
+                                   'F',
                                   ],
 
               'location': [''],

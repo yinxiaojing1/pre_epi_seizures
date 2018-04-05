@@ -14,7 +14,7 @@ from Preprocessing.segmentation import *
 
 from Preprocessing.hrv import *
 
-#from Preprocessing.rqa import *
+from Preprocessing.rqa import *
 
 from Preprocessing.pca import *
 
@@ -502,8 +502,6 @@ def _main(disk,
 
             
     print 'PCA DONE!'
-    return
-
 
 
     groups_to_process = get_feature_group_name_list(path_to_map,
