@@ -33,10 +33,7 @@ def get_phase(x, peaks):
     array 1D
         Phase vector.
     """
-    print 'here'
-    
-    print x
-    x = x[0]
+
     phase = np.zeros(len(x))
     # plt.plot(peaks, 'o')
     # plt.show()

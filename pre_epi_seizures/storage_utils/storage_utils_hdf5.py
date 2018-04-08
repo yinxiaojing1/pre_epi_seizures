@@ -14,7 +14,7 @@ def load_signal(path, group_name_list):
          for group_name in group_name_list}
     
     opened_file.close()
-    print 'closed'
+
     return return_dict
 
 

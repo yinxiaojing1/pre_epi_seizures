@@ -59,7 +59,6 @@ def interpolate(signal_array, new_domain, domain):
         f = sp.interpolate.interp1d(domain, signal_array, kind='cubic')
 
         new_signal = f(new_domain)
-        print 'doneee'
         return new_signal
 
     except Exception as e:

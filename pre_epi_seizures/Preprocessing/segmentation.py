@@ -104,11 +104,10 @@ def QRS_fixed_segmentation(signal_arguments,
 def beat_phase_segmentation(signal_arguments,
                            win_params, add_params,
                            win_param_to_process, param_to_process):
-    print 'fdkfjsadkfjla'
-    signal_list = signal_arguments['feature_group_to_process']
-    rpeaks_list = signal_arguments['rpeak_group_to_process']
+    signal_list = signal_arguments['rpeak_group_to_process']
+    rpeaks_list = signal_arguments['feature_group_to_process']
     sampling_rate = win_params['samplerate']
-
+    
 
     beats = [compute_beat_phase(signal, rpeaks, sampling_rate) for signal, rpeaks in zip(signal_list, rpeaks_list)]
     domains = rpeaks_list
@@ -122,6 +121,7 @@ def compute_beat_phase(signal, rpeaks, sampling_rate):
     signal = signal[0]
     rpeaks = rpeaks[0]
     
+
     # stop
     phase = get_phase(signal, rpeaks)
     idx_up = np.where(abs(np.diff(phase)) > 6)[0]
@@ -131,6 +131,10 @@ def compute_beat_phase(signal, rpeaks, sampling_rate):
 
     new_domain = np.linspace(-np.pi, np.pi, 1000, endpoint=True)
     new_beats = [interpolate(beat, new_domain, domain) for beat, domain in zip(beats, domains)]
+    
+    
+    print new_beats
+    stop
 
     return np.array(new_beats).T
 

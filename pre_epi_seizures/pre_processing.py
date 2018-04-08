@@ -61,7 +61,7 @@ def extract_feature(feature, arg_list):
 
 
 def get_names(group_name_list):
-    print group_name_list
+    #print group_name_list
     return [group_name[1] for group_name in group_name_list
             if 'window' not in group_name[1]]
 
@@ -139,7 +139,7 @@ def get_params_from_str_last(feature_groups_to_process, begin_str, end_str):
     params_from_str = dict()
 
     a = get_win_str_snippet(feature_groups_to_process, begin_str, end_str)
-    print a
+    #print a
     # stop
     for k in a:
         try:
@@ -172,7 +172,7 @@ def get_params_from_str(feature_group_to_process, begin_str, end_str):
         try:
             params_from_str[k.split(':')[0]] = float(k.split(':')[1])
         except Exception as e:
-            print e
+            #print e
             params_from_str[k.split(':')[0]] = k.split(':')[1]
 
     win_params_from_str = params_from_str
@@ -203,6 +203,7 @@ def load_feature(path_to_load, path_to_map, feature_to_load,
                  files='just_new', sampling_rate=1000,
                  **feature_groups_required):
 
+  
     feature_group_to_process = feature_groups_required['feature_group_to_process']
 
     feature_group_extracted = [feature_group_to_process + '/' + feature_to_load]
@@ -214,14 +215,15 @@ def load_feature(path_to_load, path_to_map, feature_to_load,
     # auxiliary_inputs = {k:feature_groups_required[k] for k in feature_groups_required.keys() if 'group' not in k and 'process' not in k}
 
 
-    # Input and default parameters from feature to extract 
+    # Input and default parameters from feature to extract
+
 
     win_inputs = {k[4:]:feature_groups_required[k] for k in feature_groups_required.keys() if 'group' not in k and 'window' in k}
     param_inputs = {k[6:]:feature_groups_required[k] for k in feature_groups_required.keys() if 'group' not in k and 'param' in k}
 
     win_final, param_final = get_input_and_default_params(win_inputs, param_inputs, feature_to_load)
 
-
+    
     win_str = get_str_from_params(win_final, '_$beginwin',
                                       'endwin$_')
     param_str = get_str_from_params(param_final, '_$beginparam',
@@ -258,7 +260,6 @@ def load_feature(path_to_load, path_to_map, feature_to_load,
 
         inF.close()
 
-   
     if files=='just_new':
         names_already_processed = get_names(list_group_signals(path_to_load, feature_group_to_save[0])['signals'])
         names_to_save = get_names(list_group_signals(path_to_load, feature_group_to_process)['signals'])
@@ -367,6 +368,7 @@ def _main(disk,
     # # 1. Raw -----------------------------------------------------------------------------------
     raw_groups = get_feature_group_name_list(path_to_map,
                                              'raw#')
+
    
     # 2. Baseline removal and denoising------------------------------------------------------
     files = 'just_new'
@@ -379,6 +381,7 @@ def _main(disk,
                          feature_group_to_process=raw_group,
                          param_filt = param_filt)
    
+
 
     # 3. Segmentation---------------------------------------------------------------------------
     feature_name = 'rpeak_detection'
@@ -457,7 +460,33 @@ def _main(disk,
                          feature_group_to_process=groups[1],
                          rpeak_group_to_process=groups[0],
                          win_samplerate=win_samplerate)
+            
+     
+    
+    files = 'all_new'
+            
+            
+    # phase-invariant beats
+    rpeaks_groups_to_process = get_feature_group_name_list(path_to_map,
+                                             'rpeak_detection#')
+    feature_name = 'beat_phase_segmentation'
+    groups_to_process = get_feature_group_name_list(path_to_map,
+                                             'baseline_removal#')
+    rpeaks_groups_to_process = [feature_group_name
+                                for feature_group_name in rpeaks_groups_to_process
+                                if 'baseline_removal' in feature_group_name]
+    sampling_rate=1000
+    for groups in zip(groups_to_process, rpeaks_groups_to_process):
+        win_samplerate_variation = [sampling_rate]
+        for win_samplerate in win_samplerate_variation:
+            # stop
+            load_feature(path_to_load, path_to_map, feature_name,
+                         files=files,
+                         feature_group_to_process=groups[1],
+                         rpeak_group_to_process=groups[0],
+                         win_samplerate=win_samplerate)
 
+    return
     #stop
 
     # # # STOP
