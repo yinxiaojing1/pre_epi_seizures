@@ -68,32 +68,69 @@ def _nested_cross_validation(full_path,
     
     return_struct = {}
     
-    # Hyper Parameter optimization---------------------
-    # 1. Hyper parameter grid-search optimization
-    name_clf = 'clf__%s.h5' %i
-    full_path_clf = full_path + name_clf
-    clf, mdata = hyper_parameter_optimization(full_path_clf,
-                                              compute_all_new,
-                                              X,y, groups,
-                                              pipe, 
-                                              train,
-                                              param_grid,
-                                              scoring,
-                                              cv_in,
-                                              search_function)
+    # Completely new trainig
+    if compute_all_new:
+        # Hyper Parameter optimization---------------------
+        # 1. Hyper parameter grid-search optimization
+        name_clf = 'clf__%s.h5' %i
+        full_path_clf = full_path + name_clf
+        clf, mdata = hyper_parameter_optimization(full_path_clf,
+                                                  compute_all_new,
+                                                  X,y, groups,
+                                                  pipe, 
+                                                  train,
+                                                  param_grid,
+                                                  scoring,
+                                                  cv_in,
+                                                  search_function)
+        
+        # 2. Test the Best Model
+        X_test, y_test = X.iloc[test], y.iloc[test]
+        y_pred = clf.predict(X_test)
+        
+        
+        # 3. Compose a predefined return structure 
+        return_struct['cv_results'] = pd.DataFrame(clf.cv_results_)
+        return_struct['y_test'] = y_test
+        return_struct['y_pred'] = y_pred
+        return_struct['best_estimator'] = clf.best_estimator_
+        return_struct['best_params'] = clf.best_params_
+        
+        
+        # 4. Save Results to disk
+        name_hp = 'hp_opt_results__%s.h5' %i
+        full_path_hp = full_path + name_hp
+        h5store(full_path_hp, return_struct['cv_results'],
+                **dict((k,return_struct[k]) 
+                       for k in return_struct.keys()
+                       if 'results' not in k))
 
-    print 'HANDDLLLLEEEEEEEEE'
-    # 2. Handle optimization results 
-    name_hp = 'hp_opt_results__%s.h5' %i
-    full_path_hp = full_path + name_hp
-    hp_opt_results = handle_optimization(full_path_hp,
-                                         compute_all_new,
-                                         clf)
-    return_struct['cv_results'] = hp_opt_results
-    return_struct['clf'] = clf
+     # Load Training from disk
+    if not compute_all_new:
+        
+        
+        # 5. Load Results from disk
+        
+
+        # 2. Handle optimization results 
+        name_hp = 'hp_opt_results__%s.h5' %i
+        full_path_hp = full_path + name_hp
+        results, mdata = load_pandas_file_h5(full_path_hp)
+        
+        print 'These are the saved results'
+        print results
+        
+        print 'This is the saved metadata'
+        print mdata
+        
+        
+        return_struct = mdata
+        return_struct['cv_results'] = results
+
+
     #-------------------------------------------------
     
-    print 'TESSSSSSSSSSSST'
+
     # Model Test-------------------------------------- 
     # ROC (Reciever-Operator-Characteristic)
     #name_ROC = 'ROC__%s.h5' %i
@@ -105,8 +142,8 @@ def _nested_cross_validation(full_path,
     #                   clf)
     #return_struct['ROC'] = ROC
     # -------------------------------------------------
-
-    return (clf, test)
+    
+    return return_struct
 
 
 # Design Pattern
@@ -119,13 +156,24 @@ def get_cv_result(func):
          # Try to load file from disk 
         results, mdata = load_pandas_file_h5(full_path)
         
+        print 'Loaded Structres... see for yourself'
+        
+        print results
+        print mdata
+        
         # If empty compute result and save
         if results.empty and compute_all_new:
+            
+            print 'Loaded Results are empty'
+            print ''
             results, mdata = func(full_path,
                                   compute_all_new,
                                   *args, **kwargs)
             
+            print 'Saving the optimization results to disk ....'
+            print ''
             print results
+            print mdata
             h5store(full_path, results, **mdata)
                
         return results, mdata
@@ -133,7 +181,7 @@ def get_cv_result(func):
     return call
                                  
 
-@get_cv_result    
+#@get_cv_result    
 def hyper_parameter_optimization(full_path,
                                  compute_all_new,
                                  X,y, groups,
@@ -162,16 +210,19 @@ def hyper_parameter_optimization(full_path,
     clf.fit(X_inner, y_innner) # retrain
     mdata = {}
     
+    print 'ready to return optimization objects'
     return clf, mdata
 
 
 def handle_optimization(full_path,
+                        
                         compute_all_new,
                         clf):
     
     # Get optimization results from clf struct    
     hp_opt_results = pd.DataFrame(clf.cv_results_)
-    mdata = clf.best_params_
+    best_params = clf.best_params_
+    named_setps = named_steps.keys()
     
     return hp_opt_results, mdata
    

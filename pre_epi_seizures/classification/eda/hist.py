@@ -10,6 +10,7 @@ requiring the datasets to be on pandas dataframe format'''
 
 def histogram(path_to_save, 
               grouped_df,
+              group_name,
               features_id,
               time_domain_id,
               patient_id,
@@ -21,10 +22,11 @@ def histogram(path_to_save,
               ):
 
 
+    plt.figure(figsize=(20, 20))
 
     for i, feature in enumerate(features_id):
         if i == 0:
-            plt.title(dist)
+            plt.title(str(group_name) + '_' + dist)
 
         plt.subplot(len(features_id), 1, i+1)
         
@@ -64,5 +66,6 @@ def histogram(path_to_save,
                     print 'not estimated'
 
                 
-                
-        plt.legend(labels)      
+    plt.savefig(path_to_save + str(group_name) + '__HIST.png')
+    plt.show()
+    plt.legend(labels)      

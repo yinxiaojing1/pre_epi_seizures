@@ -10,7 +10,7 @@ def box_plot(path_to_save,
                   seizure_id,
                   label_id,
                   color_id):
-
+    plt.figure(figsize=(20, 20))
     for i, feature in enumerate(features_id):
 
         plt.subplot(len(features_id), 1, i+1)
@@ -29,3 +29,5 @@ def box_plot(path_to_save,
                     showfliers=False,
                     order=list(labels),
                     palette=list(colors))
+    plt.savefig(path_to_save + str(title) + '__box.png')
+    plt.show()

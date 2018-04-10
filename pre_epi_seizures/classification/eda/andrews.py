@@ -33,5 +33,5 @@ def andrews_curves(path_to_save,
     
     # Save
     plt.title(title)
-    plt.savefig(path_to_save + str(title))
+    plt.savefig(path_to_save + str(title) + '__andrews')
     plt.show()

@@ -2,7 +2,7 @@ from classification.load_for_class import *
 #from labels import *
 #from supervised_training import *
 
-
+from storage_utils.patients_data_new import *
 import pandas as pd
 import numpy as np
 
@@ -23,9 +23,13 @@ def load_records(path_to_load, path_to_map, patient_list, feature_name, lead_lis
     records_data = data_struct[0]
     records_sample = window_data_struct[0]
     records_mdata = data_struct[1]
-    records_patient =[record_name[1][0] for record_name in records_list]
-    records_seizure =[record_name[1][-1] for record_name in records_list]
-
+    records_patient =[int(record_name[1].split('_')[0]) for record_name in records_list]
+    
+    try:
+        records_seizure =[int(record_name[1].split('_')[-1]) for record_name in records_list]      
+    except:
+        records_seizure =[0 for record_name in records_list]
+        
     return convert_records_to_pd_dataframe(records_data, records_sample, records_mdata,
                                           records_patient, records_seizure)
 
@@ -40,6 +44,7 @@ def convert_records_to_pd_dataframe(records_data, records_sample, records_mdata,
                        for data, sample, mdata, patient, seizure in zip(
                                               records_data, records_sample, records_mdata,
                                               records_patient, records_seizure)]
+    
     # Remove corrupted files
     records_pd_list= [record_pd
                      for record_pd in records_pd_list
@@ -54,9 +59,8 @@ def convert_records_to_pd_dataframe(records_data, records_sample, records_mdata,
 
 def _convert_record_to_pd_dataframe(data, sample, mdata, patient, seizure):
     print 'data'
-    print len(data.T)
-    print len(sample)
-    print mdata['feature_legend']
+    print patient
+    print seizure
     
     try:
         # First, convert data
@@ -66,10 +70,10 @@ def _convert_record_to_pd_dataframe(data, sample, mdata, patient, seizure):
         record['time_sample'] = sample
 
         # Add patient number
-        record['patient_nr'] = patient
+        record['patient_nr'] = str(patient)
 
         # Add seizure number
-        record['seizure_nr'] = seizure
+        record['seizure_nr'] = str(seizure)
 
     except Exception as e:
         print e
@@ -129,3 +133,29 @@ def convert_to_pandas(path_to_load, path_to_map,
         apply_label_structure(data, label_struct)
 
         return data
+    
+    
+def add_seizure_types(data,
+                      patient_id,
+                      seizure_nr_id,
+                      type_id,
+                      localization_id
+                     ):
+    
+    
+    g = data.groupby([patient_id, seizure_nr_id])
+    
+    patients_seizures_in_data = g.groups.keys()
+    
+    # Set new collumns
+    data[type_id] = np.nan
+    data[localization_id] = np.nan
+    
+    for patient, seizure in patients_seizures_in_data:
+        patient_dict = patients[str(patient)]
+        type_seizure = patient_dict[type_id][int(seizure)]
+        localization = patient_dict[localization_id][int(seizure)]
+        data[type_id].loc[(data[patient_id]==patient) & (data[seizure_nr_id]==seizure)] = type_seizure
+        data[localization_id].loc[(data[patient_id]==patient) & (data[seizure_nr_id]==seizure)] = localization
+        
+    return data

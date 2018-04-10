@@ -18,6 +18,7 @@ def pair_plot(path_to_save,
 
     # Set up figure
     plt.figure(figsize=(20,20))
+    plt.suptitle(title)
 
     # Try andrews curve
     X = grouped_df[features_id]
@@ -25,7 +26,6 @@ def pair_plot(path_to_save,
     sns.pairplot(X, hue=label_id, hue_order=labels, palette=colors, size=2.5)
 
     # Save
-    plt.title(title)
     plt.savefig(path_to_save + str(title) + '__' + 'PAIR')
     plt.show()
     

@@ -24,7 +24,6 @@ patients = {
                                          time(10, 51, 56),
                                          time(11, 7, 16),
                                          time(11, 9, 16)
-                                        
                                        ],
               'post_ictal_time': [time(19, 54, 22),
                                   time(5, 29, 52),
@@ -40,7 +39,6 @@ patients = {
                                   time(10, 52, 42),
                                   time(11, 7, 16),
                                   time(11, 10, 35)
-                                  
                                  ],
               'ictal_on_time': [time(19, 53, 56),
                                 time(5, 29, 13),
@@ -56,8 +54,6 @@ patients = {
                                 time(10, 51, 56),
                                 time(11, 7, 16),
                                 time(11, 9, 15)
-                                
-                                
                                ],
               'types_of_seizure': ['Focal Onset - Aware - Non-Motor',
                                    'Focal Onset - Not Aware - Non-Motor',
@@ -73,7 +69,7 @@ patients = {
                                    'Focal Onset - Secondary Generalized - Not Aware - Motor',
                                    'Focal Onset - Not Aware - Motor',
                                    'Focal Onset - Not Aware - Motor',
-                  
+
                                   ],
 
               'location': ['Temporal Right Lobe',
@@ -84,20 +80,13 @@ patients = {
                            'Temporal Right Lobe',
                            'Temporal Right Lobe',
                            'Frontal Right Lobe',
-                           'Parietal Left Lobe/Medial line',
-                           'Temporal Right Lobe/Posterior Right Lobe/Frontal Right Lobe',
-                           'Temporal Right Lobe/Posterior Right Lobe/Frontal Right Lobe',
-                           'Temporal Right Lobe/Posterior Right Lobe/Frontal Right Lobe',
-                           'Temporal Left Lobe/Parietal Left Lobe/Occipital Left Lobe',
-                           'Frontal Right Lobe/Posterior Right Lobe/Temporal Right Lobe',
-                           
-                           
-                           
-                           
-                           
-                           
-                           
-                           ,
+                           'Parietal Left Lobe, Medial line',
+                           'Temporal Right Lobe, Posterior Right Lobe, Frontal Right Lobe',
+                           'Temporal Right Lobe, Posterior Right Lobe, Frontal Right Lobe',
+                           'Temporal Right Lobe, Posterior Right Lobe, Frontal Right Lobe',
+                           'Temporal Left Lobe, Parietal Left Lobe, Occipital Left Lobe',
+                           'Frontal Right Lobe, Posterior Right Lobe, Temporal Right Lobe'
+                          ],
               'propagation': [], 
               'dates_of_seizure': [date(2016, 5, 9),
                                    date(2016, 5, 10),
@@ -116,6 +105,103 @@ patients = {
                                   ]
        },  
     
+'13': {'sex': 'm',
+              'age': 55,
+              'ictal_clinical_on_time': [time(11, 20, 57),
+                                         time(5, 29, 13),
+                                         time(18, 59, 42),
+                                         time(3, 15, 59),
+                                         time(12, 1, 48),
+                                         time(12, 1, 48),
+                                         time(12, 4, 46),
+                                         time(12, 9, 13),
+                                         time(12, 12, 30),
+                                         time(18, 25, 9), 
+                                         time(20, 59, 16),
+                                         time(10, 50, 23),
+                                         time(10, 51, 56),
+                                         time(11, 7, 16),
+                                         time(11, 9, 16)
+                                       ],
+              'post_ictal_time': [time(19, 54, 22),
+                                  time(5, 29, 52),
+                                  time(19, 0, 23),
+                                  time(3, 15, 59),
+                                  time(12, 2, 26),
+                                  time(12, 5, 52),
+                                  time(12, 9, 13),
+                                  time(12, 13, 10),
+                                  time(18, 27, 40),
+                                  time(21, 0, 5),
+                                  time(10, 50, 44),
+                                  time(10, 52, 42),
+                                  time(11, 7, 16),
+                                  time(11, 10, 35)
+                                 ],
+              'ictal_on_time': [time(11, 20, 57),
+                                time(5, 29, 13),
+                                time(18, 59, 42),
+                                time(3, 15, 57),
+                                time(12, 1, 48),
+                                time(12, 4, 39),
+                                time(12, 9, 13),
+                                time(12, 12, 37),
+                                time(18, 25, 9),
+                                time(20, 59, 16),
+                                time(10, 50, 24),
+                                time(10, 51, 56),
+                                time(11, 7, 16),
+                                time(11, 9, 15)
+                               ],
+              'types_of_seizure': ['Focal Onset - Not Aware - Non-Motor',
+                                   'Focal Onset - Not Aware - Non-Motor',
+                                   'Focal Onset - Aware - Non-Motor',
+                                   'Focal Onset - Not Aware - Motor',
+                                   'Focal Onset - Aware - Motor',
+                                   'Focal Onset - Aware - Motor',
+                                   'Focal Onset - Aware - Motor',
+                                   'Focal Onset - Aware - Non-Motor',
+                                   'Focal Onset - Not Aware - Motor', 
+                                   'Generalized - Tonic Clonic',
+                                   'Focal Onset - Secondary Generalized - Aware - Motor',
+                                   'Focal Onset - Secondary Generalized - Not Aware - Motor',
+                                   'Focal Onset - Not Aware - Motor',
+                                   'Focal Onset - Not Aware - Motor',
+
+                                  ],
+
+              'location': ['Temporal Right Lobe',
+                           'Temporal Right Lobe',
+                           'Temporal Right Lobe',
+                           'Temporal Right Lobe',
+                           'Temporal Right Lobe', 
+                           'Temporal Right Lobe',
+                           'Temporal Right Lobe',
+                           'Frontal Right Lobe',
+                           'Parietal Left Lobe, Medial line',
+                           'Temporal Right Lobe, Posterior Right Lobe, Frontal Right Lobe',
+                           'Temporal Right Lobe, Posterior Right Lobe, Frontal Right Lobe',
+                           'Temporal Right Lobe, Posterior Right Lobe, Frontal Right Lobe',
+                           'Temporal Left Lobe, Parietal Left Lobe, Occipital Left Lobe',
+                           'Frontal Right Lobe, Posterior Right Lobe, Temporal Right Lobe'
+                          ],
+              'propagation': [], 
+              'dates_of_seizure': [date(2016, 5, 9),
+                                   date(2016, 5, 10),
+                                   date(2016, 5, 12),
+                                   date(2016, 5, 13),
+                                   date(2016, 5, 13),
+                                   date(2016, 5, 13),
+                                   date(2016, 5, 13),
+                                   date(2016, 5, 13),
+                                   date(2016, 5, 13),
+                                   date(2016, 5, 13),
+                                   date(2016, 5, 14),
+                                   date(2016, 5, 17),
+                                   date(2016, 5, 17),
+                                   date(2016, 5, 17),
+                                  ]
+       },  
     
     
  '10': {'sex': 'm',
@@ -299,14 +385,14 @@ patients = {
                                time(16, 41, 35),
                                time(21, 43, 55)
                               ],
-             'types_of_seizure': ['GS',
-                                  'FC',
-                                  'FS'
+             'types_of_seizure': ['Focal Onset - Secondary Generalized - Aware - Motor',
+                                  'Focal Onset - Not Aware - Motor',
+                                  'Focal Onset - Aware - Non-Motor'
                                  ],
 
-              'location_of_seizure': ['FTL',
-                                      'FTL',
-                                      'FTL',
+              'location': ['Frontal Left Lobe, Temporal Left Lobe',
+                                      'Frontal Left Lobe, Temporal Left Lobe',
+                                      'Frontal Left Lobe, Temporal Left Lobe',
                                      ], 
 
              'lateralization_onset':['RL',

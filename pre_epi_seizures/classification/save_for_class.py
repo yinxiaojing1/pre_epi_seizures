@@ -75,13 +75,32 @@ def insert_corresp_unique_file(path, filename):
     
 def h5store(filename, df, **kwargs):
     try :
-        
-        print 'SAVINGGGGGGGGGGGGGGGGGGG'
+        print filename
+        print 'Trying to save file'
         store = pd.HDFStore(filename)
+        print '..Succes in opening the object'
+        
+        print ''
+        print 'these are the results in a dataframe'
+        print df
+        print ''
+        
+        print ''
+        print 'this is the asssociated metadata'
+        
+        print kwargs
+        
+        print ''
+        
         store.put('mydata', df)
+        print 'Success in saving the dataframe'
+        
+        print ''
         store.get_storer('mydata').attrs.metadata = kwargs
+        print 'Success in saving the metadata'
+
     except Exception as e:
-        print 'WHHYYYYYYYYYYYYYYYYYY?'
+        print 'failure'
         print filename
         print e
         try :
