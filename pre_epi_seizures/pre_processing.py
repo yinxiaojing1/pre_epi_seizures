@@ -463,7 +463,7 @@ def _main(disk,
             
      
     
-    files = 'all_new'
+    files = 'just_new'
             
             
     # phase-invariant beats
@@ -486,7 +486,6 @@ def _main(disk,
                          rpeak_group_to_process=groups[0],
                          win_samplerate=win_samplerate)
 
-    return
     #stop
 
     # # # STOP
@@ -535,7 +534,7 @@ def _main(disk,
 
     groups_to_process = get_feature_group_name_list(path_to_map,
                                              'QRS_fixed_segmentation#')
-    files = 'all_new'
+    files = 'just_new'
     print groups_to_process
     feature_name = 'rqa_computation'
     for groups in zip(groups_to_process, rpeaks_groups_to_process):

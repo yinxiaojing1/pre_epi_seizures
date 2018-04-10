@@ -93,7 +93,7 @@ def _nested_cross_validation(full_path,
         return_struct['cv_results'] = pd.DataFrame(clf.cv_results_)
         return_struct['y_test'] = y_test
         return_struct['y_pred'] = y_pred
-        return_struct['best_estimator'] = clf.best_estimator_
+        return_struct['best_estimator'] = str(clf.best_estimator_)
         return_struct['best_params'] = clf.best_params_
         
         
