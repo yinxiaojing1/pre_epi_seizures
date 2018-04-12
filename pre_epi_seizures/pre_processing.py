@@ -369,7 +369,6 @@ def _main(disk,
     raw_groups = get_feature_group_name_list(path_to_map,
                                              'raw#')
 
-   
     # 2. Baseline removal and denoising------------------------------------------------------
     files = 'just_new'
     feature_name = 'baseline_removal'
@@ -384,9 +383,13 @@ def _main(disk,
 
 
     # 3. Segmentation---------------------------------------------------------------------------
+    
+    files = 'just_new'
     feature_name = 'rpeak_detection'
     group_to_process = get_feature_group_name_list(path_to_map,
                                              'baseline_removal#')
+    
+ 
     for group in group_to_process:
         param_method_variation = ['hamilton']
         for param_method in param_method_variation:
@@ -435,9 +438,6 @@ def _main(disk,
                          feature_group_to_process=group[0], 
                          rpeak_group_to_process=group[1])
 
-
-    print 'STOP!!!!!!'
-    print 'Just hrv_time_features'
 
     files = 'just_new'
 
@@ -530,6 +530,8 @@ def _main(disk,
 
             
     print 'PCA DONE!'
+    
+    return
 
 
     groups_to_process = get_feature_group_name_list(path_to_map,

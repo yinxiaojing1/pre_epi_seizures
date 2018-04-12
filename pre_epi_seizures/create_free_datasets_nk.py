@@ -145,7 +145,7 @@ def create_free_datasets(path_to_load,
     [_create_free_datasets(path_to_load, path_to_save, patient)
      for patient in patient_list]
     feature_group = fetch_group_raw_to_map()
-    write_feature_to_map(path_to_map, feature_group)
+    #write_feature_to_map(path_to_map, feature_group)
 
 
 def create_free_datasets_nk(disk, time_baseline, patient_list,):

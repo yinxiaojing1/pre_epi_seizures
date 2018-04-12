@@ -19,10 +19,14 @@ def converter(patient_list, disk):
 
         name_file = path[path.index('F'): path.index('F') + 8]
         name_patient = path[path.index('P'): path.index('P') + 9]
-
+        stop
         print name_patient
         print 
         print name_file
+        print ''
+        print 'The following file is going to be loaded'
+        print path
+        print ''
         # stop
         # stop
         edf_file = pyedflib.EdfReader(path)

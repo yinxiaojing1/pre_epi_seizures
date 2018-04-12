@@ -36,6 +36,7 @@ def get_feature_group_name_list(path_to_map, feature_name):
 def write_feature_to_map(path_to_map, feature_group):
     if feature_group\
       not in get_feature_group_name_list(path_to_map, feature_group):
+        stop
         group_name = feature_group
         f = open(path_to_map,'w')
         f.write(group_name[:group_name.index('raw') + 3]

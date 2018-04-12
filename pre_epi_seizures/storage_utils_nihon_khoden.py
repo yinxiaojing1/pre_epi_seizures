@@ -23,26 +23,29 @@ def converter(patient_list, disk):
         print name_patient
         print 
         print name_file
+        print path
+        
         # stop
         # stop
-        edf_file = pyedflib.EdfReader(path)
-        # print edf_file
-        # stop
-        ecg_signals = load_ecg_signal(edf_file)
-        signals = ecg_signals[0]
-        names = ecg_signals[1]
-        date_time = ecg_signals[2]
+        try:
+            edf_file = pyedflib.EdfReader(path)
+            # print edf_file
+            # stop
+            ecg_signals = load_ecg_signal(edf_file)
+            signals = ecg_signals[0]
+            names = ecg_signals[1]
+            date_time = ecg_signals[2]
 
-        # stop
+            # stop
 
-        names_files = [name_file + '_' + name + '_' + date_time
-                       for name in names]
-        print names_files
+            names_files = [name_file + '_' + name + '_' + date_time
+                           for name in names]
+            print names_files
 
-        # stop
-        path = disk + 'h5_files/raw_fulldata/HSM_data.h5'
-        # stop
-        save_signal(path=path, signal_list= signals, mdata_list=['']*len(signals), name_list=names_files, group_list=[name_patient])
+            # stop
+            path = disk + 'h5_files/raw_fulldata/HSM_data.h5'
+            # stop
+            save_signal(path=path, signal_list= signals, mdata_list=['']*len(signals), name_list=names_files, group_list=[name_patient])
 
 
         # stop
@@ -56,7 +59,9 @@ def converter(patient_list, disk):
         #     group = '/'+name_patient +'/free'
         # print 'Saving ...'
         # save_signal(path='/home/sargo/Desktop/HSM_data.h5', signal_list=[signal], mdata_list=[mdata], name_list=[name], group_list=[group])
-        edf_file._close()
+            edf_file._close()
+        except Exception as e:
+            print e
 
 def create_mdata(header, crysis_time_seconds):
     header['crysis_time_seconds'] = list(crysis_time_seconds)
@@ -77,13 +82,24 @@ def load_ecg_signal(edf_file):
 
     # crysis_time_seconds = find_crysis(annotations)
     ecg_indexes= find_ecg_signal(edf_file, list_signals)
+    
+    
+
 
     signals = [np.array([edf_file.readSignal(ecg_index[0])]).T
                for ecg_index in ecg_indexes]
+    
 
     date_time = get_date_time(edf_file)
+    
 
     names = [ecg_index[1] for ecg_index in ecg_indexes]
+    
+    print 'final result --'
+    print names
+    print date_time
+    print signals
+
 
     return signals, names, date_time
 

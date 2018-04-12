@@ -38,10 +38,10 @@ def write_feature_to_map(path_to_map, feature_group):
       not in get_feature_group_name_list(path_to_map, feature_group):
         group_name = feature_group
         f = open(path_to_map,'w')
-        f.write(group_name[:group_name.index('raw') + 3]
-                 + '#'
-                 + group_name[group_name.index('raw') + 3:]
-                 + '!' + '\n')  # python will convert \n to os.linesep
+        #f.write(group_name[:group_name.index('raw') + 3]
+         #        + '#'
+         #        + group_name[group_name.index('raw') + 3:]
+         #        + '!' + '\n')  # python will convert \n to os.linesep
         f.close()
 
 
@@ -59,6 +59,7 @@ def find_index_seizure_file(date_time_seizure,
     index = all_date_times.index([all_date_time
                               for all_date_time in all_date_times
                               if all_date_time < date_time_seizure][-1])
+
     return index
 
 
@@ -84,7 +85,7 @@ def list_seizures_files_patient(path_to_load, patient_dict, patient_number):
 
     patients = patient_dict
 
-    print patients
+
 
 
 
@@ -102,8 +103,12 @@ def list_seizures_files_patient(path_to_load, patient_dict, patient_number):
                           in zip(date_seizures, time_seizures)]
     seizures = range(len(date_time_seizures))
 
+    print date_time_seizures
+    
+    
     # find indexes
     indexes = find_indexes_seizure_files(date_time_seizures, all_date_times)
+    
 
     # fetch seizure filenames
     list_files_seizures = [(list_group['signals'][index + i], sz)
@@ -206,8 +211,7 @@ def get_record_dataset_seizure_file(path_to_load,
         print 'creating raw dataset'
         print seizure
         print group_name_file_seizure
-        print '-------------'
-        print ''
+
         
 
         # load and allocate to memory the seizure file
@@ -215,6 +219,12 @@ def get_record_dataset_seizure_file(path_to_load,
         one_signal_structure = get_one_signal_structure(signals_structure,
                                                         group_name_file_seizure) 
         total_record = get_record(one_signal_structure)
+        
+        print '' 
+
+        print 'Raw Data from disk'
+        print total_record
+        print '-------------'
 
 
         # get seizure datetime
@@ -288,7 +298,7 @@ def save_dataset(path_to_save,
                    ]
 
 
-    write_feature_to_map(path_to_map, group_list[0])
+    #write_feature_to_map(path_to_map, group_list[0])
     for dataset_list_file in dataset_list_files:
         print dataset_list_file
         name_list = [str(patient_number) + '_' + seizure_record[0] for seizure_record in dataset_list_file]
@@ -328,6 +338,7 @@ def create_seizure_dataset_patient(path_to_load, path_to_save,
         patient_dict=patient_dict,
         patient_number=patient_number)
     _logger.debug(group_name_seizure_list)
+    
 
     # Get all the seizure records into memory
     seizure_list = [get_record_dataset_seizure_file(

@@ -26,8 +26,12 @@ def histogram(path_to_save,
 
     for i, feature in enumerate(features_id):
         if i == 0:
-            plt.title(str(group_name) + '_' + dist)
-
+            
+            if dist != None:
+                plt.title(str(group_name) + '_' + dist +'__hist')
+            else:
+                plt.title(str(group_name) + '__hist')
+                
         plt.subplot(len(features_id), 1, i+1)
         
         #iterate for each label

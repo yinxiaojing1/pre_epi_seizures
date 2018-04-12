@@ -17,6 +17,10 @@ from sklearn import preprocessing
 from sklearn.externals import joblib
 import matplotlib.pyplot as plt
 import numpy as np
+from sklearn.metrics import *
+from io import StringIO
+import pandas as pd
+
 
 # python
 import os
@@ -145,6 +149,54 @@ def _nested_cross_validation(full_path,
     
     return return_struct
 
+
+
+
+
+def generate_classification_report(learning_results):
+    # report each test from each fold of the cross_validation scheme
+    report = pd.concat(map(_generate_classification_report, learning_results))
+     
+    # format
+    report = report.reset_index(level=0, drop=True)
+    return report
+
+def _generate_classification_report(learning_result):
+
+    # Get the parameters
+    best_estimator = learning_result['best_estimator']
+    best_params = learning_result['best_params']
+    
+    # Get the Test results
+    y_test = learning_result['y_test']
+    y_pred = learning_result['y_pred']
+    
+    # Get the test group
+    group = learning_result['group']
+
+    # Convert Test result to pandas daraframe
+    classification_report_df = parse_classification_report(classification_report(y_test, y_pred, digits=4))
+    classification_report_df['Labels'] = classification_report_df.index
+    classification_report_df = classification_report_df.reset_index(drop=True)
+    classification_report_df['Test Group'] = str(group)
+    classification_report_df['Model'] = best_estimator
+    classification_report_df['Best Parameters'] = str(best_params)
+
+    # Set Collumns as indexes of the dataframe
+    classification_report_df.set_index(['Model',
+                                        'Best Parameters',
+                                        'Test Group',
+                                        'Labels'] , append=True, inplace=True)
+
+    return classification_report_df
+
+
+def parse_classification_report(classification_report):
+    """Parses sklearn classification report into a pandas dataframe."""
+    return pd.read_fwf(StringIO(classification_report),
+                       lineterminator='\n',
+                       index_col=0, 
+                       colspecs=[(0,22),(22,32),(32,42),(42,52), (52, 62)]).dropna()
 
 # Design Pattern
 def get_cv_result(func):
