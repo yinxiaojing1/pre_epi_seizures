@@ -253,7 +253,7 @@ def hyper_parameter_optimization(full_path,
     
     clf = search_function(optimization_pipe,
                        param_grid, scoring=scoring,
-                       n_jobs=1, verbose=1,
+                       n_jobs=1,
                        cv=cv_inner,
                        return_train_score=True,
                        refit=scoring[0],

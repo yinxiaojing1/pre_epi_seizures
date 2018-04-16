@@ -1,7 +1,8 @@
 # Imports
 # Modelation
 import sklearn.svm as svm
-from sklearn.model_selection import *
+from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import LeavePGroupsOut
 from sklearn.pipeline import *
 import sklearn.naive_bayes as nb
 from sklearn.feature_selection import *
@@ -48,11 +49,6 @@ def supervised_pipeline(label_struct, baseline_label_struct,
     flag_pair = True
     assign_baseline = 'assign_equal_baseline_seizure'
     
-
-
-
-    # In[2]:
-
 
     eda_dir = 'EDAnalysis/'
 
@@ -306,6 +302,7 @@ def supervised_pipeline(label_struct, baseline_label_struct,
     # Learn from data_struct using nested cross_validation
     # learninig is an optimization and respective test results
     # for each partition of the dataset according to cv_out
+    
 
 
     if learn_flag:
