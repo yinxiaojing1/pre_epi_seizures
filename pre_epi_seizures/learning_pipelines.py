@@ -22,6 +22,90 @@ import iopes
 
 import os
 
+
+def get_learning_results(label_struct, baseline_label_struct,
+                        pipe, scaler, param_grid,
+                        patient_list,
+                        feature_slot,
+                        hyper_param,
+                        plot_eda_all_new,
+                        learn_flag,
+                        compute_all_new
+                       ):
+    
+        # State the parameters of the pipeline
+
+    disk = '/mnt/Seagate/pre_epi_seizures/'
+    baseline_files = 'h5_files/processing_datasets/baseline_datasets_new'
+    seizure_files = 'h5_files/processing_datasets/seizure_datasets_new'
+
+    lead_list = ['ECG-']
+
+    interim_processing = [scaler]
+    hist_bins = None
+    dist = None
+    flag_hist = True
+    flag_andrews = True
+    flag_series = True
+    flag_box = True
+    flag_pair = True
+    assign_baseline = 'assign_equal_baseline_seizure'
+    
+
+    eda_dir = 'EDAnalysis/'
+
+    eda_id = iopes.get_eda_params_path(disk=disk,
+                                        eda_dir=eda_dir,
+                                        patient_list = patient_list,
+                                        lead_list = lead_list,
+                                        scaler = scaler,
+                                        interim_processing = interim_processing,
+                                        hist_bins = hist_bins,
+                                        dist = dist,
+                                        assign_baseline = assign_baseline,
+                                        label_struct = label_struct,
+                                        baseline_label_struct = baseline_label_struct,
+                                        feature_slot=feature_slot, 
+                                        hyper_param=0)
+    
+    
+    path_ = disk + eda_dir + eda_id + '/'
+    
+    group_id = 'seizure_nr'
+    label = 'label'
+
+
+    # define cross-validation strategy 
+    cv_out = LeavePGroupsOut(n_groups=1)
+    cv_in = LeavePGroupsOut(n_groups=1)
+
+    # choose scoring
+    scoring = ['f1_micro', 'accuracy']
+
+
+    search_function = GridSearchCV
+
+
+    
+    clf_id = iopes.get_eda_params_path(disk=disk,
+                                       eda_dir=eda_dir + eda_id + '/',
+                                       pipe = str(pipe),
+                                       param_grid = param_grid,
+                                       cv_out = cv_out,
+                                       cv_in = cv_in,
+                                       scoring = scoring,
+                                       search_function = search_function,
+                                       group_id=group_id,
+                                       label=label)
+
+    path_to_save = disk + eda_dir + eda_id + '/' + clf_id + '/'
+    
+    file = pd.read_hdf(path_to_save + 'classification_resport.h5', '/report' )
+    return file
+    
+    
+    
+
 def supervised_pipeline(label_struct, baseline_label_struct,
                         pipe, scaler, param_grid,
                         patient_list,
@@ -66,16 +150,46 @@ def supervised_pipeline(label_struct, baseline_label_struct,
                                         feature_slot=feature_slot, 
                                         hyper_param=0)
     path = disk + eda_dir + eda_id + '/'
+    group_id = 'seizure_nr'
+    label = 'label'
+    data_groups_list = list(data_groups)
+
+    
+    # prepare data for classification - watch out for memory concerns
+    X = data[features]
+    y = data[label]
+    groups = data[group_id]
+
+
+    # define cross-validation strategy 
+    cv_out = LeavePGroupsOut(n_groups=1)
+    cv_in = LeavePGroupsOut(n_groups=1)
+
+    # choose scoring
+    scoring = ['f1_micro', 'accuracy']
+
+
+    search_function = GridSearchCV
+
+    clf_id = iopes.get_eda_params_path(disk=disk,
+                                       eda_dir=eda_dir + '/' + eda_id + '/' ,
+                                       pipe = str(pipe),
+                                       param_grid = param_grid,
+                                       cv_out = cv_out,
+                                       cv_in = cv_in,
+                                       scoring = scoring,
+                                       search_function = search_function,
+                                       group_id=group_id,
+                                       label=label)
+
+    path_to_save = disk + eda_dir + eda_id + '/' + clf_id + '/'
 
 
     # In[3]:
-
+    # Presumably the files exist
     import os
     if not os.path.exists(path):
         os.mkdir(path)
-
-
-    # In[4]:
 
 
     # Ingest Seizure Data
@@ -94,8 +208,6 @@ def supervised_pipeline(label_struct, baseline_label_struct,
                             lead_list, label_struct)
     seizure_data
 
-
-    # In[5]:
 
 
     # Ingest Baseline Data
@@ -117,8 +229,6 @@ def supervised_pipeline(label_struct, baseline_label_struct,
     baseline_data
 
 
-    # In[6]:
-
 
     # Treat Baseline Data
     baseline_data = baseline_data.dropna(axis=0, how='any').reset_index(drop=True)
@@ -135,18 +245,12 @@ def supervised_pipeline(label_struct, baseline_label_struct,
 
 
 
-    # In[7]:
-
-
     # Add Seizure Type
     cv_pd.add_seizure_types(data,
                             'patient_nr',
                             'seizure_nr',
                             'types_of_seizure',
                             'location')
-
-
-    # In[8]:
 
 
     # state the Data metafeatures
@@ -157,10 +261,6 @@ def supervised_pipeline(label_struct, baseline_label_struct,
 
     # Drop missing values
     data = data.dropna(axis=0, how='any').reset_index(drop=True)
-
-
-    # In[9]:
-
 
     # Interim process the data
     for step in interim_processing:
