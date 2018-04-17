@@ -32,11 +32,28 @@ def get_eda_params_path(disk, eda_dir, **kwargs):
     else:
         # load metadata table in hdf5
         table = pd.read_hdf(table_path, '/mdata')
-      
+        
+        print 'table'
+        print table['params']
+        print ''
+        print 'new one'
+        print params_str
+        print ''
+        print 'id params in disk'
         id_params = table.loc[table['params'] == params_str]
-                             
+        print id_params
+        
+        print 'Check if they are the same'
+        print ''
+        print id_params==params_str
+
+        
         if len(id_params):
             final_id = str(id_params['id'].loc[0])
+            print ''
+            print 'final id -- check disk'
+            print final_id
+            stop
          
         else:
             # generate new id 

@@ -53,6 +53,9 @@ def get_learning_results(label_struct, baseline_label_struct,
     
 
     eda_dir = 'EDAnalysis/'
+    
+    
+    
 
     eda_id = iopes.get_eda_params_path(disk=disk,
                                         eda_dir=eda_dir,
@@ -70,6 +73,7 @@ def get_learning_results(label_struct, baseline_label_struct,
     
     
     path_ = disk + eda_dir + eda_id + '/'
+
     
     group_id = 'seizure_nr'
     label = 'label'
