@@ -90,7 +90,7 @@ def _nested_cross_validation(full_path,
         
         # 2. Test the Best Model
         X_test, y_test = X.iloc[test], y.iloc[test]
-        y_pred = clf.predict(X_test)
+        y_pred = pd.Series(clf.predict(X_test))
         
         
         # 3. Compose a predefined return structure 
@@ -99,15 +99,25 @@ def _nested_cross_validation(full_path,
         return_struct['y_pred'] = y_pred
         return_struct['best_estimator'] = str(clf.best_estimator_)
         return_struct['best_params'] = clf.best_params_
+        mdata = dict((k,return_struct[k]) 
+                         for k in return_struct.keys()
+                         if 'results' not in k
+                         and 'y' not in k)
         
-        
+
         # 4. Save Results to disk
         name_hp = 'hp_opt_results__%s.h5' %i
         full_path_hp = full_path + name_hp
-        h5store(full_path_hp, return_struct['cv_results'],
-                **dict((k,return_struct[k]) 
-                       for k in return_struct.keys()
-                       if 'results' not in k))
+        with pd.HDFStore(full_path_hp) as store:
+            store.put('cv_results', return_struct['cv_results'])
+            store.get_storer('cv_results').attrs.metadata = mdata
+            store.put('y_pred', return_struct['y_pred'])
+            store.put('y_test', return_struct['y_test'])
+
+
+
+      
+        
 
      # Load Training from disk
     if not compute_all_new:
@@ -119,17 +129,17 @@ def _nested_cross_validation(full_path,
         # 2. Handle optimization results 
         name_hp = 'hp_opt_results__%s.h5' %i
         full_path_hp = full_path + name_hp
-        results, mdata = load_pandas_file_h5(full_path_hp)
-        
-        print 'These are the saved results'
-        print results
-        
-        print 'This is the saved metadata'
-        print mdata
-        
-        
-        return_struct = mdata
+        store = pd.HDFStore(full_path_hp)
+        results = store['cv_results']
+        mdata = store.get_storer('cv_results').attrs.metadata
+        y_test = store['y_test']
+        y_pred = store['y_pred']
+ 
         return_struct['cv_results'] = results
+        return_struct['y_test'] = y_test
+        return_struct['y_pred'] = y_pred
+        return_struct['best_params'] = mdata['best_params']
+        return_struct['best_estimator'] = mdata['best_estimator']
 
 
     #-------------------------------------------------
@@ -173,20 +183,27 @@ def _generate_classification_report(learning_result):
     
     # Get the test group
     group = learning_result['group']
-
+    group_keys = learning_result['group_keys']
+    
+    
+    
     # Convert Test result to pandas daraframe
     classification_report_df = parse_classification_report(classification_report(y_test, y_pred, digits=4))
     classification_report_df['Labels'] = classification_report_df.index
     classification_report_df = classification_report_df.reset_index(drop=True)
-    classification_report_df['Test Group'] = str(group)
+    
+    for i, group_key in enumerate(group_keys):
+        classification_report_df[group_key] = group[i]
+                                                    
+    
     classification_report_df['Model'] = best_estimator
     classification_report_df['Best Parameters'] = str(best_params)
 
     # Set Collumns as indexes of the dataframe
-    classification_report_df.set_index(['Model',
-                                        'Best Parameters',
-                                        'Test Group',
-                                        'Labels'] , append=True, inplace=True)
+    #classification_report_df.set_index(['Model',
+     #                                   'Best Parameters',
+     #                                   'Test Group',
+     #                                   'Labels'] , append=True, inplace=True)
 
     return classification_report_df
 

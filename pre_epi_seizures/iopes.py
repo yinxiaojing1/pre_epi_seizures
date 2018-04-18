@@ -13,6 +13,7 @@ def get_str_eda_params(**kwargs):
 
 def get_eda_params_path(disk, eda_dir, **kwargs):
     
+    
     # Convert parameter dict into string
     params_str = get_str_eda_params(**kwargs)
     
@@ -22,27 +23,30 @@ def get_eda_params_path(disk, eda_dir, **kwargs):
  
     # Load metadata
     if not os.path.exists(table_path):
+        
+        print 'The table doesnt exist! Making a new one'
 
         new_id = uuid.uuid1()  # generate new id
         table = pd.DataFrame([[params_str, new_id]],
                              columns=['params', 'id'])  # Create new table
         table.to_hdf(table_path, '/mdata')   # save table                   
         final_id = str(new_id)
+        print 'New table done !'
                             
     else:
         # load metadata table in hdf5
         table = pd.read_hdf(table_path, '/mdata')
-        
-        print 'table'
-        print table['params']
         print ''
-        print 'new one'
+        print 'This is a list of the parameters'
+        print list(table['params'])
+        print ''
+        print 'This is the new one'
         print params_str
         print ''
         print 'id params in disk'
         id_params = table.loc[table['params'] == params_str]
         print id_params
-        
+        print ''
         print 'Check if they are the same'
         print ''
         print id_params==params_str
@@ -53,15 +57,21 @@ def get_eda_params_path(disk, eda_dir, **kwargs):
             print ''
             print 'final id -- check disk'
             print final_id
-            stop
+            
          
         else:
             # generate new id 
             new_id = uuid.uuid1()
-            table = pd.DataFrame([[params_str, new_id]],
+            new_row = pd.DataFrame([[params_str, new_id]],
                                  columns=['params', 'id'])  # Create new table
+            table = pd.concat([table, new_row])
             table.to_hdf(table_path, '/mdata')   # save table                   
             final_id = str(new_id)
+    
+    print ''
+    print 'Check for this path on disk .. should be there'
+    print final_id
+    
    
         
     return final_id
