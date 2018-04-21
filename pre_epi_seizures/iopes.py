@@ -14,6 +14,13 @@ def generate_string_identifier(**kwargs):
     
 
 def get_str_eda_params(**kwargs):
+    """
+    Generates a string identifying the parameters of a pipeline.
+    Name to be changed.
+    
+    kwargs: parameters of the pipeline
+    """
+    # Create the string
     str_params = ''
     for item in kwargs.iteritems():
         str_params = str_params + '' + str(item)
@@ -21,21 +28,32 @@ def get_str_eda_params(**kwargs):
     return str_params
 
 
-def get_eda_params_path(disk, eda_dir, **kwargs):
+def generate_txt_file_params(path, str_params):
+    """
+    Generates a small txt file containing the a string of the 
+    parameters.
     
-    # Convert parameter dict into string
-    params_str = get_str_eda_params(**kwargs)
+    kwargs: parameters of the pipeline
+    """    
+    
+    print path
+    # Open and write to file
+    text_file = open(path + "params.txt", "w")
+    text_file.write(str_params)
+    text_file.close()
+    
+
+def get_eda_params_path(disk, directory, params_str):
     
     print params_str
-    
-    table_path = disk + eda_dir + 'eda_mdata.h5'
+
+    table_path = disk + directory + 'eda_mdata.h5'
  
     # Load metadata
     if not os.path.exists(table_path):
         
-        print 'The table doesnt exist! Making a new one'
-        stop
-
+        # Create new table
+        print 'The table doesnt exist! Making a new one!'
         new_id = uuid.uuid1()  # generate new id
         table = pd.DataFrame([[params_str, new_id]],
                              columns=['params', 'id'])  # Create new table

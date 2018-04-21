@@ -20,6 +20,15 @@ from sklearn.kernel_approximation import RBFSampler
 from interim_processing import *
 import iopes
 
+
+# import plotting utils from Exploratory Data Analysis
+import classification.eda.hist as plt_hist
+import classification.eda.andrews as plt_and
+import classification.eda.series as plt_ts
+import classification.eda.box as plt_box
+import classification.eda.scatter as plt_sc
+import matplotlib.pyplot as plt
+
 import os
 
 
@@ -52,7 +61,7 @@ def get_hyper_param_results(label_struct, baseline_label_struct,
     assign_baseline = 'assign_equal_baseline_seizure'
     
 
-    eda_dir = 'EDAnalysis/'
+    eda_dir = 'EDAnalysis_new/'
     
     eda_id = iopes.read_only_table(disk=disk,
                                    eda_dir=eda_dir,
@@ -153,7 +162,7 @@ def get_learning_results(label_struct, baseline_label_struct,
     assign_baseline = 'assign_equal_baseline_seizure'
     
 
-    eda_dir = 'EDAnalysis/'
+    eda_dir = 'EDAnalysis_new/'
     
     
     
@@ -211,6 +220,39 @@ def get_learning_results(label_struct, baseline_label_struct,
     
     return file
     
+
+def prepare_disk_space_hyper_param_results(disk,
+                                           directory,
+                                           **kwargs):
+    """
+    Returns the appropriate path to save the return of the classification pipelines
+    kwargs: parameters of the pipeline
+    
+    """
+    
+    # Generate string to identify
+    params_str = iopes.generate_string_identifier(**kwargs)
+    
+    # Generate identification based on hyperparameters,
+    # using table in .hdf5
+    identifier = iopes.get_eda_params_path(disk=disk,
+                                           directory=directory,
+                                           params_str = params_str)
+    
+    # Create the path, if it doesnt exist
+    path = disk + directory + identifier + '/'
+    import os
+    if not os.path.exists(path):
+        print 'The path doesnt exist. Creating..'
+        os.mkdir(path) 
+    
+    if os.path.exists(path): 
+        print 'Be careful the path already exists!'
+    
+    # Generate .txt file to backup the hyper_parameters
+    iopes.generate_txt_file_params(path, params_str)
+    
+    return path
     
     
 
@@ -242,34 +284,22 @@ def supervised_pipeline(label_struct, baseline_label_struct,
     assign_baseline = 'assign_equal_baseline_seizure'
     
 
-    eda_dir = 'EDAnalysis/'
+    eda_dir = 'EDAnalysis_new/'
     
-    str_id = iopes.generate_string_identifier(patient_list = patient_list,
-                                        lead_list = lead_list,
-                                        scaler = scaler,
-                                        interim_processing = interim_processing,
-                                        hist_bins = hist_bins,
-                                        dist = dist,
-                                        assign_baseline = assign_baseline,
-                                        label_struct = label_struct,
-                                        baseline_label_struct = baseline_label_struct,
-                                        feature_slot=feature_slot, 
-                                        hyper_param=0)
-    print str_id
     
-    stop
-
-    eda_id = iopes.get_eda_params_path(disk=disk,
-                                        eda_dir=eda_dir,
-                                        )
-    path = disk + eda_dir + eda_id + '/'
-
-
-    # In[3]:
-    # Presumably the files exist
-    import os
-    if not os.path.exists(path):
-        os.mkdir(path)
+    eda_path_to_save =  prepare_disk_space_hyper_param_results(disk=disk,
+                                                               directory=eda_dir ,
+                                                               patient_list = patient_list,
+                                                               lead_list = lead_list,
+                                                               scaler = scaler,
+                                                               interim_processing = interim_processing,
+                                                               hist_bins = hist_bins,
+                                                               dist = dist,
+                                                               assign_baseline = assign_baseline,
+                                                               label_struct = label_struct,
+                                                               baseline_label_struct = baseline_label_struct,
+                                                               feature_slot=feature_slot, 
+                                                               hyper_param=0)
 
 
     # Ingest Seizure Data
@@ -380,18 +410,21 @@ def supervised_pipeline(label_struct, baseline_label_struct,
 
     
 
-    clf_id = iopes.get_eda_params_path(disk=disk,
-                                       eda_dir=eda_dir + '/' + eda_id + '/' ,
-                                       pipe = str(pipe_steps),
-                                       param_grid = param_grid,
-                                       cv_out = cv_out,
-                                       cv_in = cv_in,
-                                       scoring = scoring,
-                                       search_function = search_function,
-                                       group_id=group_id,
-                                       label=label)
+    classification_path_to_save =  prepare_disk_space_hyper_param_results(disk=disk,
+                                                               directory=eda_dir ,
+                                                               patient_list = patient_list,
+                                                               lead_list = lead_list,
+                                                               scaler = scaler,
+                                                               interim_processing = interim_processing,
+                                                               hist_bins = hist_bins,
+                                                               dist = dist,
+                                                               assign_baseline = assign_baseline,
+                                                               label_struct = label_struct,
+                                                               baseline_label_struct = baseline_label_struct,
+                                                               feature_slot=feature_slot, 
+                                                               hyper_param=0)
 
-    path_to_save = disk + eda_dir + eda_id + '/' + clf_id + '/'
+    classification_path_to_save = disk + eda_dir + eda_id + '/' + clf_id + '/'
 
 
 
@@ -803,3 +836,7 @@ def dask_supervised_pipeline(label_struct, baseline_label_struct,
         
         print report
     print 'Done!'
+    
+    
+def plot_eda(path_to_save,
+             
