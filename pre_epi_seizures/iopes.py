@@ -43,11 +43,11 @@ def generate_txt_file_params(path, str_params):
     text_file.close()
     
 
-def get_eda_params_path(disk, directory, params_str):
+def get_eda_params_path(directory, params_str):
     
     print params_str
 
-    table_path = disk + directory + 'eda_mdata.h5'
+    table_path = directory + 'eda_mdata.h5'
  
     # Load metadata
     if not os.path.exists(table_path):
@@ -105,13 +105,9 @@ def get_eda_params_path(disk, directory, params_str):
     return final_id
 
 
-def read_only_table(disk, eda_dir, **kwargs):
+def read_only_table(directory,  params_str):
     # Convert parameter dict into string
-    params_str = get_str_eda_params(**kwargs)
-    
-    print params_str
-    
-    table_path = disk + eda_dir + 'eda_mdata.h5'
+    table_path = directory + 'eda_mdata.h5'
  
     # Load metadata
     if not os.path.exists(table_path):

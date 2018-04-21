@@ -189,6 +189,7 @@ def _generate_classification_report(learning_result):
     
     # Convert Test result to pandas daraframe
     classification_report_df = parse_classification_report(classification_report(y_test, y_pred, digits=4))
+    
     classification_report_df['Labels'] = classification_report_df.index
     classification_report_df = classification_report_df.reset_index(drop=True)
     
@@ -208,12 +209,41 @@ def _generate_classification_report(learning_result):
     return classification_report_df
 
 
+def accumu(lis):
+    total = 0
+    for x in lis:
+        total += x
+        yield total
+
+
+
 def parse_classification_report(classification_report):
     """Parses sklearn classification report into a pandas dataframe."""
-    return pd.read_fwf(StringIO(classification_report),
+    print classification_report
+    
+    # Allocate the quantities in order to conver the string correctly
+    longest_label='Inter-Ictal data points'
+     
+    colspecs_len = [0,
+                     len('Inter-Ictal data points  '),
+                     len(' Precision '),
+                     len(' Recall '), 
+                     len(' f1-score '), 
+                     len(' support  ')
+                    ]
+    
+    colspecs_accumu = list(accumu(colspecs_len))
+    colspecs = zip(colspecs_accumu[0:-1], colspecs_accumu[1:])
+    
+    
+    return  pd.read_fwf(StringIO(classification_report),
                        lineterminator='\n',
                        index_col=0, 
-                       colspecs=[(0,22),(22,32),(32,42),(42,52), (52, 62)]).dropna()
+                       colspecs=colspecs).dropna()
+    
+
+    
+
 
 # Design Pattern
 def get_cv_result(func):
@@ -270,7 +300,7 @@ def hyper_parameter_optimization(full_path,
     
     clf = search_function(optimization_pipe,
                        param_grid, scoring=scoring,
-                       n_jobs=1,
+                       n_jobs=-1,
                        cv=cv_inner,
                        return_train_score=True,
                        refit=scoring[0],
