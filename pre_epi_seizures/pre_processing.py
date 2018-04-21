@@ -209,6 +209,10 @@ def load_feature(path_to_load, path_to_map, feature_to_load,
     feature_group_extracted = [feature_group_to_process + '/' + feature_to_load]
 
     feature_groups_to_process = {k:feature_groups_required[k] for k in feature_groups_required.keys() if 'process' in k}
+    
+    print feature_group_to_process
+    print feature_group_extracted
+    
 
     # feature_group_aux = {k:feature_groups_required[k] for k in feature_groups_required.keys() if 'group' in k and 'process' not in k}
 
@@ -467,24 +471,24 @@ def _main(disk,
             
             
     # phase-invariant beats
-    rpeaks_groups_to_process = get_feature_group_name_list(path_to_map,
-                                             'rpeak_detection#')
-    feature_name = 'beat_phase_segmentation'
-    groups_to_process = get_feature_group_name_list(path_to_map,
-                                             'baseline_removal#')
-    rpeaks_groups_to_process = [feature_group_name
-                                for feature_group_name in rpeaks_groups_to_process
-                                if 'baseline_removal' in feature_group_name]
-    sampling_rate=1000
-    for groups in zip(groups_to_process, rpeaks_groups_to_process):
-        win_samplerate_variation = [sampling_rate]
-        for win_samplerate in win_samplerate_variation:
+    #rpeaks_groups_to_process = get_feature_group_name_list(path_to_map,
+                #                             'rpeak_detection#')
+    #feature_name = 'beat_phase_segmentation'
+    #groups_to_process = get_feature_group_name_list(path_to_map,
+           #                                  'baseline_removal#')
+    #rpeaks_groups_to_process = [feature_group_name
+    #                            for feature_group_name in rpeaks_groups_to_process
+     #                           if 'baseline_removal' in feature_group_name]
+    #sampling_rate=1000
+    #for groups in zip(groups_to_process, rpeaks_groups_to_process):
+      #  win_samplerate_variation = [sampling_rate]
+     #   for win_samplerate in win_samplerate_variation:
             # stop
-            load_feature(path_to_load, path_to_map, feature_name,
-                         files=files,
-                         feature_group_to_process=groups[1],
-                         rpeak_group_to_process=groups[0],
-                         win_samplerate=win_samplerate)
+       #     load_feature(path_to_load, path_to_map, feature_name,
+       #                  files=files,
+       #                  feature_group_to_process=groups[1],
+       #                  rpeak_group_to_process=groups[0],
+        #                 win_samplerate=win_samplerate)
 
     #stop
 
@@ -530,6 +534,53 @@ def _main(disk,
 
             
     print 'PCA DONE!'
+    
+    
+    
+    print 'Computing P_fixed_segmentation'        
+            
+    rpeaks_groups_to_process = get_feature_group_name_list(path_to_map,
+                                             'rpeak_detection#')
+    # stop
+    feature_name = 'P_fixed_segmentation'
+    files = 'just_new'
+    groups_to_process = get_feature_group_name_list(path_to_map,
+                                             'baseline_removal#')
+    rpeaks_groups_to_process = [feature_group_name
+                                for feature_group_name in rpeaks_groups_to_process
+                                if 'baseline_removal' in feature_group_name]
+
+    for groups in zip(groups_to_process, rpeaks_groups_to_process):
+        win_samplerate_variation = [sampling_rate]
+        for win_samplerate in win_samplerate_variation:
+            # stop
+            load_feature(path_to_load, path_to_map, feature_name,
+                         files=files,
+                         feature_group_to_process=groups[1],
+                         rpeak_group_to_process=groups[0],
+                         win_samplerate=win_samplerate) 
+            
+    print 'Computing PCA'       
+    groups_to_process = get_feature_group_name_list(path_to_map,
+                                             'P_fixed_segmentation#')
+    
+    print groups_to_process
+  
+    feature_name = 'pca_beat_amp_computation'
+    for groups in zip(groups_to_process, rpeaks_groups_to_process):
+        nr_comp_variation = [5]
+        for nr_comp in nr_comp_variation:
+            # stop
+            load_feature(path_to_load, path_to_map, feature_name,
+                         files=files,
+                         feature_group_to_process=groups[1],
+                         rpeak_group_to_process=groups[0],
+                         nr_comp = nr_comp_variation)
+
+            
+    print 'PCA DONE!'
+            
+            
     
     return
 

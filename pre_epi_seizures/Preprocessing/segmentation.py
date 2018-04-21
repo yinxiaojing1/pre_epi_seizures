@@ -101,6 +101,30 @@ def QRS_fixed_segmentation(signal_arguments,
     return beats, mdata, domains
 
 
+def P_fixed_segmentation(signal_arguments,
+                           win_params, add_params,
+                           win_param_to_process, param_to_process):
+    #CHANGE URGENTLY*************************************************************
+    signal_list = signal_arguments['rpeak_group_to_process']
+    rpeaks_list = signal_arguments['feature_group_to_process']
+    sampling_rate = win_params['samplerate']
+    
+    try:
+
+        beats = [compute_P(signal, rpeaks, sampling_rate) 
+                 for signal, rpeaks in zip(signal_list, rpeaks_list)]
+
+        domains = [rpeaks[0][1:-1] for rpeaks in rpeaks_list]
+        
+    except Exception as e:
+        beats = [[]]
+        domains = [[]]
+    
+    
+    mdata = [''] * len(rpeaks_list)
+    return beats, mdata, domains
+
+
 def beat_phase_segmentation(signal_arguments,
                            win_params, add_params,
                            win_param_to_process, param_to_process):
@@ -158,6 +182,13 @@ def compute_QRS(signal, rpeaks, sampling_rate):
     rpeaks = rpeaks[0]
     beats = np.asarray([signal[rpeak - int(0.04*sampling_rate):rpeak + int(0.06*sampling_rate)] for rpeak in rpeaks[1:-1]])
     return beats.T
+
+def compute_P(signal, rpeaks, sampling_rate):
+    signal = signal[0]
+    rpeaks = rpeaks[0]
+    beats = np.asarray([signal[rpeak - int(0.05*sampling_rate):rpeak - int(0.04*sampling_rate)] for rpeak in rpeaks[1:-1]])
+    return beats.T
+
 
 def create_heart_beat_dataset(path, name, group, save_dfile=None):
     X = load_signal(path=path, name=name, group=group) # 1 record per row

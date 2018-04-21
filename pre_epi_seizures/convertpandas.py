@@ -14,6 +14,7 @@ def load_records(path_to_load, path_to_map, patient_list, feature_name, lead_lis
                                                     feature_name,
                                                     patient_list,
                                                     lead_list)
+    
     data_struct = load_feature_from_input_list(path_to_load,
                                                records_list)
     window_data_struct = load_feature_window_from_input_list(path_to_load,

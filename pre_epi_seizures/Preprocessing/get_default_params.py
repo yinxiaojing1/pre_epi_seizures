@@ -66,6 +66,15 @@ def get_input_and_default_params(win_params, add_params, feature_name):
         final_add_params = input_default_params(add_params,
                             seg_begin=0.04,
                             seg_end=0.06)
+        
+    if feature_name == 'P_fixed_segmentation':
+        final_win_params = input_default_params(win_params,
+                            win='rpeaks',
+                            samplerate=1000)
+
+        final_add_params = input_default_params(add_params,
+                            seg_begin=0.04,
+                            seg_end=0.06)
 
 
     if feature_name == 'beat_phase_segmentation':

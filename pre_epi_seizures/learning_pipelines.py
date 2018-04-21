@@ -23,6 +23,107 @@ import iopes
 import os
 
 
+
+def get_hyper_param_results(label_struct, baseline_label_struct,
+                                       pipe, scaler, param_grid,
+                                       patient_list,
+                                       feature_slot,
+                                       hyper_param,
+                                       plot_eda_all_new,
+                                       learn_flag,
+                                       compute_all_new
+                                       ):
+    # This procedure is required to determine the path where the files reside.
+    # State the parameters of the pipeline
+    disk = '/mnt/Seagate/pre_epi_seizures/'
+    baseline_files = 'h5_files/processing_datasets/baseline_datasets_new'
+    seizure_files = 'h5_files/processing_datasets/seizure_datasets_new'
+
+    lead_list = ['ECG-']
+
+    interim_processing = [scaler]
+    hist_bins = None
+    dist = None
+    flag_hist = True
+    flag_andrews = True
+    flag_series = True
+    flag_box = True
+    flag_pair = True
+    assign_baseline = 'assign_equal_baseline_seizure'
+    
+
+    eda_dir = 'EDAnalysis/'
+    
+    eda_id = iopes.read_only_table(disk=disk,
+                                   eda_dir=eda_dir,
+                                   patient_list = patient_list,
+                                   lead_list = lead_list,
+                                   scaler = scaler,
+                                   interim_processing = interim_processing,
+                                   hist_bins = hist_bins,
+                                   dist = dist,
+                                   assign_baseline = assign_baseline,
+                                   label_struct = label_struct,
+                                   baseline_label_struct = baseline_label_struct,
+                                   feature_slot=feature_slot, 
+                                   hyper_param=0)
+
+    
+    path = disk + eda_dir + eda_id + '/'
+    print path
+    
+    group_id = 'seizure_nr'
+    label = 'label'
+
+    # define cross-validation strategy 
+    cv_out = LeavePGroupsOut(n_groups=1)
+    cv_in = LeavePGroupsOut(n_groups=1)
+
+    # choose scoring
+    scoring = ['f1_micro']
+
+    search_function = GridSearchCV
+
+    pipe_steps = [step[0] for step in pipe.steps]
+    
+    clf_id = iopes.read_only_table(disk=disk,
+                                   eda_dir=eda_dir + eda_id + '/',
+                                   pipe = str(pipe_steps),
+                                   param_grid = param_grid,
+                                   cv_out = cv_out,
+                                   cv_in = cv_in,
+                                   scoring = scoring,
+                                   search_function = search_function,
+                                   group_id=group_id,
+                                   label=label)
+
+    path_to_save = disk + eda_dir + eda_id + '/' + clf_id + '/'
+    
+    # After determined path_to_save, now load all the files
+    # from hyperparameter optimization
+    hyper_parameterization_results = [load_optimization_test_file(path_to_save + name)
+                                      for name in os.listdir(path_to_save)
+                                      if 'hp_opt_results' in name]
+    return hyper_parameterization_results[0]
+    
+  
+def load_optimization_test_file(full_path_hp):
+    return_struct = dict()
+    store = pd.HDFStore(full_path_hp)
+    results = store['cv_results']
+    mdata = store.get_storer('cv_results').attrs.metadata
+    y_test = store['y_test']
+    y_pred = store['y_pred']
+ 
+    return_struct['cv_results'] = results
+    return_struct['y_test'] = y_test
+    return_struct['y_pred'] = y_pred
+    return_struct['best_params'] = mdata['best_params']
+    return_struct['best_estimator'] = mdata['best_estimator']
+    
+    return return_struct
+
+    
 def get_learning_results(label_struct, baseline_label_struct,
                         pipe, scaler, param_grid,
                         patient_list,
@@ -57,7 +158,7 @@ def get_learning_results(label_struct, baseline_label_struct,
     
     
 
-    eda_id = iopes.get_eda_params_path(disk=disk,
+    eda_id = iopes.read_only_table(disk=disk,
                                         eda_dir=eda_dir,
                                         patient_list = patient_list,
                                         lead_list = lead_list,
@@ -86,14 +187,14 @@ def get_learning_results(label_struct, baseline_label_struct,
     cv_in = LeavePGroupsOut(n_groups=1)
 
     # choose scoring
-    scoring = ['f1_micro', 'accuracy']
+    scoring = ['f1_micro']
 
 
     search_function = GridSearchCV
 
     pipe_steps = [step[0] for step in pipe.steps]
     
-    clf_id = iopes.get_eda_params_path(disk=disk,
+    clf_id = iopes.read_only_table(disk=disk,
                                        eda_dir=eda_dir + eda_id + '/',
                                        pipe = str(pipe_steps),
                                        param_grid = param_grid,
@@ -142,10 +243,8 @@ def supervised_pipeline(label_struct, baseline_label_struct,
     
 
     eda_dir = 'EDAnalysis/'
-
-    eda_id = iopes.get_eda_params_path(disk=disk,
-                                        eda_dir=eda_dir,
-                                        patient_list = patient_list,
+    
+    str_id = iopes.generate_string_identifier(patient_list = patient_list,
                                         lead_list = lead_list,
                                         scaler = scaler,
                                         interim_processing = interim_processing,
@@ -156,6 +255,13 @@ def supervised_pipeline(label_struct, baseline_label_struct,
                                         baseline_label_struct = baseline_label_struct,
                                         feature_slot=feature_slot, 
                                         hyper_param=0)
+    print str_id
+    
+    stop
+
+    eda_id = iopes.get_eda_params_path(disk=disk,
+                                        eda_dir=eda_dir,
+                                        )
     path = disk + eda_dir + eda_id + '/'
 
 
@@ -174,15 +280,9 @@ def supervised_pipeline(label_struct, baseline_label_struct,
     feature_name = get_feature_group_name_list(path_to_map,
                                                    feature_slot)[hyper_param]
 
-    print feature_name
-
-
     seizure_data = cv_pd.convert_to_pandas(path_to_load, path_to_map,
                             patient_list, feature_name,
                             lead_list, label_struct)
-    seizure_data
-
-
 
     # Ingest Baseline Data
 
@@ -271,13 +371,14 @@ def supervised_pipeline(label_struct, baseline_label_struct,
     cv_in = LeavePGroupsOut(n_groups=1)
 
     # choose scoring
-    scoring = ['f1_micro', 'accuracy']
+    scoring = ['f1_micro']
 
 
     search_function = GridSearchCV
     
     pipe_steps = [step[0] for step in pipe.steps]
 
+    
 
     clf_id = iopes.get_eda_params_path(disk=disk,
                                        eda_dir=eda_dir + '/' + eda_id + '/' ,
@@ -291,9 +392,6 @@ def supervised_pipeline(label_struct, baseline_label_struct,
                                        label=label)
 
     path_to_save = disk + eda_dir + eda_id + '/' + clf_id + '/'
-
-
-    # In[12]:
 
 
 
@@ -407,7 +505,7 @@ def supervised_pipeline(label_struct, baseline_label_struct,
     print 'Done!'
     
     
-def delayed_supervised_pipeline(label_struct, baseline_label_struct,
+def dask_supervised_pipeline(label_struct, baseline_label_struct,
                         pipe, scaler, param_grid,
                         patient_list,
                         feature_slot,
@@ -554,11 +652,13 @@ def delayed_supervised_pipeline(label_struct, baseline_label_struct,
 
     data_groups_list = list(data_groups)
 
-    
     # prepare data for classification - watch out for memory concerns
     X = data[features]
     y = data[label]
     groups = data[group_id]
+    
+    # Scatter the data on the cluster
+    dask_client.scatter(X)
 
 
     # define cross-validation strategy 
@@ -566,10 +666,11 @@ def delayed_supervised_pipeline(label_struct, baseline_label_struct,
     cv_in = LeavePGroupsOut(n_groups=1)
 
     # choose scoring
-    scoring = ['f1_micro', 'accuracy']
+    scoring = ['f1_micro']
 
-    from dask_ml.model_selection import GridSearchCV
-    search_function = GridSearchCV
+    from dask_ml.model_selection import GridSearchCV as grid_search_dask
+    search_function = grid_search_dask
+    
     
     pipe_steps = [step[0] for step in pipe.steps]
 
@@ -680,14 +781,16 @@ def delayed_supervised_pipeline(label_struct, baseline_label_struct,
 
 
     if learn_flag:
-        learning_results = cv.nested_cross_validation(path_to_save,
-                                               X,y, groups,
-                                               pipe,
-                                               param_grid, scoring,
-                                               compute_all_new, cv_out, cv_in,
-                                               search_function)
+        learning_results = dask_client.compute(cv.nested_cross_validation(path_to_save,
+                                                                          X,y, groups,
+                                                                          pipe,
+                                                                          param_grid, scoring,
+                                                                          compute_all_new, cv_out, cv_in,
+                                                                          search_function))
         #************************************************************************
         groups = data_groups.groups.keys()
+        
+        return learning_results
 
         for learning_result, group in zip(learning_results, groups):
                 learning_result['group'] = group

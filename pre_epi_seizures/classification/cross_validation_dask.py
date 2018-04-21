@@ -39,22 +39,26 @@ def nested_cross_validation(full_path,
                            pipe,
                            param_grid, scoring,
                            compute_all_new, cv_out, cv_in,
-                           search_function):
+                           search_function,
+                           dask_client):
+    # Scatter data to the cluster
+    scatt = dask_client.scatter(X)
+    
     
     # Outer-loop cross-validation
-    cv_out = cv_out.split(X, y, groups=groups)
+    cv_out = cv_out.split(X=X, y=y, groups=groups)
 
     # Employ crossvalidation for each partion
     # according to cv_out
-    struct = [_nested_cross_validation(full_path,
-                             X,y, groups,
-                             pipe, 
-                             train,
-                             test,
-                             i,
-                             param_grid, scoring,
-                             compute_all_new, cv_in,
-                             search_function)
+    struct = [dask_client.submit(_nested_cross_validation, full_path,
+                                                          X,y, groups,
+                                                          pipe, 
+                                                          train,
+                                                          test,
+                                                             i,
+                                                          param_grid, scoring,
+                                                          compute_all_new, cv_in,
+                                                          search_function)
               for i, (train, test) in enumerate(cv_out)]
  
     return struct
@@ -274,8 +278,7 @@ def hyper_parameter_optimization(full_path,
                        cv=cv_inner,
                        return_train_score=True,
                        refit=scoring[0],
-                       error_score=0,
-                       verbose=1)
+                       error_score=0)
     
     clf.fit(X_inner, y_innner) # retrain
     mdata = {}
