@@ -258,52 +258,13 @@ def prepare_disk_space_hyper_param_results(directory,
     
     return path
 
+
+def interim_process(disk, seizure_files, baseline_files,
+                    feature_slot, hyper_param,
+                    patient_list, lead_list,
+                    label_struct, baseline_label_struct,
+                    interim_processing):
     
-    
-
-def supervised_pipeline(label_struct, baseline_label_struct,
-                        pipe, scaler, param_grid,
-                        patient_list,
-                        feature_slot,
-                        hyper_param,
-                        plot_eda_all_new,
-                        learn_flag,
-                        compute_all_new
-                       ):
-    # State the parameters of the pipeline
-
-    disk = '/mnt/Seagate/pre_epi_seizures/'
-    baseline_files = 'h5_files/processing_datasets/baseline_datasets_new'
-    seizure_files = 'h5_files/processing_datasets/seizure_datasets_new'
-
-    lead_list = ['ECG-']
-
-    interim_processing = [scaler]
-    hist_bins = None
-    dist = None
-    flag_hist = True
-    flag_andrews = True
-    flag_series = True
-    flag_box = True
-    flag_pair = True
-    assign_baseline = 'assign_equal_baseline_seizure'
-    
-
-    general_dir = disk + 'EDanalysis_new/'
-    
-    
-    eda_dir =  prepare_disk_space_hyper_param_results(directory=general_dir ,
-                                                               patient_list = patient_list,
-                                                               lead_list = lead_list,
-                                                               scaler = scaler,
-                                                               interim_processing = interim_processing,
-                                                               assign_baseline = assign_baseline,
-                                                               label_struct = label_struct,
-                                                               baseline_label_struct = baseline_label_struct,
-                                                               feature_slot=feature_slot, 
-                                                               hyper_param=0)
-
-
     # Ingest Seizure Data
     path_to_load = disk + seizure_files + '.h5'
     path_to_map = disk + seizure_files + '_map.txt'
@@ -324,15 +285,14 @@ def supervised_pipeline(label_struct, baseline_label_struct,
 
     # Feature group to analyse -- point of entry
     feature_name = get_feature_group_name_list(path_to_map,
-                                                   feature_slot)[0]
+                                                   feature_slot)[hyper_param]
 
     print feature_name
 
     baseline_data = cv_pd.convert_to_pandas(path_to_load, path_to_map,
                             patient_list, feature_name,
-                            lead_list, baseline_label_struct)
-
-    print baseline_data
+                            lead_list, 
+                            baseline_label_struct)
 
 
     # Treat Baseline Data
@@ -376,7 +336,11 @@ def supervised_pipeline(label_struct, baseline_label_struct,
         #X_norm = pd.DataFrame(X_norm_np, columns=X.columns)
 
         data[features] = X_norm_np
+        
+    return data, features, metafeatures
 
+
+def group_data_per_seizure(data):
     # Group the data
     group_keys= ['patient_nr',
                   'seizure_nr',
@@ -384,12 +348,67 @@ def supervised_pipeline(label_struct, baseline_label_struct,
                   'location']
     
     data_groups = data.groupby(group_keys)
-    group_id = 'seizure_nr'
-
-    label = 'label'
-
     data_groups_list = list(data_groups)
+                           
+    return data_groups_list
+    
 
+def supervised_pipeline(label_struct, baseline_label_struct,
+                        pipe, scaler, param_grid,
+                        patient_list,
+                        feature_slot,
+                        hyper_param,
+                        plot_eda_all_new,
+                        learn_flag,
+                        compute_all_new
+                       ):
+    # State the parameters of the pipeline
+
+    disk = '/mnt/Seagate/pre_epi_seizures/'
+    baseline_files = 'h5_files/processing_datasets/baseline_datasets_new'
+    seizure_files = 'h5_files/processing_datasets/seizure_datasets_new'
+
+    lead_list = ['ECG-']
+
+    interim_processing = [scaler]
+    hist_bins = None
+    dist = None
+    flag_hist = True
+    flag_andrews = True
+    flag_series = True
+    flag_box = True
+    flag_pair = True
+    assign_baseline = 'assign_equal_baseline_seizure'
+    
+
+    general_dir = disk + 'EDanalysis_new/'
+    
+    
+    eda_dir =  prepare_disk_space_hyper_param_results(directory=general_dir ,
+                                                               patient_list = patient_list,
+                                                               lead_list = lead_list,
+                                                               scaler = scaler,
+                                                               interim_processing = interim_processing,
+                                                               assign_baseline = assign_baseline,
+                                                               label_struct = label_struct,
+                                                               baseline_label_struct = baseline_label_struct,
+                                                               feature_slot=feature_slot, 
+                                                               hyper_param=0)
+    
+    # Load the data, according to specification (loading made by convert pandas)
+    data_struct = interim_process(disk, seizure_files, baseline_files,
+                    feature_slot, hyper_param,
+                    patient_list, lead_list,
+                    label_struct, baseline_label_struct,
+                    interim_processing)
+    
+    data = data_struct[0]
+    features = data_struct[1]
+    meta_features = data_struct[2]
+
+    # information for sklearn groups
+    group_id = 'seizure_nr'
+    label = 'label'
     
     # prepare data for classification - watch out for memory concerns
     X = data[features]
@@ -461,9 +480,115 @@ def supervised_pipeline(label_struct, baseline_label_struct,
         
         print report
     print 'Done!'
+
     
     
-def plot_eda(directory,
+    
+def plot_eda(plot_directory,
+             label_struct, baseline_label_struct,
+             pipe, scaler, param_grid,
+             patient_list,
+             feature_slot,
+             hyper_param,
+             plot_eda_all_new,
+             learn_flag,
+             compute_all_new
+                       ):
+    # State the parameters of the pipeline
+
+    disk = '/mnt/Seagate/pre_epi_seizures/'
+    baseline_files = 'h5_files/processing_datasets/baseline_datasets_new'
+    seizure_files = 'h5_files/processing_datasets/seizure_datasets_new'
+
+    lead_list = ['ECG-']
+
+    interim_processing = [scaler]
+    hist_bins = None
+    dist = None
+    flag_hist = True
+    flag_andrews = True
+    flag_series = True
+    flag_box = True
+    flag_pair = True
+    assign_baseline = 'assign_equal_baseline_seizure'
+    
+
+    general_dir = disk + 'EDanalysis_new/'
+    
+    
+    eda_dir = read_disk_space_hyper_param_results(general_dir,
+                                                        patient_list = patient_list,
+                                                        lead_list = lead_list,
+                                                        scaler = scaler,
+                                                        interim_processing = interim_processing,
+                                                        assign_baseline = assign_baseline,
+                                                        label_struct = label_struct,
+                                                        baseline_label_struct = baseline_label_struct,
+                                                        feature_slot=feature_slot, 
+                                                        hyper_param=0)
+    
+    # Load the data, according to specification (loading made by convert pandas)
+    data_struct = interim_process(disk, seizure_files, baseline_files,
+                    feature_slot, hyper_param,
+                    patient_list, lead_list,
+                    label_struct, baseline_label_struct,
+                    interim_processing)
+    
+    data = data_struct[0]
+    features = data_struct[1]
+    meta_features = data_struct[2]
+
+    # information for sklearn groups
+    group_id = 'seizure_nr'
+    label = 'label'
+    
+    # prepare data for classification - watch out for memory concerns
+    X = data[features]
+    y = data[label]
+    groups = data[group_id]
+
+
+    # define cross-validation strategy 
+    cv_out = LeavePGroupsOut(n_groups=1)
+    cv_in = LeavePGroupsOut(n_groups=1)
+
+    # choose scoring
+    scoring = ['f1_micro']
+
+
+    search_function = GridSearchCV
+    
+    pipe_steps = [step[0] for step in pipe.steps]
+
+    classification_dir =  read_disk_space_hyper_param_results(directory=eda_dir,
+                                                               pipe = str(pipe_steps),
+                                                               param_grid = param_grid,
+                                                               cv_out = cv_out,
+                                                               cv_in = cv_in,
+                                                               scoring = scoring,
+                                                               search_function = search_function,
+                                                               group_id=group_id,
+                                                               label=label)
+    
+    print 'This is the classification dir'
+    print classification_dir
+    
+    # Get classification identifier
+    split = classification_dir.split('/')
+    eda_id = split[-1]
+    
+    data_group_list = group_data_per_seizure(data)
+    
+    stop
+    
+                           
+  
+    
+    
+    
+    
+    
+def _plot_eda(directory,
              data_groups_list):  
     """
     Plots and saves all the proposed plots for Exploratory data analysis to disk.
