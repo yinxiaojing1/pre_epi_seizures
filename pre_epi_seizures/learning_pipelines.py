@@ -42,8 +42,8 @@ def get_hyper_param_results(label_struct, baseline_label_struct,
                                        learn_flag,
                                        compute_all_new
                                        ):
-    # This procedure is required to determine the path where the files reside.
-    # State the parameters of the pipeline
+    
+       # State the parameters of the pipeline
     disk = '/mnt/Seagate/pre_epi_seizures/'
     baseline_files = 'h5_files/processing_datasets/baseline_datasets_new'
     seizure_files = 'h5_files/processing_datasets/seizure_datasets_new'
@@ -61,28 +61,24 @@ def get_hyper_param_results(label_struct, baseline_label_struct,
     assign_baseline = 'assign_equal_baseline_seizure'
     
 
-    eda_dir = 'EDAnalysis_new/'
-    
-    eda_id = iopes.read_only_table(disk=disk,
-                                   eda_dir=eda_dir,
-                                   patient_list = patient_list,
-                                   lead_list = lead_list,
-                                   scaler = scaler,
-                                   interim_processing = interim_processing,
-                                   hist_bins = hist_bins,
-                                   dist = dist,
-                                   assign_baseline = assign_baseline,
-                                   label_struct = label_struct,
-                                   baseline_label_struct = baseline_label_struct,
-                                   feature_slot=feature_slot, 
-                                   hyper_param=0)
+    general_dir = disk + 'EDanalysis_new/'
 
-    
-    path = disk + eda_dir + eda_id + '/'
-    print path
-    
+    eda_dir = read_disk_space_hyper_param_results(general_dir,
+                                                        patient_list = patient_list,
+                                                        lead_list = lead_list,
+                                                        scaler = scaler,
+                                                        interim_processing = interim_processing,
+                                                        assign_baseline = assign_baseline,
+                                                        label_struct = label_struct,
+                                                        baseline_label_struct = baseline_label_struct,
+                                                        feature_slot=feature_slot, 
+                                                        hyper_param=0)
+
+
+    # Define grouping of the data
     group_id = 'seizure_nr'
     label = 'label'
+
 
     # define cross-validation strategy 
     cv_out = LeavePGroupsOut(n_groups=1)
@@ -91,27 +87,26 @@ def get_hyper_param_results(label_struct, baseline_label_struct,
     # choose scoring
     scoring = ['f1_micro']
 
+    # choose the seach function
     search_function = GridSearchCV
-
+    
+    # Get pipe steps
     pipe_steps = [step[0] for step in pipe.steps]
     
-    clf_id = iopes.read_only_table(directory=directory,
-                                   pipe = str(pipe_steps),
-                                   param_grid = param_grid,
-                                   cv_out = cv_out,
-                                   cv_in = cv_in,
-                                   scoring = scoring,
-                                   search_function = search_function,
-                                   group_id=group_id,
-                                   label=label)
-
-
-    path_to_save = disk + eda_dir + eda_id + '/' + clf_id + '/'
+    classification_dir =  read_disk_space_hyper_param_results(directory=eda_dir,
+                                                               pipe = str(pipe_steps),
+                                                               param_grid = param_grid,
+                                                               cv_out = cv_out,
+                                                               cv_in = cv_in,
+                                                               scoring = scoring,
+                                                               search_function = search_function,
+                                                               group_id=group_id,
+                                                               label=label)
     
     # After determined path_to_save, now load all the files
     # from hyperparameter optimization
-    hyper_parameterization_results = [load_optimization_test_file(path_to_save + name)
-                                      for name in os.listdir(path_to_save)
+    hyper_parameterization_results = [load_optimization_test_file(classification_dir + name)
+                                      for name in os.listdir(classification_dir)
                                       if 'hp_opt_results' in name]
     return hyper_parameterization_results[0]
     

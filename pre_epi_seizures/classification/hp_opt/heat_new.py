@@ -14,7 +14,7 @@ def get_hp_opt_results_args(hp_opt_results):
                         for key in cv_results.columns
                         if 'param' in key]
     
-    # Get metrics from optimization
+    # Get metrics from optimizations
     metrics = [key 
                for key in cv_results.columns
                if 'param' not in key
@@ -49,5 +49,5 @@ def get_hp_opt_results_args(hp_opt_results):
             plt.ylabel(bi_comb[1])
             #plt.savefig(path_to_save + '/' + key)
             plt.show()
-
             
+
