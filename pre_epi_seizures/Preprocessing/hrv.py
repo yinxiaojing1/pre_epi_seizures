@@ -36,6 +36,34 @@ def hrv_computation(signal_arguments, window_params, add_params, win_param_to_pr
     return hrv_list, mdata, new_domains_i
 
 
+def hrv_computation_raw(signal_arguments, window_params, add_params, win_param_to_process, param_to_process):
+    signal_list = signal_arguments['feature_group_to_process']
+    rpeaks_list = signal_arguments['feature_group_to_process']
+    
+
+    try:
+        
+        # Compute Unequal sampled hrv
+        hrv_list = map(compute_hrv, rpeaks_list[0])
+
+        new_domains_i = rpeaks_list
+    except Exception as e:
+        print e
+        hrv_list = [[]]
+        new_domains_i =[[]]
+
+    # Load feature names
+    mdata = [{'feature_legend': ['hrv']}] * len(hrv_list)
+    
+    print hrv_list
+    
+    print rpeaks_list
+    
+    stop
+
+    return hrv_list, mdata, new_domains_i
+
+
 def hrv_time_features(signal_arguments, window_params, add_params, win_param_to_process, param_to_process):
     
     # Get hrv signal parameters

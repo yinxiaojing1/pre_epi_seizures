@@ -44,6 +44,19 @@ def get_input_and_default_params(win_params, add_params, feature_name):
         final_add_params = input_default_params(add_params,
                             method='hamilton',
                             resampling='spline')
+        
+        
+    if feature_name == 'hrv_computation_raw':
+        print 'here'
+        final_win_params = input_default_params(win_params,
+                            win=0.001,
+                            init='rpeaks[0]',
+                            finish='rpeaks[-1]',
+                            samplerate=1000)
+
+        final_add_params = input_default_params(add_params,
+                            method='hamilton',
+                            resampling='spline')
 
     if feature_name == 'hrv_time_features':
         print 'hrv_features'

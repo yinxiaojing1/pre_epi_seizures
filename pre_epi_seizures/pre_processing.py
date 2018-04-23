@@ -401,9 +401,13 @@ def _main(disk,
                          files=files,
                          feature_group_to_process=group,
                          param_method = param_method)
+            
+              
 
 
     # 3.1 HRV computation-----------------------------------------------------------------------
+    
+    files='all_new'
     rpeaks_groups_to_process = get_feature_group_name_list(path_to_map,
                                              'rpeak_detection#')
     feature_name = 'hrv_computation'

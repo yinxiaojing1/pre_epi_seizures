@@ -39,7 +39,8 @@ def nested_cross_validation(full_path,
                            pipe,
                            param_grid, scoring,
                            compute_all_new, cv_out, cv_in,
-                           search_function):
+                           search_function,
+                           n_jobs):
     
     # Outer-loop cross-validation
     cv_out = cv_out.split(X, y, groups=groups)
@@ -54,7 +55,8 @@ def nested_cross_validation(full_path,
                              i,
                              param_grid, scoring,
                              compute_all_new, cv_in,
-                             search_function)
+                             search_function,
+                             n_jobs)
               for i, (train, test) in enumerate(cv_out)]
  
     return struct
@@ -68,7 +70,8 @@ def _nested_cross_validation(full_path,
                              i,
                              param_grid, scoring,
                              compute_all_new, cv_in,
-                             search_function):
+                             search_function,
+                             n_jobs):
     
     return_struct = {}
     
@@ -86,7 +89,8 @@ def _nested_cross_validation(full_path,
                                                   param_grid,
                                                   scoring,
                                                   cv_in,
-                                                  search_function)
+                                                  search_function,
+                                                  n_jobs)
         
         # 2. Test the Best Model
         X_test, y_test = X.iloc[test], y.iloc[test]
@@ -288,7 +292,8 @@ def hyper_parameter_optimization(full_path,
                                  train,
                                  param_grid, scoring,
                                  cv_in,
-                                 search_function):
+                                 search_function,
+                                 n_jobs):
     
     # get inner data
     groups_inner = groups.iloc[train] # get data seizures
@@ -300,7 +305,7 @@ def hyper_parameter_optimization(full_path,
     
     clf = search_function(optimization_pipe,
                        param_grid, scoring=scoring,
-                       n_jobs=-1,
+                       n_jobs=n_jobs,
                        cv=cv_inner,
                        return_train_score=True,
                        refit=scoring[0],

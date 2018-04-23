@@ -43,7 +43,7 @@ def get_hyper_param_results(label_struct, baseline_label_struct,
                                        compute_all_new
                                        ):
     
-       # State the parameters of the pipeline
+    # State the parameters of the pipeline
     disk = '/mnt/Seagate/pre_epi_seizures/'
     baseline_files = 'h5_files/processing_datasets/baseline_datasets_new'
     seizure_files = 'h5_files/processing_datasets/seizure_datasets_new'
@@ -355,7 +355,8 @@ def supervised_pipeline(label_struct, baseline_label_struct,
                         hyper_param,
                         plot_eda_all_new,
                         learn_flag,
-                        compute_all_new
+                        compute_all_new,
+                        n_jobs
                        ):
     # State the parameters of the pipeline
 
@@ -397,7 +398,7 @@ def supervised_pipeline(label_struct, baseline_label_struct,
                                                                baseline_label_struct = baseline_label_struct,
                                                                feature_slot=feature_slot, 
                                                                group_id=group_id,
-                                                               hyper_param=0)
+                                                               hyper_param=hyper_param)
     
     # information for sklearn labeling
     label = 'label'
@@ -461,7 +462,8 @@ def supervised_pipeline(label_struct, baseline_label_struct,
                                                pipe,
                                                param_grid, scoring,
                                                compute_all_new, cv_out, cv_in,
-                                               search_function)
+                                               search_function,
+                                               n_jobs=n_jobs)
         #************************************************************************
         
         print 'These are the learning results'
@@ -493,7 +495,7 @@ def plot_eda(label_struct, baseline_label_struct,
              hyper_param,
              plot_eda_all_new,
              learn_flag,
-             compute_all_new
+             compute_all_new,
             ):
     
 
@@ -502,16 +504,16 @@ def plot_eda(label_struct, baseline_label_struct,
     baseline_files = 'h5_files/processing_datasets/baseline_datasets_new'
     seizure_files = 'h5_files/processing_datasets/seizure_datasets_new'
 
-    lead_list = ['ECG-']
+    lead_list = ['Ecg']
 
     interim_processing = [scaler]
     hist_bins = None
     dist = None
-    flag_hist = True
-    flag_andrews = True
+    flag_hist = False
+    flag_andrews = False
     flag_series = True
-    flag_box = True
-    flag_pair = True
+    flag_box = False
+    flag_pair = False
     assign_baseline = 'assign_equal_baseline_seizure'
     
 
@@ -536,10 +538,15 @@ def plot_eda(label_struct, baseline_label_struct,
                                                   baseline_label_struct = baseline_label_struct,
                                                   feature_slot=feature_slot, 
                                                   group_id=group_id,
-                                                  hyper_param=0)
+                                                  hyper_param=hyper_param)
     
     print eda_dir
     
+    if not os.path.exists(eda_dir)\
+    and (feature_slot=='baseline_removal' or feature_slot=='hrv_computation'):
+        print 'The path doesnt exist. Creating...'
+        os.mkdir(eda_dir) 
+        
     # Load the data, according to specification (loading made by convert pandas)
     data_struct = interim_process(disk, seizure_files, baseline_files,
                     feature_slot, hyper_param,
@@ -563,7 +570,7 @@ def plot_eda(label_struct, baseline_label_struct,
     
     
     
-    stop
+    print 'Plotted!'
     
                         
 def _plot_eda(directory, data_groups_list,
@@ -658,7 +665,7 @@ def load_eda(label_struct, baseline_label_struct,
     hist_bins = None
     dist = None
     flag_hist = True
-    flag_andrews = True
+    flag_andrews = False
     flag_series = True
     flag_box = True
     flag_pair = True
@@ -686,7 +693,7 @@ def load_eda(label_struct, baseline_label_struct,
                                                   baseline_label_struct = baseline_label_struct,
                                                   feature_slot=feature_slot, 
                                                   group_id=group_id,
-                                                  hyper_param=0)
+                                                  hyper_param=hyper_param)
     
     return _load_eda(eda_dir)
             
