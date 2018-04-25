@@ -380,8 +380,9 @@ patients = {
 
              'lateralization_onset':['RL',
                                      'L',
-
                                 ],
+      
+             'ECG leads':['Ecg', 'ECG-'],
              'dates_of_seizure': [date(2017, 4, 20),
                                   date(2017, 4, 20),
                                   date(2017, 4, 20),

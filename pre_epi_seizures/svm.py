@@ -38,7 +38,7 @@ from learning_pipelines import supervised_pipeline
 # In[ ]:
 
 
-# arguments
+# LABELING STRUCTURE
 label_struct = {
                         'inter_ictal':{
                             'label': 'Inter-Ictal Data Points',
@@ -94,7 +94,7 @@ param_grid = [{'SVC__C': [2**i for i in xrange(-5, 11)],
 
 
 
-feature_slot = 'pca_beat_amp_computation'
+feature_slot = 'hrv_time_features'
 hyper_param=0
 
 

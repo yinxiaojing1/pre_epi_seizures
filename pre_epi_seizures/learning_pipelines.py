@@ -273,6 +273,9 @@ def interim_process(disk, seizure_files, baseline_files,
                     label_struct, baseline_label_struct,
                     interim_processing):
     
+    print 'you are at interim process!'
+    
+    
     # Ingest Seizure Data
     path_to_load = disk + seizure_files + '.h5'
     path_to_map = disk + seizure_files + '_map.txt'
@@ -280,11 +283,21 @@ def interim_process(disk, seizure_files, baseline_files,
     # Feature group to analyse -- point of entry
     feature_name = get_feature_group_name_list(path_to_map,
                                                    feature_slot)[hyper_param]
+    
+    
+    print 'This is the feature name'
+    print feature_name
+    
 
+    print 'trying to load seizure data'
     seizure_data = cv_pd.convert_to_pandas(path_to_load, path_to_map,
                             patient_list, feature_name,
                             lead_list, label_struct)
 
+    print 'Here is the data'
+    
+    print seizure_data
+    
     # Ingest Baseline Data
 
     # set Labeling structure
@@ -294,14 +307,20 @@ def interim_process(disk, seizure_files, baseline_files,
     # Feature group to analyse -- point of entry
     feature_name = get_feature_group_name_list(path_to_map,
                                                    feature_slot)[hyper_param]
-
+    print ''
+    print get_feature_group_name_list(path_to_map, feature_slot)
+    print ''
     print feature_name
-
+    print 'trying to load baseline data'
     baseline_data = cv_pd.convert_to_pandas(path_to_load, path_to_map,
                             patient_list, feature_name,
                             lead_list, 
                             baseline_label_struct)
-
+    
+    print 'Here is the baseline data'
+    
+    print baseline_data
+    
 
     # Treat Baseline Data
     baseline_data = baseline_data.dropna(axis=0, how='any').reset_index(drop=True)
@@ -504,15 +523,15 @@ def plot_eda(label_struct, baseline_label_struct,
     baseline_files = 'h5_files/processing_datasets/baseline_datasets_new'
     seizure_files = 'h5_files/processing_datasets/seizure_datasets_new'
 
-    lead_list = ['Ecg']
+    lead_list = ['ECG-']
 
     interim_processing = [scaler]
     hist_bins = None
     dist = None
-    flag_hist = False
+    flag_hist = True
     flag_andrews = False
     flag_series = True
-    flag_box = False
+    flag_box = True
     flag_pair = False
     assign_baseline = 'assign_equal_baseline_seizure'
     
@@ -587,7 +606,8 @@ def _plot_eda(directory, data_groups_list,
     If the files already exist, just show them.
     
     """
-             
+    print 'This is the path to save!'
+    print path_to_save
     # Loop for all groups of data
     for data_patient_seizure in data_groups_list:
 
@@ -698,8 +718,9 @@ def load_eda(label_struct, baseline_label_struct,
     return _load_eda(eda_dir)
             
             
-def _load_eda(eda_dir):
+def _load_eda(eda_dir, display_flag=True):
     
+
     path_to_save = eda_dir
     
     # if files in disk just show them        
@@ -708,6 +729,12 @@ def _load_eda(eda_dir):
     a = [path_to_save + name for name in os.listdir(path_to_save) if name.endswith(".png")]
     
     print a
+    
+    print display_flag
+    if display_flag:
+        [display(Image(filename)) for filename in a]
+        
+    
     return a
 
     

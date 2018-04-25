@@ -1,0 +1,25 @@
+# LABELING STRUCTURE  -- 1st try
+label_struct = {
+                        'inter_ictal':{
+                            'label': 'Inter-Ictal Data Points',
+                            'color': 'blue',
+                            'intervals_samples': [(1000 * 0 * 60, 1000 * 20 * 60 )]
+                                     },
+                        'pre_ictal':{
+                            'label': 'Pre-Ictal data points',
+                            'color': 'yellow',
+                            'intervals_samples': [(1000 * 20 * 60, 1000 * 49 * 60 )]
+                                     },
+                        'ictal':{
+                            'label': 'Ictal data points',
+                            'color': 'red',
+                            'intervals_samples': [(1000 * 50 * 60, 1000 * 55 * 60 )]
+                                 },
+                        }
+baseline_label_struct = {
+                         'baseline':{
+                            'label': 'Baseline Data Points',
+                            'color': 'green',
+                            'intervals_samples': [(0, 1000 * 30 * 60 )]
+                                    },
+                        }

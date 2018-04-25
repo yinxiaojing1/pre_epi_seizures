@@ -384,7 +384,9 @@ def _main(disk,
                          feature_group_to_process=raw_group,
                          param_filt = param_filt)
    
-
+    
+    print 'Lets see what happened to the baseline_signal'
+    STOP
 
     # 3. Segmentation---------------------------------------------------------------------------
     
