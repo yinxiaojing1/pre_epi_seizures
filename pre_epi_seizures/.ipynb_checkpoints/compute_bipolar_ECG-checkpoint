@@ -1,0 +1,229 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "/home/franciscosargo/.virtualenvs/pre-epi-seizures/local/lib/python2.7/site-packages/h5py/__init__.py:36: FutureWarning: Conversion of the second argument of issubdtype from `float` to `np.floating` is deprecated. In future, it will be treated as `np.float64 == np.dtype(float).type`.\n",
+      "  from ._conv import register_converters as _register_converters\n"
+     ]
+    }
+   ],
+   "source": [
+    "# python\n",
+    "import h5py\n",
+    "import seaborn as sns\n",
+    "import matplotlib.pyplot as plt\n",
+    "import pandas as pd\n",
+    "import numpy as np\n",
+    "from storage_utils.patients_data_new import patients\n",
+    "import os\n",
+    "from biosppy.signals import ecg\n",
+    "import matplotlylib as pltly"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "/mnt/Seagate/h5_files_backup/processing_datasets/seizure_datasets_new.h5\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Open data file\n",
+    "# load the file\n",
+    "\n",
+    "disk='/mnt/Seagate/'\n",
+    "files_dir = 'h5_files_backup/processing_datasets/'\n",
+    "file_name = 'seizure_datasets_new.h5'\n",
+    "file_path = disk + files_dir + file_name\n",
+    "print file_path\n",
+    "f = h5py.File(file_path, 'a')\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "[u'5_FA7773TC_ECG-_2016-08-23 08:24:24.000000_0', u'5_FA7773TC_Ecg_2016-08-23 08:24:24.000000_0', u'5_FA7773TT_ECG-_2016-08-24 13:48:00.000000_1', u'5_FA7773TT_Ecg_2016-08-24 13:48:00.000000_1', u'5_FA7773U1_ECG-_2016-08-25 01:44:21.000000_2', u'5_FA7773U1_Ecg_2016-08-25 01:44:21.000000_2', u'5_FA7773U3_ECG-_2016-08-25 05:44:46.000000_3', u'5_FA7773U3_Ecg_2016-08-25 05:44:46.000000_3', u'5_FA7773U4_ECG-_2016-08-25 07:44:59.000000_4', u'5_FA7773U4_ECG-_2016-08-25 07:44:59.000000_5', u'5_FA7773U4_Ecg_2016-08-25 07:44:59.000000_4', u'5_FA7773U4_Ecg_2016-08-25 07:44:59.000000_5', u'5_FA7773U5_ECG-_2016-08-25 09:45:14.000000_6', u'5_FA7773U5_Ecg_2016-08-25 09:45:14.000000_6', u'5_FA7773U6_ECG-_2016-08-25 11:45:26.000000_7']\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Compute Bipolar ECG, from available data\n",
+    "\n",
+    "# patient parameters\n",
+    "patient_number=5\n",
+    "\n",
+    "patient_info = patients[str(patient_number)]\n",
+    "patient_info\n",
+    "\n",
+    "# feature for analysis\n",
+    "feature_name=('signals/3000_1200'\n",
+    "              '/baseline_removal')\n",
+    "feature_name_for_struct = 'baseline_removal'\n",
+    "\n",
+    "seizures = f[feature_name].keys()\n",
+    "\n",
+    "# get seizures from patient\n",
+    "seizure_from_patient = [seizure\n",
+    "                         for seizure in seizures\n",
+    "                         if seizure.split('_')[0] == str(patient_number)]\n",
+    "print seizure_from_patient\n",
+    "    "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# Get the time parameters of the signal\n",
+    "Fs=1000\n",
+    "sec_before_onset = 50 * 60\n",
+    "sec_after_onset = 20 * 60\n",
+    "relative_time_seconds = np.linspace(-sec_before_onset, sec_after_onset, \n",
+    "                           (sec_before_onset + sec_after_onset) * Fs)   # relative time-frame to EEG onset\n",
+    "time_sec = np.linspace(0, (sec_before_onset + sec_after_onset),\n",
+    "                           (sec_before_onset + sec_after_onset) * Fs)   # time-frame relative\n",
+    "                                                                        # to the beggining of acquisition"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "<HDF5 dataset \"5_FA7773TC_ECG-_2016-08-23 08:24:24.000000_0\": shape (1, 4200000), type \"<f8\">\n",
+      "<HDF5 dataset \"5_FA7773TC_Ecg_2016-08-23 08:24:24.000000_0\": shape (1, 4200000), type \"<f8\">\n",
+      "5_FA7773TC_2016-08-23 08:24:24.000000_0\n",
+      "<HDF5 dataset \"5_FA7773TT_ECG-_2016-08-24 13:48:00.000000_1\": shape (1, 4200000), type \"<f8\">\n",
+      "<HDF5 dataset \"5_FA7773TT_Ecg_2016-08-24 13:48:00.000000_1\": shape (1, 4200000), type \"<f8\">\n",
+      "5_FA7773TT_2016-08-24 13:48:00.000000_1\n",
+      "<HDF5 dataset \"5_FA7773U1_ECG-_2016-08-25 01:44:21.000000_2\": shape (1, 4200000), type \"<f8\">\n",
+      "<HDF5 dataset \"5_FA7773U1_Ecg_2016-08-25 01:44:21.000000_2\": shape (1, 4200000), type \"<f8\">\n",
+      "5_FA7773U1_2016-08-25 01:44:21.000000_2\n",
+      "<HDF5 dataset \"5_FA7773U3_ECG-_2016-08-25 05:44:46.000000_3\": shape (1, 4200000), type \"<f8\">\n",
+      "<HDF5 dataset \"5_FA7773U3_Ecg_2016-08-25 05:44:46.000000_3\": shape (1, 4200000), type \"<f8\">\n",
+      "5_FA7773U3_2016-08-25 05:44:46.000000_3\n",
+      "<HDF5 dataset \"5_FA7773U4_ECG-_2016-08-25 07:44:59.000000_4\": shape (1, 4200000), type \"<f8\">\n",
+      "<HDF5 dataset \"5_FA7773U4_Ecg_2016-08-25 07:44:59.000000_4\": shape (1, 4200000), type \"<f8\">\n",
+      "5_FA7773U4_2016-08-25 07:44:59.000000_4\n",
+      "<HDF5 dataset \"5_FA7773U4_ECG-_2016-08-25 07:44:59.000000_5\": shape (1, 4200000), type \"<f8\">\n",
+      "<HDF5 dataset \"5_FA7773U4_Ecg_2016-08-25 07:44:59.000000_5\": shape (1, 4200000), type \"<f8\">\n",
+      "5_FA7773U4_2016-08-25 07:44:59.000000_5\n",
+      "<HDF5 dataset \"5_FA7773U5_ECG-_2016-08-25 09:45:14.000000_6\": shape (1, 4200000), type \"<f8\">\n",
+      "<HDF5 dataset \"5_FA7773U5_Ecg_2016-08-25 09:45:14.000000_6\": shape (1, 4200000), type \"<f8\">\n",
+      "5_FA7773U5_2016-08-25 09:45:14.000000_6\n",
+      "Files saved!\n"
+     ]
+    }
+   ],
+   "source": [
+    "# Change Data in disk, correct for bipolarity of ECG\n",
+    "channels_from_patient = seizure_from_patient\n",
+    "\n",
+    "channels_from_patient\n",
+    "\n",
+    "hsm_convention_negative_pole_1 = 'ECG-'\n",
+    "\n",
+    "hsm_convention_positive_pole_1 = 'Ecg'\n",
+    "\n",
+    "hsm_convention_positive_pole_2 = 'ECG+'\n",
+    "\n",
+    "positive_channels_name = [channel_name \n",
+    "                     for channel_name in channels_from_patient\n",
+    "                     if hsm_convention_positive_pole_1 in channel_name\n",
+    "                     or hsm_convention_positive_pole_2 in channel_name]\n",
+    "\n",
+    "negative_channels_name = [channel_name \n",
+    "                     for channel_name in channels_from_patient\n",
+    "                     if hsm_convention_negative_pole_1 in channel_name]\n",
+    "window = [200, 300]\n",
+    "\n",
+    "for negative_channel_name, positive_channel_name in zip(negative_channels_name,\n",
+    "                                              positive_channels_name):\n",
+    "    \n",
+    "    # load h5 datasets\n",
+    "    negative_channel_h5_dataset = f[feature_name + '/' + negative_channel_name]\n",
+    "    positive_channel_h5_dataset = f[feature_name + '/' + positive_channel_name]\n",
+    "    \n",
+    "    print negative_channel_h5_dataset\n",
+    "    print positive_channel_h5_dataset\n",
+    "    \n",
+    "    # load numpy arrays\n",
+    "    negative_channel_array = negative_channel_h5_dataset[:][0]\n",
+    "    positive_channel_array = positive_channel_h5_dataset[:][0]\n",
+    "    \n",
+    "    # Compute bipolar ECG feature\n",
+    "    bipolar_channel_array = (negative_channel_array - positive_channel_array)\n",
+    "    \n",
+    "    # Create name for new bipolar ECG channel\n",
+    "    bipolar_channel_name = negative_channel_name.replace('_'\n",
+    "                                                        + hsm_convention_negative_pole_1,\n",
+    "                                                        '')\n",
+    "    print bipolar_channel_name\n",
+    "    \n",
+    "    # Structure data into predefined pipeline structure\n",
+    "    feature_array = np.asarray([bipolar_channel_array])\n",
+    "    \n",
+    "    # Save data\n",
+    "    dset = f.create_dataset(feature_name + '/' + bipolar_channel_name,\n",
+    "                     data=bipolar_channel_array)\n",
+    "    time_dset = f.create_dataset(feature_name + '/' + 'time_domain_' + bipolar_channel_name, \n",
+    "                     data=time_sec)\n",
+    "    \n",
+    "    # add metadata\n",
+    "    dset.attrs['feature_legend'] = feature_name_for_struct\n",
+    "    time_dset.attrs['feature_legend'] = feature_name_for_struct\n",
+    "    \n",
+    "\n",
+    "f.close()\n",
+    "print 'Files saved!'\n",
+    "    "
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 2",
+   "language": "python",
+   "name": "python2"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 2
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython2",
+   "version": "2.7.12"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 2
+}
