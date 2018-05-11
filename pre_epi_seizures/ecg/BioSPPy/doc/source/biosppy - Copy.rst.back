@@ -1,0 +1,92 @@
+Documentation for BioSPPY
+**************************
+
+.. automodule:: biosppy
+
+FILT -- auto members
+=========================
+
+This is something I want to say that is not in the docstring.
+
+.. automodule:: biosppy.filt
+   :members:    
+
+PEAKD -- auto members
+=========================
+
+This is something I want to say that is not in the docstring.
+
+.. automodule:: biosppy.peakd
+   :members:    
+   
+PLUX -- auto members
+=========================
+
+This is something I want to say that is not in the docstring.
+
+.. automodule:: biosppy.plux
+   :members:    
+   
+SYNC -- auto members
+=========================
+
+This is something I want to say that is not in the docstring.
+
+.. automodule:: biosppy.sync
+   :members:    
+   
+TIMING -- auto members
+=========================
+
+This is something I want to say that is not in the docstring.
+
+.. automodule:: biosppy.timing
+   :members:    
+   
+TOOLS -- auto members
+=========================
+
+This is something I want to say that is not in the docstring.
+
+.. automodule:: biosppy.tools
+   :members:    
+  
+BVP -- auto members
+=========================
+
+This is something I want to say that is not in the docstring.
+
+.. automodule:: biosppy.bvp
+   :members:    
+
+ECG -- auto members
+=========================
+
+This is something I want to say that is not in the docstring.
+
+.. automodule:: biosppy.ecg
+   :members:   
+   
+EDA -- auto members
+=========================
+
+This is something I want to say that is not in the docstring.
+
+.. automodule:: biosppy.eda
+   :members:    
+   
+EMG -- auto members
+=========================
+
+This is something I want to say that is not in the docstring.
+
+.. automodule:: biosppy.emg
+   :members:    
+   
+RESP -- auto members
+=========================
+
+This is something I want to say that is not in the docstring.
+
+.. automodule:: biosppy.resp
+   :members:

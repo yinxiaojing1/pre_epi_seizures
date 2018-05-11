@@ -1,0 +1,16 @@
+{
+"logPath": "/home/ccarreiras/work/BiometricsExperiments/worker.log",
+"rabbitHost": "193.136.222.235",
+"mongoHost": "193.136.222.234",
+"workerName": "Mighty2",
+"queue": "BiometricsQ",
+"mode": "production",
+"dstPath": "/home/ccarreiras/work/BioMESH",
+"parameters": {
+    "BioSPPy": "/home/ccarreiras/work/BioSPPy",
+    "BiometricsPyKit": "/home/ccarreiras/work/BiometricsPyKit",
+    "experimentsFolder": "/home/ccarreiras/work/BiometricsExperiments",
+    "numberProcesses": 10,
+    "queueTimeOut": 2
+    }
+}

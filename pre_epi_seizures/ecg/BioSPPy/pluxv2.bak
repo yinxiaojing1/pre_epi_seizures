@@ -1,0 +1,346 @@
+"""
+.. module:: plux
+   :platform: Unix, Windows
+   :synopsis: This module provides various functions to...
+
+.. moduleauthor:: Filipe Canento
+
+
+"""
+import numpy as np
+import copy as c
+import bioplux
+import pylab as pl
+
+# Connect to Bioplux device
+def bioconnect(mac='test'):
+    """
+
+    Connect with the Bioplux device with the input MAC address. If no MAC address is provided, a connection is established with the 'test' port. 
+
+    Kwargs:
+        mac (string): Bioplux device MAC address.
+    
+    Kwrvals:
+        BioPluxDevice (bioplux.Device): BioPlux Device.
+    
+    Configurable fields:{"name": "plux.bioconnect", "config": {"mac": "test"}, "inputs": [""], "outputs": ["BioPluxDevice"]}
+
+    See Also:
+    
+    Notes:
+    
+
+    Example:
+    
+    References:
+        .. [1] 
+        
+    """
+    BioPluxDevice = bioplux.Device(mac)
+    inf = "Description: %s" %BioPluxDevice.getDescription()
+    print inf
+    return {'BioPluxDevice': BioPluxDevice}
+# Start Acquisition    
+def biostart(BioPluxDevice=None, SamplingRate=1000):
+    """
+
+    Starts acquisition. 
+
+    Kwargs:
+        BioPluxDevice (bioplux.Device): BioPlux Device.
+        
+        SamplingRate (int): Sampling Rate (Hz).
+    
+    Kwrvals:
+        BioPluxDevice (bioplux.Device): BioPlux Device.
+    
+    Configurable fields:{"name": "plux.biostart", "config": {"SamplingRate": "1000"}, "inputs": ["BioPluxDevice"], "outputs": ["BioPluxDevice", "SamplingRate"]}
+
+    See Also:
+    
+    Notes:
+    
+
+    Example:
+    
+    References:
+        .. [1] 
+        
+    """
+    if BioPluxDevice is None:
+        raise TypeError, "A BioPluxDevice input is needed."
+    BioPluxDevice.beginAcq(int(SamplingRate), 0xFF, 12)
+    return {'BioPluxDevice': BioPluxDevice, 'SamplingRate': SamplingRate}
+# Get frames
+def bioframes(BioPluxDevice=None, SamplingRate=None, nsamples=100):
+    """
+
+    Gets frames. The device needs to be in acquisition mode.
+
+    Kwargs:
+        BioPluxDevice (bioplux.Device): BioPlux Device.
+        
+        SamplingRate (float): Sampling Rate (Hz).
+        
+        nsamples (int): number of samples to acquire.
+
+    Kwrvals:
+        Frames (bparray): acquired frames
+
+    Configurable fields:{"name": "plux.bioframes", "config": {"nsamples": "100"}, "inputs": ["BioPluxDevice", "SamplingRate"], "outputs": ["Frames"]}
+
+    See Also:
+
+    Notes:
+
+    Example:
+
+    References:
+        .. [1] 
+        
+    """
+    if BioPluxDevice is None:
+        raise TypeError, "A BioPluxDevice input is needed."
+    if SamplingRate is None:
+        raise TypeError, "An input SamplingRate is needed."        
+    frames = BioPluxDevice.getFrames(nsamples)
+    hdr = {'Version': 0, 'SamplingResolution': 12., 'SamplingFrequency': float(SamplingRate), 'Vcc': 5., 'Units': 'ADC'}
+    return {'Frames': bparray(frames, hdr)}
+# Stop Acquisition    
+def biostop(BioPluxDevice=None):
+    """
+
+    Stops acquisition.
+
+    Kwargs:
+        BioPluxDevice (bioplux.Device): BioPlux Device.
+    
+    Kwrvals:
+    
+    Configurable fields:{"name": "plux.biostop", "config": {"":""}, "inputs": ["BioPluxDevice"], "outputs": [""]}
+
+    See Also:
+    
+    Notes:
+    
+    Example:
+    
+    References:
+        .. [1] 
+        
+    """
+    if BioPluxDevice is None:
+        raise TypeError, "A BioPluxDevice input is needed."
+    BioPluxDevice.endAcq()
+# Disconnect Bioplux device
+def biodisconnect(BioPluxDevice=None):
+    """
+
+    Disconnects BioPlux device.
+
+    Kwargs:
+        BioPluxDevice (bioplux.Device): BioPlux Device.
+    
+    Kwrvals:
+    
+    Configurable fields:{"name": "plux.biodisconnect", "config": {"":""}, "inputs": ["BioPluxDevice"], "outputs": [""]}
+
+    See Also:
+    
+    Notes:
+    
+    Example:
+    
+    References:
+        .. [1] 
+        
+    """
+    if BioPluxDevice is None:
+        raise TypeError, "A BioPluxDevice input is needed."
+    BioPluxDevice.close()
+# Load bioplux data
+def loadbpf(fname=None):
+    """
+
+    Loads Bioplux Device data from an input file. 
+    
+    Kwargs:
+        fname(string): data filename
+    
+    Kwrvals:
+        data (bparray): bioplux data array
+    
+    Configurable fields:{"name": "plux.loadbpf", "config": {"": ""}, "inputs": ["fname"], "outputs": ["data"]}
+
+    See Also:
+    
+    Notes:
+
+    Example:
+    
+    References:
+        .. [1] 
+        
+    """
+	# Check
+    if fname is None:
+        raise TypeError, "An input filename is needed."
+	hdr = {'Version': 0}
+	bpf = open(fname,'r')
+	try:
+		for l in bpf:
+			if l[0] != '#': break
+			ddp = l.find(':')
+			if ddp >= 0:
+				val = l[(ddp+1):].strip()
+				if val.isdigit():
+					val = int(val)
+				hdr[l[1:ddp].strip()] = val
+	except:
+		bpf.close()
+		raise
+	if hdr['Version'] == 0:
+		hdr['SamplingResolution'] = 12.
+		hdr['SamplingFrequency'] = 1000.0
+	if hdr['Version'] <= 1:
+		hdr['Vcc'] = 5.
+	hdr['Units']='ADC'
+    
+	return {'data': bparray(np.loadtxt(fname, comments='#', delimiter='\t'), hdr)}
+# Get Signal
+def getSignal(Frames=None, ch=None):
+    """
+
+    Gets specific channel of given input frames acquired with bioframes function. 
+    
+    Kwargs:
+        Frames (bparray): acquired frames
+        
+        ch (int): channel
+    
+    Kwrvals:
+        Signal (bparray): bioplux signal array
+    
+    Configurable fields:{"name": "plux.getSignal", "config": {"": ""}, "inputs": ["Frames", "ch"], "outputs": ["Signal"]}
+
+    See Also:
+        bioframes
+    
+    Notes:
+
+    Example:
+    
+    References:
+        .. [1] 
+        
+    """
+    return {'Signal': Frames[:,ch]}
+# Plot Frames
+def plotSignal(Signal=None, type='Unknown'):
+    """
+
+    Plots bioplux device data array.
+    
+    Kwargs:
+        Signal (bparray): signal to plot
+        
+        type (string): signal type (e.g., 'ECG')
+    
+    Kwrvals:
+    
+    Configurable fields:{"name": "plux.plotSignal", "config": {"type": ""}, "inputs": ["Signal"], "outputs": [""]}
+
+    See Also:
+    
+    Notes:
+
+    Example:
+    
+    References:
+        .. [1] 
+        
+    """
+    if Signal is None:
+        raise TypeError, "An input Signal is needed."
+    # Plot
+    SamplingRate = float(Signal.header['SamplingFrequency'])
+    Time = np.linspace(0,len(Signal)/SamplingRate, len(Signal))
+    fig = pl.figure()
+    ax = fig.add_subplot(111)
+    ax.plot(Time,Signal,'k')
+    ax.set_xlabel('Time (sec)')
+    ax.set_ylabel(type+' ('+Signal.header['Units']+')')
+    ax.set_title("")
+    ax.axis('tight')
+    ax.grid('on')
+    fig.show()
+# Bioplux data array class
+class bparray(np.ndarray):
+    """
+
+    Bioplux Data Array Class. 
+    
+    """    
+    def __new__(cls, ndarr, hdr={}):
+        obj=np.asarray(ndarr).view(cls)
+        obj.header=hdr.copy()
+        return obj
+    
+    def __array_finalize__(self, obj):
+        if obj is None: return
+        self.header=getattr(obj, 'header', None)
+
+    def toADC(self):
+        unit='ADC'
+        
+        cself=bparray(self,self.header)
+        
+        if cself.header['Units']==unit: return cself
+
+        cself=(cself.toV()*2.**cself.header['SamplingResolution'])/cself.header['Vcc']
+        cself.header['Units']=unit
+        
+        return cself
+    
+    def toV(self):
+        unit='V'
+        
+        cself=bparray(self,self.header)
+        
+        if cself.header['Units']==unit: return cself
+        elif cself.header['Units']=='ADC': 
+            cself=cself.header['Vcc']*cself/2.**cself.header['SamplingResolution']
+        elif cself.header['Units']=='uS':
+            cself=cself*cself.header['Vcc']+0.2
+        elif cself.header['Units']=='mV':
+            cself=cself*1000.
+        else:
+            raise TypeError("conversion from "+cself.header['Units']+" is not currently supported")
+        
+        cself.header['Units']=unit
+        return cself
+    
+    def tomV(self):
+        unit='mV'
+        
+        cself=bparray(self,self.header)
+        
+        if cself.header['Units']==unit: return cself
+
+        cself=cself.toV()/1000.
+        cself.header['Units']=unit
+        
+        return cself
+    
+    def touS(self):
+        unit='uS'
+        
+        cself=bparray(self,self.header)
+        
+        if cself.header['Units']==unit: return cself
+        
+        cself=(cself.toV()-0.2)/cself.header['Vcc']
+        cself.header['Units']=unit
+        
+        return cself
