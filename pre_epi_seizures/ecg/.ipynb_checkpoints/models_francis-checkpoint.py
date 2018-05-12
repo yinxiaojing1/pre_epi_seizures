@@ -69,6 +69,8 @@ def hamilton(hand, Signal=None, SamplingRate=1000., Filter=True, init=(), Show=0
         http://www.eplimited.com/osea13.pdf
 
     """
+    
+    
     # Check
     if Signal is None:
         raise TypeError("An input signal is needed.")
@@ -76,7 +78,7 @@ def hamilton(hand, Signal=None, SamplingRate=1000., Filter=True, init=(), Show=0
     # 0.1 - Choose sign of peaks (batch)
     # up = definepeak(Signal, SamplingRate)
     up = 1
-
+    
     if Filter:
         # 0.15 - Remove EMG, powerline and baseline shift
         emgsamples = 0.028*SamplingRate
@@ -84,6 +86,7 @@ def hamilton(hand, Signal=None, SamplingRate=1000., Filter=True, init=(), Show=0
         rawbase = prepro.medFIR(Signal, SamplingRate)['Signal']
         rawend = ss.convolve(rawbase, movemg, mode='same')
         RawSignal = np.copy(rawend)
+    
     else:
         RawSignal = np.copy(Signal)
 
@@ -98,6 +101,7 @@ def hamilton(hand, Signal=None, SamplingRate=1000., Filter=True, init=(), Show=0
     #                                        'Parameters': None})['Signal']
     Signal = moving_average(Signal, int(0.15*SamplingRate), cut=True)
     # 0.3 - Initialize Buffers
+    
     if not init:
         init_ecg = 8
         if len(Signal)/(1.*SamplingRate) < init_ecg:
