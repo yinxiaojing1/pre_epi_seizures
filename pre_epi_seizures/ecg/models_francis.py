@@ -6,7 +6,6 @@ from math import pi, log
 
 import sys
 sys.path.append('/home/franciscosargo/pre_epi_seizures/pre_epi_seizures/ecg/BioSSPy')			# for cardiocloud_server work
-print sys.path
 
 import tools
 import peakd
@@ -108,7 +107,6 @@ def hamilton(hand, Signal=None, SamplingRate=1000., Filter=True, init=(), Show=0
             init_ecg = int(len(Signal)/(1.*SamplingRate))
         qrspeakbuffer = np.zeros(init_ecg)
         noisepeakbuffer = np.zeros(init_ecg)
-        print init_ecg
         rrinterval = SamplingRate*np.ones(init_ecg)
         a, b = 0, int(SamplingRate)
         all_peaks = np.array(peakd.sgndiff(Signal)['Peak'])
