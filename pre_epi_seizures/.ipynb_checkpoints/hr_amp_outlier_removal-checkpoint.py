@@ -103,11 +103,11 @@ class AdaContextHRAmpWaveOutlier(object):
             check_f = check_bpm
 
         if not check_f:  # reset memory if
-            print 'memory reset'
+            #print 'memory reset'
             self.memory_reset(peaks_diff_curr)
 
-        print check_f
-        print '-' * 100
+        #print check_f
+        #print '-' * 100
         return check_f
 
     def addtomemory(self, peaks_diff_curr, amp=None):
