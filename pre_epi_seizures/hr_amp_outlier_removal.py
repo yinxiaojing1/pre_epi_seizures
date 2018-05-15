@@ -66,13 +66,13 @@ class AdaContextHRAmpWaveOutlier(object):
                 True if the peak is considered valid, else False
         """
 
-        print '--Validation Function'
+        #print '--Validation Function'
         
-        print 'time [sec] difference between the next peak and the current one'
-        print peaks_diff_curr
+        #print 'time [sec] difference between the next peak and the current one'
+        #print peaks_diff_curr
         
-        print 'amplitude of the current peak'
-        print peak_amp_curr
+        #print 'amplitude of the current peak'
+        #print peak_amp_curr
         
         past_mean_peaks_diff = np.mean(self.peaks_diff_past)
         past_mean_amp = np.mean(self.peaks_amp_past)
@@ -85,7 +85,7 @@ class AdaContextHRAmpWaveOutlier(object):
         # print '-' * 100
         # print 'curr', peaks_diff_curr, peak_amp_curr
         # print 'cond fix', self.bpm_range[0], self.sampling_rate * 60. / peaks_diff_curr, self.bpm_range[1]
-        print '::check_bpm {}'.format(check_bpm)
+        #print '::check_bpm {}'.format(check_bpm)
         # when the memory is not empty, use contextual information
         if len(self.peaks_diff_past) != 0:
 
@@ -94,21 +94,21 @@ class AdaContextHRAmpWaveOutlier(object):
             # print 'cond', self.weights_t[0] * past_mean_peaks_diff, peaks_diff_curr, \
             #     self.weights_t[1] * past_mean_peaks_diff
 
-            print ':Memory is not empty'
+            #print ':Memory is not empty'
             # heart rate contextual interval check
             check_t = self.weights_t[0] * past_mean_peaks_diff <= peaks_diff_curr <= \
                       self.weights_t[1] * past_mean_peaks_diff
 
-            print '::check_t {}'.format(check_t)
+            #print '::check_t {}'.format(check_t)
             
             # if the fiducial point amplitude context is used
             if len(self.weights_a) != 0:
                 
-                print ':Fiducial point amplitude context'
+                #print ':Fiducial point amplitude context'
                 # fiducial point amplitude contextual interval check
                 check_a = np.abs(peak_amp_curr - past_mean_amp) <= np.abs(self.weights_a[0] * past_mean_amp -
                                                                           self.weights_a[1] * past_mean_amp)
-                print '::check_a {}'.format(check_a)
+                #print '::check_a {}'.format(check_a)
                 
                 # check the 3 conditions
                 check_f = np.all([check_bpm, check_t, check_a])
@@ -116,12 +116,12 @@ class AdaContextHRAmpWaveOutlier(object):
                 
             else:  # use only temporal information
                 pdb.set_trace()
-                print ':Using only temporal information'
+                #print ':Using only temporal information'
                 check_f = np.all([check_bpm, check_t])
 
         else:  # if the memory is empty, use only physiological heart rate range
             
-            print ':Using only physiological heart rate range'
+            #print ':Using only physiological heart rate range'
             check_f = check_bpm
 
         if not check_f:  # reset memory if
@@ -129,10 +129,10 @@ class AdaContextHRAmpWaveOutlier(object):
             self.memory_reset(peaks_diff_curr)
         
         
-        print 'Result of peak validation : {}'.format(check_f)
+        #print 'Result of peak validation : {}'.format(check_f)
         #pdb.set_trace()
-        print '-'*10
-        print ''
+        #print '-'*10
+        #print ''
         return check_f
 
     def addtomemory(self, peaks_diff_curr, amp=None):
