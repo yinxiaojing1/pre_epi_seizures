@@ -2,6 +2,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sbn
+import pdb
 
 
 class AdaContextHRAmpWaveOutlier(object):
@@ -55,7 +56,7 @@ class AdaContextHRAmpWaveOutlier(object):
             Parameters:
             -----------
             peaks_diff_curr: int
-                sample difference between the next peak and the current one
+                time [sec] difference between the next peak and the current one
             peak_amp_curr: float
                 amplitude of the current peak
 
@@ -65,15 +66,26 @@ class AdaContextHRAmpWaveOutlier(object):
                 True if the peak is considered valid, else False
         """
 
+        print '--Validation Function'
+        
+        print 'time [sec] difference between the next peak and the current one'
+        print peaks_diff_curr
+        
+        print 'amplitude of the current peak'
+        print peak_amp_curr
+        
         past_mean_peaks_diff = np.mean(self.peaks_diff_past)
         past_mean_amp = np.mean(self.peaks_amp_past)
-
+        
+        
+        #print past_mean_peaks_diff
+        #print past_mean_amp
         # physiological acceptable heart rate condition check
-        check_bpm = self.bpm_range[0] <= self.sampling_rate * 60. / peaks_diff_curr <= self.bpm_range[1]
+        check_bpm = self.bpm_range[0] <= 60. / peaks_diff_curr <= self.bpm_range[1]
         # print '-' * 100
         # print 'curr', peaks_diff_curr, peak_amp_curr
         # print 'cond fix', self.bpm_range[0], self.sampling_rate * 60. / peaks_diff_curr, self.bpm_range[1]
-
+        print '::check_bpm {}'.format(check_bpm)
         # when the memory is not empty, use contextual information
         if len(self.peaks_diff_past) != 0:
 
@@ -82,32 +94,45 @@ class AdaContextHRAmpWaveOutlier(object):
             # print 'cond', self.weights_t[0] * past_mean_peaks_diff, peaks_diff_curr, \
             #     self.weights_t[1] * past_mean_peaks_diff
 
+            print ':Memory is not empty'
             # heart rate contextual interval check
             check_t = self.weights_t[0] * past_mean_peaks_diff <= peaks_diff_curr <= \
                       self.weights_t[1] * past_mean_peaks_diff
 
+            print '::check_t {}'.format(check_t)
+            
             # if the fiducial point amplitude context is used
             if len(self.weights_a) != 0:
+                
+                print ':Fiducial point amplitude context'
                 # fiducial point amplitude contextual interval check
                 check_a = np.abs(peak_amp_curr - past_mean_amp) <= np.abs(self.weights_a[0] * past_mean_amp -
                                                                           self.weights_a[1] * past_mean_amp)
-
+                print '::check_a {}'.format(check_a)
+                
                 # check the 3 conditions
                 check_f = np.all([check_bpm, check_t, check_a])
-
+                
+                
             else:  # use only temporal information
+                pdb.set_trace()
+                print ':Using only temporal information'
                 check_f = np.all([check_bpm, check_t])
 
         else:  # if the memory is empty, use only physiological heart rate range
-
+            
+            print ':Using only physiological heart rate range'
             check_f = check_bpm
 
         if not check_f:  # reset memory if
             #print 'memory reset'
             self.memory_reset(peaks_diff_curr)
-
-        #print check_f
-        #print '-' * 100
+        
+        
+        print 'Result of peak validation : {}'.format(check_f)
+        #pdb.set_trace()
+        print '-'*10
+        print ''
         return check_f
 
     def addtomemory(self, peaks_diff_curr, amp=None):
@@ -158,11 +183,20 @@ class AdaContextHRAmpWaveOutlier(object):
 
         if peaks_amp_arr is None:
             peaks_amp_arr = [None] * len(peaks_diff_arr)
-
+        
         valid_peaks = []
+        
+        print '--Init'
+        print peaks_diff_arr
+        print peaks_amp_arr
+        print '_' * 10
+        print ''
+        
         for i in range(len(peaks_diff_arr)):
             dec = self.validation(peaks_diff_arr[i], peaks_amp_arr[i])
+            
             valid_peaks.append(dec)
+            
             if dec:
                 self.addtomemory(peaks_diff_arr[i], peaks_amp_arr[i])
             else:
@@ -173,27 +207,33 @@ class AdaContextHRAmpWaveOutlier(object):
 
 # Example -----------------
 
-bpm_range = [40, 170]  # physiological heart range, in bpm
-sampling_rate = 1e3  # in Hz
-weights_t = [0.8, 1.3]  # heart rate context weights
-max_diff = 3  # forgetting time interval
-memory_size = 5  # number of last accepted peaks considered
-weights_a = []  # fiducial point amplitude context weights
+if __name__=='__main__':
+    bpm_range = [40, 170]  # physiological heart range, in bpm
+    sampling_rate = 1e3  # in Hz
+    weights_t = [0.8, 1.3]  # heart rate context weights
+    max_diff = 3  # forgetting time interval
+    memory_size = 5  # number of last accepted peaks considered
+    weights_a = []  # fiducial point amplitude context weights
 
-outlier_dec = AdaContextHRAmpWaveOutlier(bpm_range, sampling_rate, weights_t, max_diff, memory_size, weights_a)
+    outlier_dec = AdaContextHRAmpWaveOutlier(bpm_range,
+                                             sampling_rate,
+                                             weights_t,
+                                             max_diff,
+                                             memory_size,
+                                             weights_a)
 
-rr_int = np.random.normal(700, 100, 60).astype('int')
-# rr_int = np.diff(rpeaks)
+    rr_int = np.random.normal(700, 100, 60).astype('int')
+    # rr_int = np.diff(rpeaks)
 
-valid_peaks = outlier_dec.run(rr_int)
+    valid_peaks = outlier_dec.run(rr_int)
 
-x = np.arange(len(rr_int))
-valid_idx = np.where(valid_peaks)[0]
-plt.figure()
-plt.plot(x, 60*sampling_rate/rr_int, label='Raw')
-plt.plot(x[valid_idx], 60*sampling_rate/rr_int[valid_idx], label='Valid')
-plt.legend()
-plt.ylabel('Instantaneous heart rate (bpm)')
+    x = np.arange(len(rr_int))
+    valid_idx = np.where(valid_peaks)[0]
+    plt.figure()
+    plt.plot(x, 60*sampling_rate/rr_int, label='Raw')
+    plt.plot(x[valid_idx], 60*sampling_rate/rr_int[valid_idx], label='Valid')
+    plt.legend()
+    plt.ylabel('Instantaneous heart rate (bpm)')
 
 #########################
 # check ratio current peak hr with average hr last n peaks
